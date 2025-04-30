@@ -5,14 +5,6 @@ This repository contains the frontend, backend, and documentation for our applic
 
 ---
 
-## 📂 Project Structure
-
-```
-/frontend    ➔ Next.js frontend application
-/backend     ➔ Express.js backend API
-/docs        ➔ Project documentation (architecture, API specs, setup guides)
-```
-
 
 ## 🚀 Getting Started
 
