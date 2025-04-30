@@ -143,7 +143,7 @@ Please **read these files** before working on big features or backend routes!
 
 ## 🎯 Final Reminder
 
-- **Always** pull the latest `main` branch before starting a new feature:
+- **Always** pull the latest `development` branch before starting a new feature:
   ```bash
   git checkout development
   git pull origin development
