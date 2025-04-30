@@ -1,4 +1,4 @@
-# My Monorepo
+# Monorepo of Auctasync
 
 Welcome to the **AsyncAwait - Auction Management Project** project!  
 This repository contains the frontend, backend, and documentation for our application.
