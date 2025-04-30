@@ -145,8 +145,8 @@ Please **read these files** before working on big features or backend routes!
 
 - **Always** pull the latest `main` branch before starting a new feature:
   ```bash
-  git checkout main
-  git pull origin main
+  git checkout development
+  git pull origin development
   ```
 - **Small commits** and **small PRs** are better than huge ones.
 - **Ask questions early** — don’t stay stuck!
