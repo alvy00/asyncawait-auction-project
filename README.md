@@ -1,17 +1,9 @@
-# My Monorepo
+# Monorepo of Auctasync
 
 Welcome to the **AsyncAwait - Auction Management Project** project!  
 This repository contains the frontend, backend, and documentation for our application.
 
 ---
-
-## 📂 Project Structure
-
-```
-/frontend    ➔ Next.js frontend application
-/backend     ➔ Express.js backend API
-/docs        ➔ Project documentation (architecture, API specs, setup guides)
-```
 
 
 ## 🚀 Getting Started
@@ -143,10 +135,10 @@ Please **read these files** before working on big features or backend routes!
 
 ## 🎯 Final Reminder
 
-- **Always** pull the latest `main` branch before starting a new feature:
+- **Always** pull the latest `development` branch before starting a new feature:
   ```bash
-  git checkout main
-  git pull origin main
+  git checkout development
+  git pull origin development
   ```
 - **Small commits** and **small PRs** are better than huge ones.
 - **Ask questions early** — don’t stay stuck!
