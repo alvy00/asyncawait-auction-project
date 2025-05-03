@@ -7,20 +7,50 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export default function LoginPage() {
+  const router = useRouter();
+
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
+  
+    try {
+      const data = new FormData(e.currentTarget);
+      const body = {
+        email: data.get('email'),
+        password: data.get('password')
+      };
+  
+      const res = await fetch('http://localhost:8000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+  
+      const result = await res.json();
+  
+      if (!res.ok) {
+        toast.error(result.message || 'Login failed');
+        return;
+      }
+  
+      toast.success('Login successful!');
+      router.push('/');
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('Something went wrong. Please try again.');
+    } finally {
       setIsLoading(false);
-      // Redirect would happen here after successful login
-    }, 1500);
+    }
   };
+  
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
@@ -41,6 +71,7 @@ export default function LoginPage() {
               <Label htmlFor="email">Email</Label>
               <Input 
                 id="email" 
+                name='email'
                 type="email" 
                 placeholder="name@example.com" 
                 required 
@@ -57,6 +88,7 @@ export default function LoginPage() {
               </div>
               <Input 
                 id="password" 
+                name='password'
                 type="password" 
                 placeholder="••••••••" 
                 required 

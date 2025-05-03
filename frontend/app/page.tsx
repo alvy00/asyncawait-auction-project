@@ -1,5 +1,4 @@
 "use client";
-import Head from 'next/head';
 import { useEffect } from 'react';
 import {Navbar} from './components/Navbar';
 import {HeroSection} from './components/HeroSection';
@@ -13,6 +12,7 @@ import LiveAuctionsSection from './components/LiveAuctionsSection';
 import TrustedPartners from './components/TrustedPartners';
 import LimitedTimeOffer from './components/LimitedTimeOffer';
 import CategoryShowcase from './components/CategoryShowcase';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function Home() {
   useEffect(() => {
@@ -28,6 +28,7 @@ export default function Home() {
     <>
       <main className="overflow-hidden">
         <Navbar />
+        <Toaster position='top-center' reverseOrder={false}/>
         <HeroSection />
         <StatsSection />
         <TrustedPartners />
