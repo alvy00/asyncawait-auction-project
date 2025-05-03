@@ -7,8 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export default function SignUpPage() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
 
@@ -28,8 +31,35 @@ export default function SignUpPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     // Simulate API call
+    try{
+      const formData = new FormData(e.currentTarget);
+      const body = {
+        name: formData.get('firstName') + ' ' + formData.get('lastName'),
+        username: formData.get('username'),
+        email: formData.get('email'),
+        password: formData.get('password')
+      }
+      const res = await fetch('http://localhost:8000/api/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type' : 'application/json'
+        },
+        body: JSON.stringify(body)
+      })
+
+      const r = await res.json();
+      if(!res.ok) return console.error("Signup failed: ", r.message);
+      //console.log("SignUp successful", res);
+
+      toast.success("Account created successfully");
+      router.push('/');
+    }catch(e){
+      toast.error("Account creation failed");
+      console.error("Error signing up", e);
+    }
+    
     setTimeout(() => {
       setIsLoading(false);
       // Redirect would happen here after successful registration
@@ -71,7 +101,7 @@ export default function SignUpPage() {
                   </svg>
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Real-time Updates</h3>
-                <p className="text-sm opacity-80">Get instant notifications when you're outbid or win an auction.</p>
+                <p className="text-sm opacity-80">Get instant notifications when you&apos;re outbid or win an auction.</p>
               </div>
               
               <div className="bg-white/20 backdrop-blur-sm rounded-lg p-6 text-left">
@@ -115,7 +145,8 @@ export default function SignUpPage() {
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
                 <Input 
-                  id="firstName" 
+                  id="firstName"
+                  name="firstName"
                   placeholder="John" 
                   required 
                   className="w-full"
@@ -126,17 +157,28 @@ export default function SignUpPage() {
                 <Label htmlFor="lastName">Last Name</Label>
                 <Input 
                   id="lastName" 
+                  name="lastName"
                   placeholder="Doe" 
                   required 
                   className="w-full"
                 />
               </div>
             </div>
-            
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <Input 
+                id="username" 
+                name="username"
+                placeholder="user001" 
+                required 
+                className="w-full"
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input 
                 id="email" 
+                name="email"
                 type="email" 
                 placeholder="name@example.com" 
                 required 
@@ -148,6 +190,7 @@ export default function SignUpPage() {
               <Label htmlFor="password">Password</Label>
               <Input 
                 id="password" 
+                name="password"
                 type="password" 
                 placeholder="••••••••" 
                 required 
