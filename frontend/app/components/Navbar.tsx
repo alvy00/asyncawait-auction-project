@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -6,12 +7,16 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, Menu, X, Bell, User } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/auth-context';
+import toast from 'react-hot-toast';
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-
+  const { loggedIn, logout } = useAuth();
   const toggleMenu = () => setIsOpen(!isOpen);
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,6 +30,16 @@ export const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    
+  }, [])
+
+  const handleLogOut = () => {
+    logout();
+    toast.success('Logged out successfully')
+    router.push('/');
+  };
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/95 shadow-md' : 'bg-white/80'} backdrop-blur-md border-b`}>
@@ -64,13 +79,28 @@ export const Navbar = () => {
               <Button variant="ghost" size="sm" className="rounded-full w-10 h-10 p-0 flex items-center justify-center text-gray-600 hover:text-orange-500 hover:bg-orange-50">
                 <Bell className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" className="font-medium hover:text-orange-500" asChild>
-                <Link href="/login">Login</Link>
-              </Button>
-              <Button className="bg-orange-500 hover:bg-orange-600 shadow-sm transition-all duration-200" asChild>
-                <Link href="/signup">Sign Up</Link>
-              </Button>
+
+              {loggedIn ? (
+                <>
+                  <Button variant="ghost" className="font-medium hover:text-orange-500" asChild>
+                    <Link href="/profile">Profile</Link>
+                  </Button>
+                  <Button className="bg-orange-500 hover:bg-orange-600 shadow-sm transition-all duration-200" onClick={handleLogOut}>
+                    Log Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="ghost" className="font-medium hover:text-orange-500" asChild>
+                    <Link href="/login">Login</Link>
+                  </Button>
+                  <Button className="bg-orange-500 hover:bg-orange-600 shadow-sm transition-all duration-200" asChild>
+                    <Link href="/signup">Sign Up</Link>
+                  </Button>
+                </>
+              )}
             </div>
+
           </div>
 
           {/* Mobile Menu Button */}
@@ -85,16 +115,19 @@ export const Navbar = () => {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="lg:hidden py-4 border-t border-gray-100">
+          <div className="lg:hidden py-4 border-t border-gray-100">  
             <div className="flex flex-col space-y-4">
               <Link href="/" className="text-gray-700 hover:text-orange-500 font-medium py-2">Home</Link>
+              
               <div className="border-t border-gray-100 pt-2">
                 <p className="text-sm font-medium text-gray-500 mb-2 px-1">Auctions</p>
                 <Link href="/auctions/live" className="text-gray-700 hover:text-orange-500 block py-2 pl-3">Live Auctions</Link>
                 <Link href="/auctions/upcoming" className="text-gray-700 hover:text-orange-500 block py-2 pl-3">Upcoming Auctions</Link>
                 <Link href="/auctions/past" className="text-gray-700 hover:text-orange-500 block py-2 pl-3">Past Auctions</Link>
               </div>
+
               <Link href="/how-it-works" className="text-gray-700 hover:text-orange-500 font-medium py-2 border-t border-gray-100 pt-4">How it Works</Link>
+              
               <div className="relative border-t border-gray-100 pt-4">
                 <Input 
                   type="search"
@@ -103,14 +136,30 @@ export const Navbar = () => {
                 />
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               </div>
-              <div className="flex flex-col space-y-2 border-t border-gray-100 pt-4">
-                <Button variant="ghost" className="w-full justify-start" asChild>
-                  <Link href="/login">Login</Link>
-                </Button>
-                <Button className="w-full bg-orange-500 hover:bg-orange-600" asChild>
-                  <Link href="/signup">Sign Up</Link>
-                </Button>
-              </div>
+
+              {loggedIn? 
+
+                  <div className="flex flex-col space-y-2 border-t border-gray-100 pt-4">
+                    <Button variant="ghost" className="w-full justify-start" asChild>
+                      <Link href="/profile">Profile</Link>
+                    </Button>
+                    <Button className="w-full bg-orange-500 hover:bg-orange-600" asChild onClick={handleLogOut}>
+                      Log Out
+                    </Button>
+                  </div>
+              
+                : 
+                  <div className="flex flex-col space-y-2 border-t border-gray-100 pt-4">
+                    <Button variant="ghost" className="w-full justify-start" asChild>
+                      <Link href="/login">Login</Link>
+                    </Button>
+                    <Button className="w-full bg-orange-500 hover:bg-orange-600" asChild>
+                      <Link href="/signup">Sign Up</Link>
+                    </Button>
+                  </div>
+              }
+              
+
             </div>
           </div>
         )}
