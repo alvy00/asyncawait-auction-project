@@ -4,14 +4,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
-// Sample auction data
+// ✅ Static ISO strings instead of Date.now()
 const auctions = [
   {
     id: 1,
     title: "Vintage Rolex Submariner",
     description: "Rare 1960s Rolex Submariner in excellent condition",
     currentBid: 15250,
-    endTime: new Date(Date.now() + 3600000 * 24 * 2), // 2 days from now
+    endTime: "2025-05-06T12:00:00Z",
     image: "https://images.unsplash.com/photo-1547996160-81dfa63595aa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1287&q=80",
     category: "Jewelry"
   },
@@ -20,7 +20,7 @@ const auctions = [
     title: "Abstract Oil Painting",
     description: "Original abstract artwork by contemporary artist",
     currentBid: 2100,
-    endTime: new Date(Date.now() + 3600000 * 12), // 12 hours from now
+    endTime: "2025-05-04T23:00:00Z",
     image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1290&q=80",
     category: "Art"
   },
@@ -29,7 +29,7 @@ const auctions = [
     title: "Restored 1969 Ford Mustang",
     description: "Fully restored classic American muscle car",
     currentBid: 42500,
-    endTime: new Date(Date.now() + 3600000 * 48), // 48 hours from now
+    endTime: "2025-05-06T23:00:00Z",
     image: "https://images.unsplash.com/photo-1567808291548-fc3ee04dbcf0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1287&q=80",
     category: "Cars"
   },
@@ -38,7 +38,7 @@ const auctions = [
     title: "Beachfront Property",
     description: "Luxury beachfront villa with private access",
     currentBid: 1250000,
-    endTime: new Date(Date.now() + 3600000 * 72), // 72 hours from now
+    endTime: "2025-05-07T23:00:00Z",
     image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     category: "Real Estate"
   },
@@ -47,7 +47,7 @@ const auctions = [
     title: "MacBook Pro M2 Max",
     description: "Latest model MacBook Pro with all accessories",
     currentBid: 2850,
-    endTime: new Date(Date.now() + 3600000 * 10), // 10 hours from now
+    endTime: "2025-05-04T21:00:00Z",
     image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1626&q=80",
     category: "Electronics"
   },
@@ -56,18 +56,18 @@ const auctions = [
     title: "Rare Comic Book Collection",
     description: "First editions of Marvel classics in mint condition",
     currentBid: 8700,
-    endTime: new Date(Date.now() + 3600000 * 36), // 36 hours from now
+    endTime: "2025-05-06T09:00:00Z",
     image: "https://images.unsplash.com/photo-1608889175123-8ee362201f81?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1160&q=80",
     category: "Collectibles"
   },
 ];
 
-const CountdownTimer = ({ endTime }: any) => {
+const CountdownTimer = ({ endTime }: { endTime: string }) => {
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(endTime));
 
-  function calculateTimeLeft(endTime: any) {
-    const difference = new Date(endTime) - new Date();
-    let timeLeft = {};
+  function calculateTimeLeft(endTime: string) {
+    const difference = new Date(endTime).getTime() - Date.now();
+    let timeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0 };
 
     if (difference > 0) {
       timeLeft = {
@@ -82,16 +82,13 @@ const CountdownTimer = ({ endTime }: any) => {
   }
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft(endTime));
     }, 1000);
+    return () => clearInterval(timer);
+  }, [endTime]);
 
-    return () => clearTimeout(timer);
-  });
-
-  const formatTime = (value: any) => {
-    return value < 10 ? `0${value}` : value;
-  };
+  const formatTime = (val: number) => (val < 10 ? `0${val}` : val);
 
   return (
     <div className="flex space-x-2 text-sm font-medium">
@@ -117,74 +114,63 @@ const CountdownTimer = ({ endTime }: any) => {
   );
 };
 
-const AuctionCard = ({ auction }: any) => {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg transition-transform duration-300 hover:shadow-xl hover:-translate-y-1">
-      <div className="relative h-48 overflow-hidden">
-        <div className="absolute top-2 right-2 z-10 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-          {auction.category}
-        </div>
-        <Image 
-          src={auction.image} 
-          alt={auction.title}
-          width={400}
-          height={200}
-          className="w-full h-full object-cover"
-        />
+const AuctionCard = ({ auction }: { auction: typeof auctions[0] }) => (
+  <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg transition-transform duration-300 hover:shadow-xl hover:-translate-y-1">
+    <div className="relative h-48 overflow-hidden">
+      <div className="absolute top-2 right-2 z-10 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+        {auction.category}
       </div>
-      <div className="p-5">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 truncate">{auction.title}</h3>
-        <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">{auction.description}</p>
-        
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Current Bid</p>
-            <p className="text-xl font-bold text-orange-500">${auction.currentBid.toLocaleString()}</p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 text-right">Ends in</p>
-            <CountdownTimer endTime={auction.endTime} />
-          </div>
+      <Image 
+        src={auction.image} 
+        alt={auction.title}
+        width={400}
+        height={200}
+        className="w-full h-full object-cover"
+      />
+    </div>
+    <div className="p-5">
+      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 truncate">{auction.title}</h3>
+      <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">{auction.description}</p>
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Current Bid</p>
+          <p className="text-xl font-bold text-orange-500">${auction.currentBid.toLocaleString()}</p>
         </div>
-        
-        <div className="flex space-x-2">
-          <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white">
-            Place Bid
-          </Button>
-          <Button variant="outline" className="border-gray-300 dark:border-gray-600">
-            Watch
-          </Button>
+        <div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 text-right">Ends in</p>
+          <CountdownTimer endTime={auction.endTime} />
         </div>
+      </div>
+      <div className="flex space-x-2">
+        <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white">Place Bid</Button>
+        <Button variant="outline" className="border-gray-300 dark:border-gray-600">Watch</Button>
       </div>
     </div>
-  );
-};
+  </div>
+);
 
-const LiveAuctionsSection = () => {
-  return (
-    <section className="py-16 bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center mb-10">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Live Auctions</h2>
-            <p className="text-gray-600 dark:text-gray-300 mt-2">Bid on these hot items before they're gone!</p>
-          </div>
-          <Link href="/auctions/live" className="text-orange-500 hover:text-orange-600 font-medium flex items-center">
-            View All
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-            </svg>
-          </Link>
+const LiveAuctionsSection = () => (
+  <section className="py-16 bg-gray-50 dark:bg-gray-900">
+    <div className="container mx-auto px-4">
+      <div className="flex justify-between items-center mb-10">
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Live Auctions</h2>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">Bid on these hot items before they&apos;re gone!</p>
         </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {auctions.map((auction) => (
-            <AuctionCard key={auction.id} auction={auction} />
-          ))}
-        </div>
+        <Link href="/auctions/live" className="text-orange-500 hover:text-orange-600 font-medium flex items-center">
+          View All
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+          </svg>
+        </Link>
       </div>
-    </section>
-  );
-};
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {auctions.map((auction) => (
+          <AuctionCard key={auction.id} auction={auction} />
+        ))}
+      </div>
+    </div>
+  </section>
+);
 
 export default LiveAuctionsSection;
