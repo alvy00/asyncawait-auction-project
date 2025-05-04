@@ -41,7 +41,10 @@ export default function SignUpPage() {
         email: formData.get('email'),
         password: formData.get('password')
       }
-      const res = await fetch('http://localhost:8000/api/signup', {
+
+      // https://asyncawait-auction-project.onrender.com/api/signup
+      // http://localhost:8000/api/signup
+      const res = await fetch('https://asyncawait-auction-project.onrender.com/api/signup', {
         method: 'POST',
         headers: {
           'Content-Type' : 'application/json'
@@ -50,11 +53,15 @@ export default function SignUpPage() {
       })
 
       const r = await res.json();
-      if(!res.ok) return console.error("Signup failed: ", r.message);
+      console.log(r);
+      if (res.ok) {
+        toast.success("Account created successfully");
+        router.push('/');
+      } else {
+        toast.error(r.message);
+      }
       //console.log("SignUp successful", res);
 
-      toast.success("Account created successfully");
-      router.push('/');
     }catch(e){
       toast.error("Account creation failed");
       console.error("Error signing up", e);

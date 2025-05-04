@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -9,48 +9,72 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { useAuth } from '@/lib/auth-context';  // Importing your AuthContext hook
+import { getSessionToken, clearSessionToken, isSessionExpired } from '@/lib/utils';
 
 export default function LoginPage() {
+  const { login } = useAuth();  // Get login function from context
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  useEffect(() => {
+    const token = getSessionToken();
+    const expired = isSessionExpired();
+  
+    if (!token || expired) {
+      clearSessionToken(); // clear stale token
+      router.replace('/login');
+    } else {
+      router.replace('/');
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-  
+
     try {
       const data = new FormData(e.currentTarget);
       const body = {
         email: data.get('email'),
         password: data.get('password')
       };
-  
-      const res = await fetch('http://localhost:8000/api/login', {
+
+      const res = await fetch('https://asyncawait-auction-project.onrender.com/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(body)
       });
-  
+
       const result = await res.json();
-  
+
       if (!res.ok) {
-        toast.error(result.message || 'Login failed');
+        console.error('Login failed:', result);
+        toast.error(result?.message || 'Login failed. Please check your credentials.');
         return;
       }
-  
+
+      if (result.token) {
+        login(result.token, rememberMe);  // Use the login function from the context
+        window.dispatchEvent(new Event("authChange"));
+      }
+
       toast.success('Login successful!');
       router.push('/');
     } catch (error) {
-      console.error('Login error:', error);
-      toast.error('Something went wrong. Please try again.');
+      if (error instanceof Error) {
+        toast.error('Something went wrong. Please try again.');
+      } else {
+        toast.error('Network error. Please check your connection.');
+      }
     } finally {
       setIsLoading(false);
     }
   };
-  
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
@@ -66,19 +90,20 @@ export default function LoginPage() {
           <h1 className="text-3xl font-bold mb-2 text-gray-900 font-serif">Welcome back</h1>
           <p className="text-gray-600 mb-8">Please enter your details to sign in</p>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6" aria-live="polite">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input 
-                id="email" 
-                name='email'
-                type="email" 
-                placeholder="name@example.com" 
-                required 
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="name@example.com"
+                required
                 className="w-full"
+                aria-describedby="email-error"
               />
             </div>
-            
+
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <Label htmlFor="password">Password</Label>
@@ -86,18 +111,24 @@ export default function LoginPage() {
                   Forgot password?
                 </Link>
               </div>
-              <Input 
-                id="password" 
-                name='password'
-                type="password" 
-                placeholder="••••••••" 
-                required 
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="••••••••"
+                required
                 className="w-full"
+                aria-describedby="password-error"
               />
             </div>
-            
+
             <div className="flex items-center space-x-2">
-              <Checkbox id="remember" />
+              <Checkbox
+                id="remember"
+                checked={rememberMe}
+                onCheckedChange={(checked) => setRememberMe(!!checked)}
+                aria-describedby="remember-error"
+              />
               <label
                 htmlFor="remember"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -105,10 +136,10 @@ export default function LoginPage() {
                 Remember me
               </label>
             </div>
-            
-            <Button 
-              type="submit" 
-              className="w-full bg-orange-500 hover:bg-orange-600" 
+
+            <Button
+              type="submit"
+              className="w-full bg-orange-500 hover:bg-orange-600"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -121,14 +152,14 @@ export default function LoginPage() {
                 </div>
               ) : 'Sign In'}
             </Button>
-            
+
             <div className="text-center">
-              <span className="text-gray-600">Don't have an account?</span>{' '}
+              <span className="text-gray-600">Don&apos;t have an account?</span>{' '}
               <Link href="/signup" className="text-orange-600 font-medium hover:text-orange-500">
                 Sign up
               </Link>
             </div>
-            
+
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>
@@ -139,7 +170,7 @@ export default function LoginPage() {
                 </span>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <Button variant="outline" className="w-full">
                 <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
