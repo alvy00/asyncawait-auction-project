@@ -1,17 +1,50 @@
-// frontend/tsconfig.json
 {
-  "extends": "../tsconfig.json",
   "compilerOptions": {
+    "baseUrl": "..",
+    "paths": {
+      "@frontend/*": [
+        "frontend/*"
+      ],
+      "@backend/*": [
+        "backend/*"
+      ],
+      "@types/*": [
+        "frontend/types/*"
+      ],
+      "@docs/*": [
+        "docs/*"
+      ]
+    },
+    "target": "ES2017",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noEmit": true,
+    "incremental": true,
+    "module": "esnext",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
     "plugins": [
-      { "name": "next" }
+      {
+        "name": "next"
+      }
     ]
   },
   "include": [
     "next-env.d.ts",
-    "types/**/*.d.ts",
+    ".next/types/**/*.ts",
     "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
+    "**/*.tsx"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }

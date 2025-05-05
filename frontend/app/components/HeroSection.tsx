@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Button } from '@frontend/components/ui/button';
+import { Button } from "../../components/ui/button";
 
 export const HeroSection = () => {
   return (
