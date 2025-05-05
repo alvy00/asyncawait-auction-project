@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@frontend/components/ui/button';
+import { Input } from '@frontend/components/ui/input';
+import { Label } from '@frontend/components/ui/label';
+import { Checkbox } from '@frontend/components/ui/checkbox';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { FaEnvelope, FaFacebookF, FaGoogle, FaLock, FaUser } from 'react-icons/fa';

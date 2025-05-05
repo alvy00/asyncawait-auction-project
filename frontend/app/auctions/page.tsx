@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import { Button } from "@frontend/components/ui/button";
 
 // Default fallback image
 const FALLBACK_IMAGE = "https://via.placeholder.com/400x200?text=No+Image";

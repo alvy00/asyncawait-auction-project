@@ -4,11 +4,11 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button } from '@frontend/components/ui/button';
+import { Input } from '@frontend/components/ui/input';
 import { Search, Menu, X, Bell, User, Home } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth-context';
+import { useAuth } from '@frontend/lib/auth-context';
 import toast from 'react-hot-toast';
 import { Info } from 'lucide-react';
 
