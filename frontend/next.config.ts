@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
       "images.unsplash.com",
       "plus.unsplash.com",
       "i.pravatar.cc",
-      "via.placeholder.com"
+      "via.placeholder.com",
     ],
   },
 };
