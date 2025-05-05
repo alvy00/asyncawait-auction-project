@@ -3,14 +3,14 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Button } from '@frontend/components/ui/button';
-import { Input } from '@frontend/components/ui/input';
-import { Label } from '@frontend/components/ui/label';
-import { Checkbox } from '@frontend/components/ui/checkbox';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
+import { Checkbox } from '../../components/ui/checkbox';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { useAuth } from '@frontend/lib/auth-context';
-import { getSessionToken, clearSessionToken, isSessionExpired } from '@frontend/lib/utils';
+import { useAuth } from '../../lib/auth-context';
+import { getSessionToken, clearSessionToken, isSessionExpired } from '../../lib/utils';
 import { FaEnvelope, FaFacebookF, FaGoogle, FaLock } from 'react-icons/fa';
 
 export default function LoginPage() {

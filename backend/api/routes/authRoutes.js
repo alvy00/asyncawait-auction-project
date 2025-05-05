@@ -4,6 +4,29 @@ import supabase from '../../config/supabaseClient.js';
 
 const authRouter = express.Router();
 
+//Get User
+authRouter.get('/getuser', async (req, res) => {
+    const authHeader = req.headers.authorization;
+  
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Missing or invalid Authorization header" });
+    }
+  
+    const token = authHeader.split(" ")[1];
+  
+    const { data, error } = await supabase.auth.getUser(token);
+  
+    if (error) {
+      console.error("Supabase auth error:", error.message);
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+  
+    return res.status(200).json(data.user);
+  });
+
+
+
+//User SignUP
 authRouter.post('/signup', async (req, res) => {
     const { name, username, email, password } = req.body;
     if(!name || !username || !email || !password) return res.status(400).json({message: 'All fields are required!'})
@@ -48,6 +71,7 @@ authRouter.post('/signup', async (req, res) => {
 });
 
 
+//User Login
 authRouter.post('/login', async (req, res) => {
     const { email, password } = req.body;
     if(!email || !password) return res.status(400).json({message: "All fields required!"})

@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
   eslint: {
@@ -15,6 +16,16 @@ const nextConfig: NextConfig = {
       "i.pravatar.cc",
       "via.placeholder.com",
     ],
+  },
+  webpack(config) {
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      "@frontend": path.resolve(__dirname, "../frontend"),
+      "@backend": path.resolve(__dirname, "../backend"),
+      "@docs": path.resolve(__dirname, "../docs"),
+      "@types": path.resolve(__dirname, "../frontend/types"),
+    };
+    return config;
   },
 };
 
