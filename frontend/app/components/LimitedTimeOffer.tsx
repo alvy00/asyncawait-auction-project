@@ -1,36 +1,40 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
 
-// ✅ Static end date to avoid hydration mismatch
-const STATIC_END_DATE = new Date("2025-05-11T00:00:00Z");
+const STATIC_END_DATE_STRING = "2025-05-11T00:00:00Z"; // ✅ Static string to avoid hydration issues
 
 const LimitedTimeOffer = () => {
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
-
-  function calculateTimeLeft() {
-    const now = new Date();
-    const difference = STATIC_END_DATE.getTime() - now.getTime();
-
-    if (difference <= 0) {
-      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-    }
-
-    return {
-      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-      minutes: Math.floor((difference / 1000 / 60) % 60),
-      seconds: Math.floor((difference / 1000) % 60),
-    };
-  }
+  const [timeLeft, setTimeLeft] = useState({
+    days: "--",
+    hours: "--",
+    minutes: "--",
+    seconds: "--",
+  });
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
-    }, 1000);
-    return () => clearInterval(timer);
+    function calculateTimeLeft() {
+      const now = new Date();
+      const end = new Date(STATIC_END_DATE_STRING);
+      const difference = end.getTime() - now.getTime();
+
+      if (difference <= 0) {
+        return { days: "00", hours: "00", minutes: "00", seconds: "00" };
+      }
+
+      return {
+        days: String(Math.floor(difference / (1000 * 60 * 60 * 24))).padStart(2, "0"),
+        hours: String(Math.floor((difference / (1000 * 60 * 60)) % 24)).padStart(2, "0"),
+        minutes: String(Math.floor((difference / 1000 / 60) % 60)).padStart(2, "0"),
+        seconds: String(Math.floor((difference / 1000) % 60)).padStart(2, "0"),
+      };
+    }
+
+    const updateTimer = () => setTimeLeft(calculateTimeLeft());
+    updateTimer(); // run once on mount
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -56,10 +60,10 @@ const LimitedTimeOffer = () => {
 
           <div className="flex flex-col items-center">
             <div className="flex space-x-4 mb-4">
-              {["days", "hours", "minutes", "seconds"].map((unit) => (
+              {Object.entries(timeLeft).map(([unit, value]) => (
                 <div key={unit} className="flex flex-col items-center">
                   <div className="bg-white/20 backdrop-blur-sm w-16 h-16 rounded-lg flex items-center justify-center text-2xl font-bold">
-                    {String((timeLeft as any)[unit]).padStart(2, "0")}
+                    {value}
                   </div>
                   <span className="text-sm mt-1 capitalize">{unit}</span>
                 </div>
