@@ -4,7 +4,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
-// ✅ Static ISO strings instead of Date.now()
 const auctions = [
   {
     id: 1,
@@ -12,7 +11,7 @@ const auctions = [
     description: "Rare 1960s Rolex Submariner in excellent condition",
     currentBid: 15250,
     endTime: "2025-05-06T12:00:00Z",
-    image: "https://images.unsplash.com/photo-1547996160-81dfa63595aa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1287&q=80",
+    image: "https://images.unsplash.com/photo-1547996160-81dfa63595aa?auto=format&fit=crop&w=1287&q=80",
     category: "Jewelry"
   },
   {
@@ -21,7 +20,7 @@ const auctions = [
     description: "Original abstract artwork by contemporary artist",
     currentBid: 2100,
     endTime: "2025-05-04T23:00:00Z",
-    image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1290&q=80",
+    image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&w=1290&q=80",
     category: "Art"
   },
   {
@@ -30,7 +29,7 @@ const auctions = [
     description: "Fully restored classic American muscle car",
     currentBid: 42500,
     endTime: "2025-05-06T23:00:00Z",
-    image: "https://images.unsplash.com/photo-1567808291548-fc3ee04dbcf0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1287&q=80",
+    image: "https://images.unsplash.com/photo-1567808291548-fc3ee04dbcf0?auto=format&fit=crop&w=1287&q=80",
     category: "Cars"
   },
   {
@@ -39,7 +38,7 @@ const auctions = [
     description: "Luxury beachfront villa with private access",
     currentBid: 1250000,
     endTime: "2025-05-07T23:00:00Z",
-    image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+    image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1170&q=80",
     category: "Real Estate"
   },
   {
@@ -48,7 +47,7 @@ const auctions = [
     description: "Latest model MacBook Pro with all accessories",
     currentBid: 2850,
     endTime: "2025-05-04T21:00:00Z",
-    image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1626&q=80",
+    image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1626&q=80",
     category: "Electronics"
   },
   {
@@ -57,57 +56,68 @@ const auctions = [
     description: "First editions of Marvel classics in mint condition",
     currentBid: 8700,
     endTime: "2025-05-06T09:00:00Z",
-    image: "https://images.unsplash.com/photo-1608889175123-8ee362201f81?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1160&q=80",
+    image: "https://images.unsplash.com/photo-1608889175123-8ee362201f81?auto=format&fit=crop&w=1160&q=80",
     category: "Collectibles"
   },
 ];
 
 const CountdownTimer = ({ endTime }: { endTime: string }) => {
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(endTime));
+  const [timeLeft, setTimeLeft] = useState({
+    days: "--",
+    hours: "--",
+    minutes: "--",
+    seconds: "--",
+  });
 
-  function calculateTimeLeft(endTime: string) {
-    const difference = new Date(endTime).getTime() - Date.now();
-    let timeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0 };
+  useEffect(() => {
+    function calculateTimeLeft(endTime: string) {
+      const difference = new Date(endTime).getTime() - Date.now();
 
-    if (difference > 0) {
-      timeLeft = {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
+      if (difference <= 0) {
+        return {
+          days: "00",
+          hours: "00",
+          minutes: "00",
+          seconds: "00",
+        };
+      }
+
+      return {
+        days: String(Math.floor(difference / (1000 * 60 * 60 * 24))).padStart(2, "0"),
+        hours: String(Math.floor((difference / (1000 * 60 * 60)) % 24)).padStart(2, "0"),
+        minutes: String(Math.floor((difference / 1000 / 60) % 60)).padStart(2, "0"),
+        seconds: String(Math.floor((difference / 1000) % 60)).padStart(2, "0"),
       };
     }
 
-    return timeLeft;
-  }
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft(endTime));
-    }, 1000);
+    const updateTimer = () => setTimeLeft(calculateTimeLeft(endTime));
+    updateTimer();
+    const timer = setInterval(updateTimer, 1000);
     return () => clearInterval(timer);
   }, [endTime]);
 
-  const formatTime = (val: number) => (val < 10 ? `0${val}` : val);
+  const isOver = timeLeft.days === "00" && timeLeft.hours === "00" && timeLeft.minutes === "00" && timeLeft.seconds === "00";
 
-  return (
+  return isOver ? (
+    <span className="text-red-500 font-semibold">Auction Ended</span>
+  ) : (
     <div className="flex space-x-2 text-sm font-medium">
-      {timeLeft.days > 0 && (
+      {timeLeft.days !== "00" && (
         <div className="flex flex-col items-center">
           <span className="text-lg font-bold">{timeLeft.days}</span>
           <span className="text-xs text-gray-500">days</span>
         </div>
       )}
       <div className="flex flex-col items-center">
-        <span className="text-lg font-bold">{formatTime(timeLeft.hours)}</span>
+        <span className="text-lg font-bold">{timeLeft.hours}</span>
         <span className="text-xs text-gray-500">hrs</span>
       </div>
       <div className="flex flex-col items-center">
-        <span className="text-lg font-bold">{formatTime(timeLeft.minutes)}</span>
+        <span className="text-lg font-bold">{timeLeft.minutes}</span>
         <span className="text-xs text-gray-500">min</span>
       </div>
       <div className="flex flex-col items-center">
-        <span className="text-lg font-bold">{formatTime(timeLeft.seconds)}</span>
+        <span className="text-lg font-bold">{timeLeft.seconds}</span>
         <span className="text-xs text-gray-500">sec</span>
       </div>
     </div>

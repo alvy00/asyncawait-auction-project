@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -5,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// Login logics
+// Login logics-----------------------
 export const setSessionToken = (token: string, remember: boolean, expiresInSeconds: number = 3600) => {
   const expiry = Date.now() + expiresInSeconds * 1000;
   const storage = remember ? localStorage : sessionStorage;
@@ -31,3 +32,23 @@ export const isSessionExpired = (): boolean => {
   return Date.now() > expiry;
 };
 //--------------------
+
+
+//Auction logics--------------------
+
+export const fetchAllAuctions = async () => {
+    try{
+      const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions', {
+        method: "GET",
+        headers: {
+          'Content-type': 'application/json'
+        }
+      })
+
+      const result = await res.json();
+
+      return result;
+    }catch(e){
+      console.error("Error fetching auctions", e);
+    }
+}
