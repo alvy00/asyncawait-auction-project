@@ -1,6 +1,5 @@
-import Link from 'next/link';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
+import { Button } from '@frontend/components/ui/button';
 
 export const HeroSection = () => {
   return (
