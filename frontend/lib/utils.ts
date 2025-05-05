@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { Auction } from "@frontend/types/types";
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -36,19 +37,28 @@ export const isSessionExpired = (): boolean => {
 
 //Auction logics--------------------
 
-export const fetchAllAuctions = async () => {
-    try{
-      const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions', {
-        method: "GET",
-        headers: {
-          'Content-type': 'application/json'
-        }
-      })
+export const fetchAllAuctions = async (): Promise<Auction[] | null> => {
+  try {
+    const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-      const result = await res.json();
-
-      return result;
-    }catch(e){
-      console.error("Error fetching auctions", e);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch auctions: ${res.statusText}`);
     }
-}
+
+    const result: Auction[] = await res.json();
+    return result;
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      console.error('Error fetching auctions:', e.message);
+    } else {
+      console.error('An unknown error occurred', e);
+    }
+
+    return null;
+  }
+};

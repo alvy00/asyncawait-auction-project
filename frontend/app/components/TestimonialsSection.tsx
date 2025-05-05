@@ -53,7 +53,7 @@ const TestimonialsSection = () => {
               transition={{ duration: 0.5 }}
               className="bg-white/10 backdrop-blur-lg rounded-2xl p-10 shadow-xl"
             >
-              <div className="text-5xl text-orange-300 mb-6">"</div>
+              <div className="text-5xl text-orange-300 mb-6">`&quot;`</div>
               <p className="text-xl mb-8">{testimonials[current].content}</p>
               <div className="flex items-center">
                 <div className="w-16 h-16 rounded-full overflow-hidden mr-4 border-2 border-orange-300">

@@ -1,0 +1,28 @@
+// tsconfig.json (root)
+{
+    "compilerOptions": {
+      "target": "ES2017",
+      "lib": ["dom", "dom.iterable", "esnext"],
+      "allowJs": true,
+      "skipLibCheck": true,
+      "strict": true,
+      "noEmit": true,
+      "esModuleInterop": true,
+      "module": "esnext",
+      "moduleResolution": "node",
+      "resolveJsonModule": true,
+      "isolatedModules": true,
+      "jsx": "preserve",
+      "incremental": true,
+      "baseUrl": ".",  
+      "paths": {
+        "@frontend/*": ["frontend/*"],
+        "@backend/*": ["backend/*"],
+        "@types/*": ["frontend/types/*"],
+        "@docs/*": ["docs/*"]
+      }
+    },
+    "include": ["frontend/**/*", "backend/**/*", "docs/**/*"],
+    "exclude": ["node_modules"]
+  }
+  

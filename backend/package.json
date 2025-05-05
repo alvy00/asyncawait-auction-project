@@ -11,7 +11,7 @@
         "typescript": "^5.8.3"
     },
     "scripts": {
-        "start": "node index.js",
-        "dev": "nodemon index.js"
-    }
+    "start": "node backend/api/index.js",
+    "dev": "nodemon backend/api/index.js"
+}
 }
