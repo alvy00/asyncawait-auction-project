@@ -45,7 +45,7 @@ auctionRouter.post('/create', async (req, res) => {
                     user_id: user.id,
                     ...result.data,
                 },
-            ]);
+            ]).select();
 
         console.log("Supabase Response:", { data, error });
 
