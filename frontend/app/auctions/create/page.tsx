@@ -16,18 +16,16 @@ export default function AuctionCreationForm() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const router = useRouter();
 
-
   useEffect(() => {
+    const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
     const fetchUser = async () => {
-      const token = localStorage.getItem("sessionToken");
-  
       if (!token) {
         console.warn("No session token found");
         return;
       }
   
       try {
-        const res = await fetch('/api/getUser', {
+        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getUser', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -40,6 +38,7 @@ export default function AuctionCreationForm() {
         }
   
         const user = await res.json();
+        //console.log(user);
         setCurrentUser(user);
       } catch (error) {
         console.error("Error fetching user:", error);
@@ -67,6 +66,7 @@ export default function AuctionCreationForm() {
     }
 
     try{
+      const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
       const formData = new FormData(e.currentTarget);
       const body = {
         user_id: currentUser.id,
@@ -78,14 +78,15 @@ export default function AuctionCreationForm() {
         buy_now: formData.get('buy_now'),
         start_time: formData.get('start_time'),
         end_time: formData.get('end_time'),
-        status: formData.get('status'),
+        status: 'ongoing',
         images: imageUrls.filter(url => url.trim() !== ""),
       };
 
       const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/create', {
         method: 'POST',
         headers: {
-          'Content-type': 'application/json'
+          'Content-type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(body),
       });
@@ -245,24 +246,6 @@ export default function AuctionCreationForm() {
               className="pl-10 py-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 outline-none"
             />
           </div>
-        </div>
-      </div>
-
-      {/* Status */}
-      <div className="space-y-2">
-        <Label htmlFor="status" className="text-lg font-medium text-gray-600">Status</Label>
-        <div className="relative">
-          <FaRegCalendarAlt className="absolute top-3 left-3 text-gray-500" />
-          <select
-            id="status"
-            name="status"
-            required
-            className="pl-10 py-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 outline-none"
-          >
-            <option value="">Select status</option>
-            <option value="ongoing">Ongoing</option>
-            <option value="ended">Ended</option>
-          </select>
         </div>
       </div>
 
