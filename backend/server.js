@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv'
 import auctionRoutes from './api/routes/auctionRoutes.js'
 import authRoutes from './api/routes/authRoutes.js'
+import cookieParser from 'cookie-parser'
 
 
 dotenv.config();
@@ -15,6 +16,7 @@ const PORT = process.env.PORT || 8000;
 app.use(express.json());
 app.use(cors());
 app.use(morgan('dev'));
+app.use(cookieParser());
 app.use('/api/auctions', auctionRoutes);
 app.use('/api', authRoutes);
 
