@@ -20,7 +20,8 @@ authRouter.get('/getuser', async (req, res) => {
       console.error("Supabase auth error:", error.message);
       return res.status(401).json({ message: "User not authenticated" });
     }
-  
+    
+    console.log(data.user);
     return res.status(200).json(data.user);
 });
 
