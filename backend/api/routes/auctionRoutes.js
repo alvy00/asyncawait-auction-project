@@ -5,7 +5,6 @@ import { getUser } from '../controllers/authController.js';
 
 
 const auctionRouter = express.Router();
-const user = await getUser();
 
 // Get all auctions
 auctionRouter.get('/', async (req, res) => {
@@ -26,6 +25,7 @@ auctionRouter.get('/', async (req, res) => {
 //Create Auction
 auctionRouter.post('/create', async (req, res) => {
     try {
+        const user = await getUser(req);
         if (!user) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
@@ -43,8 +43,6 @@ auctionRouter.post('/create', async (req, res) => {
             .insert([
                 {
                     user_id: user.id,
-                    created_at: new Date(),
-                    updated_at: new Date(),
                     ...result.data,
                 },
             ]);
