@@ -59,7 +59,7 @@ export default function AuctionCreationForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+    console.log(currentUser.id);
     if (!currentUser) {
       toast.error("You need to be logged in to create an auction.");
       return;
@@ -69,17 +69,16 @@ export default function AuctionCreationForm() {
       const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
       const formData = new FormData(e.currentTarget);
       const body = {
-        user_id: currentUser.id,
-        item_name: formData.get('item_name'),
-        description: formData.get('description'),
-        category: formData.get('category'),
-        condition: formData.get('condition'),
-        starting_price: formData.get('starting_price'),
-        buy_now: formData.get('buy_now'),
-        start_time: formData.get('start_time'),
-        end_time: formData.get('end_time'),
+        item_name: formData.get('item_name') as string,
+        description: formData.get('description') as string,
+        category: formData.get('category') as 'electronics' | 'art' | 'fashion' | 'vehicles' | 'other',
+        starting_price: parseFloat(formData.get('starting_price') as string),
+        buy_now: formData.get('buy_now') ? parseFloat(formData.get('buy_now') as string) : undefined,
+        start_time: new Date(formData.get('start_time') as string).toISOString(),
+        end_time: new Date(formData.get('end_time') as string).toISOString(),
         status: 'ongoing',
         images: imageUrls.filter(url => url.trim() !== ""),
+        condition: formData.get('condition') as 'new' | 'used' | 'refurbished',
       };
 
       const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/create', {
