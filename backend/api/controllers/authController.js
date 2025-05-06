@@ -1,31 +1,24 @@
-import supabase from "../../config/supabaseClient";
+import supabase from "../../config/supabaseClient.js";
 
-export const getUser = async () => {
-  const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
+export const getUser = async (req) => {
+  const authHeader = req.headers.authorization;
 
-  if (!token) {
-    console.log("No session token found.");
-    return null;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return null; // No token or invalid header
   }
 
-  // Set the session manually if needed (not always required if supabase handles it automatically)
-  const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
-    access_token: token,
-    refresh_token: token, // if you store refresh_token too
-  });
+  const token = authHeader.split(" ")[1];
 
-  if (sessionError) {
-    console.error("Error setting session:", sessionError.message);
-    return null;
+  try {
+      const { data, error } = await supabase.auth.getUser(token);
+      if (error) {
+          console.error("Supabase auth error:", error.message);
+          return null;
+      }
+      return data.user;
+  } catch (error) {
+      console.error("Error fetching user:", error.message);
+      return null;
   }
-
-  // Get the authenticated user
-  const { data, error } = await supabase.auth.getUser();
-
-  if (error) {
-    console.error("Error fetching user:", error.message);
-    return null;
-  }
-
-  return data.user;
 };
+
