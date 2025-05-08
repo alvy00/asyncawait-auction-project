@@ -30,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${playfair.variable} ${montserrat.variable} font-sans antialiased`}
+        className={`${playfair.variable} ${montserrat.variable} font-sans antialiased bg-[#0a0a18]`}
       >
         <AuthProvider>
           <Toaster position='top-center'/>

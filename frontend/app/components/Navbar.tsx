@@ -1,22 +1,32 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from "../../components/ui/button";
 import { Input } from '../../components/ui/input';
-import { Search, Menu, X, Bell, User, Home } from 'lucide-react';
+import { Search, Menu, X, Bell, Heart, ChevronDown, Home } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../lib/auth-context';
 import toast from 'react-hot-toast';
 import { Info } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { loggedIn, logout } = useAuth();
-  const toggleMenu = () => setIsOpen(!isOpen);
+  const { loggedIn, logout } = useAuth();  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  const handleDropdown = (dropdown: string) => {
+    setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
+  };
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
   const router = useRouter();
 
   useEffect(() => {
@@ -28,9 +38,36 @@ export const Navbar = () => {
       }
     };
     
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setActiveDropdown(null);
+      }
+      
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node) && mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    };
+    
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [mobileMenuOpen]);
+
+  // Navigation items for reuse
+  const navItems = [
+    { name: 'Home', href: '/' },
+    { name: 'Auctions', href: '#', dropdown: true, items: [
+      { name: 'Live Auctions', href: '/auctions/live' },
+      { name: 'Upcoming Auctions', href: '/auctions/upcoming' },
+      { name: 'Past Auctions', href: '/auctions/past' },
+    ]},
+    { name: 'How it works', href: '/how-it-works' },
+    { name: 'Contact', href: '/contact' },
+  ];
 
   useEffect(() => {
     
@@ -43,248 +80,227 @@ export const Navbar = () => {
   };
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/95 shadow-md' : 'bg-white/80'} backdrop-blur-md border-b`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-[#0a1929]/95' : 'bg-transparent'} backdrop-blur-sm`}>      
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <Image src="/logo.png" alt="AuctaSync Logo" width={180} height={45}/>
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/logo-white.png"
+              alt="AuctaSync Logo"
+              width={200}
+              height={80}
+            />
           </Link>
 
-          {/* Desktop Navigation */}
-      <div className="hidden lg:flex items-center gap-10 px-6">
-        {/* Logo or Home */}
-        <Link
-          href="/"
-          className="text-gray-800 hover:text-orange-500 font-semibold text-base transition-colors"
-        >
-          Home
-        </Link>
-
-        {/* Auctions Dropdown */}
-        <div className="relative group">
-          <button
-            className="flex items-center text-gray-800 font-semibold text-base hover:text-orange-500 transition-colors"
-          >
-            Auctions
-            <svg
-              className="w-4 h-4 ml-1 mt-[1px]"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          <div
-            className="absolute z-20 left-0 mt-2 w-56 rounded-lg bg-white shadow-lg border border-gray-100 py-2 opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200"
-          >
-            <Link
-              href="/auctions"
-              className="block px-5 py-2 text-gray-700 hover:bg-orange-50 hover:text-orange-500 transition"
-            >
-              Live Auctions
-            </Link>
-            <Link
-              href="/auctions/upcoming"
-              className="block px-5 py-2 text-gray-700 hover:bg-orange-50 hover:text-orange-500 transition"
-            >
-              Upcoming Auctions
-            </Link>
-            <Link
-              href="/auctions/past"
-              className="block px-5 py-2 text-gray-700 hover:bg-orange-50 hover:text-orange-500 transition"
-            >
-              Past Auctions
-            </Link>
-          </div>
-        </div>
-
-        {/* How It Works */}
-        <Link
-          href="/how-it-works"
-          className="text-gray-800 hover:text-orange-500 font-semibold text-base transition-colors"
-        >
-          How it Works
-        </Link>
-
-        {/* Search Bar */}
-        <div className="relative flex-1 max-w-xs">
-          <Input
-            type="search"
-            placeholder="Search auctions..."
-            className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:ring-orange-300 focus:border-orange-400 transition"
-          />
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-        </div>
-
-        {/* Icons and Auth */}
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full w-10 h-10 text-gray-600 hover:text-orange-500 hover:bg-orange-100"
-          >
-            <Bell className="h-5 w-5" />
-          </Button>
-
-          {loggedIn ? (
-            <>
-              <Button variant="ghost" className="font-medium hover:text-orange-500" asChild>
-                <Link href="/dashboard">Dashboard</Link>
-              </Button>
-              <Button
-                className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full transition"
-                onClick={handleLogOut}
-              >
-                Log Out
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="ghost" className="font-medium hover:text-orange-500" asChild>
-                <Link href="/login">Login</Link>
-              </Button>
-              <Button
-                className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full transition"
-                asChild
-              >
-                <Link href="/signup">Sign Up</Link>
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
-
-
-          {/* Mobile Menu Toggle Button */}
-            <button
-              type="button"
-              className="inline-flex items-center justify-center lg:hidden p-2 rounded-md text-gray-700 hover:text-orange-500 hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-300 transition-all"
-              onClick={toggleMenu}
-              aria-expanded={isOpen}
-              aria-label="Toggle menu"
-            >
-              {isOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </button>
-        </div>
-
-        {/* Mobile Navigation */}
-        {isOpen && (
-          <div className="lg:hidden py-4 px-4 border-t border-gray-100 space-y-6 bg-white shadow-md">
-            <div className="flex flex-col space-y-4">
-
-              {/* Home */}
-              <Link
-                href="/"
-                className="flex items-center text-sm font-medium text-gray-800 hover:text-orange-500 hover:bg-orange-50 px-3 py-2 rounded-md transition-colors duration-200"
-              >
-                <Home className="w-4 h-4 text-gray-600 mr-2" />
-                Home
-              </Link>
-
-              {/* Auctions */}
-              <div className="border-t border-gray-100 pt-5">
-                <div className="bg-gray-50 rounded-xl px-4 py-3 shadow-sm">
-                  <div className="flex items-center gap-2 mb-3">
-                    <svg className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-6h13M4 6h16M4 12h8m-8 6h16" />
-                    </svg>
-                    <p className="text-xs uppercase tracking-wide font-semibold text-gray-600">
-                      Auctions
-                    </p>
+          {/* Main Navigation - Desktop */}
+          <nav className="hidden md:flex items-center space-x-6">
+            {navItems.map((item, index) => (
+              <div key={index} className={`relative ${item.dropdown ? 'group' : ''}`}>
+                {item.dropdown ? (
+                  <div ref={dropdownRef}>
+                    <button 
+                      onClick={() => handleDropdown(item.name)}
+                      className="text-white hover:text-orange-400 transition-colors flex items-center text-sm font-medium"
+                    >
+                      {item.name}
+                      <ChevronDown className="w-4 h-4 ml-1" />
+                    </button>
+                    
+                    <AnimatePresence>
+                      {activeDropdown === item.name && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          transition={{ duration: 0.2 }}
+                          className="absolute top-full left-0 w-48 bg-[#0a1929] rounded-lg py-2 mt-1 z-50 shadow-lg"
+                        >
+                          {item.items?.map((subItem, subIndex) => (
+                            <Link 
+                              key={subIndex} 
+                              href={subItem.href} 
+                              className="block px-4 py-2 text-white hover:bg-[#162a3d] text-sm"
+                            >
+                              {subItem.name}
+                            </Link>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
-
-                  <div className="space-y-1">
-                    <Link
-                      href="/auctions"
-                      className="block text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-500 rounded-md px-3 py-2 transition-colors"
-                    >
-                      Live Auctions
-                    </Link>
-                    <Link
-                      href="/auctions/upcoming"
-                      className="block text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-500 rounded-md px-3 py-2 transition-colors"
-                    >
-                      Upcoming Auctions
-                    </Link>
-                    <Link
-                      href="/auctions/past"
-                      className="block text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-500 rounded-md px-3 py-2 transition-colors"
-                    >
-                      Past Auctions
-                    </Link>
-                  </div>
-                </div>
-              </div>
-
-              {/* How it Works */}
-              <div className="border-t border-gray-100 pt-4">
-                <Link
-                  href="/how-it-works"
-                  className="flex items-center gap-2 text-sm font-medium text-gray-800 hover:text-orange-500 hover:bg-orange-50 px-3 py-2 rounded-md transition-colors duration-200"
-                >
-                  <Info className="w-4 h-4 text-orange-400" />
-                  How it Works
-                </Link>
-              </div>
-
-              {/* Search */}
-              <div className="relative border-t border-gray-100 pt-4">
-                <div className="relative w-full">
-                  <Input
-                    type="search"
-                    placeholder="Search auctions..."
-                    className="w-full pl-10 pr-4 py-2 rounded-full bg-gray-50 border border-gray-200 text-sm shadow-sm focus:border-orange-400 focus:ring-2 focus:ring-orange-200 focus:ring-opacity-50 transition-all"
-                  />
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
-                </div>
-              </div>
-
-              {/* Auth Section */}
-              <div className="border-t border-gray-100 pt-4 space-y-2">
-                {loggedIn ? (
-                  <>
-                    <Button variant="ghost" className="w-full justify-start text-gray-700 hover:text-orange-500 transition" asChild>
-                      <Link href="/dashboard">Dashboard</Link>
-                    </Button>
-                    <Button
-                      className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-full transition"
-                      onClick={handleLogOut}
-                    >
-                      Log Out
-                    </Button>
-                  </>
                 ) : (
-                  <>
-                    {/* Login Button */}
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-center text-gray-700 hover:text-orange-500 hover:bg-orange-50 font-medium rounded-full transition-all duration-200 shadow-sm"
-                      asChild
-                    >
-                      <Link href="/login">Login</Link>
-                    </Button>
-
-                    {/* Sign Up Button */}
-                    <Button
-                      className="w-full bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white font-semibold rounded-full shadow-md transition-all duration-200"
-                      asChild
-                    >
-                      <Link href="/signup">Sign Up</Link>
-                    </Button>
-                  </>
+                  <Link 
+                    href={item.href} 
+                    className="text-white hover:text-orange-400 transition-colors text-sm font-medium"
+                  >
+                    {item.name}
+                  </Link>
                 )}
               </div>
+            ))}
+          </nav>
+          
+          {/* Search and Actions */}
+          <div className="flex items-center space-x-3">
+            {/* Search Bar */}
+            <div className="relative hidden md:block">
+              <div className="relative">
+                <Input 
+                  type="search"
+                  placeholder="Find your items..."
+                  className="w-56 pl-10 h-9 rounded-full bg-[#0a1929] border-[#1e3a52] text-white placeholder:text-gray-400 focus:border-orange-500 focus:ring focus:ring-orange-500/20"
+                />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              </div>
             </div>
+            
+            {/* Notification Icon */}
+            <Link href="/notifications" className="text-white hidden md:block">
+              <Bell className="w-5 h-5" />
+            </Link>
+            
+            {/* Messages Icon */}
+            <Link href="/messages" className="text-white hidden md:block">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </Link>
+            
+            {/* Favorites Icon */}
+            <Link href="/favorites" className="text-white hidden md:block">
+              <Heart className="w-5 h-5" />
+            </Link>
+            
+            {/* Login/Signup Buttons */}
+            <div className="hidden md:flex items-center space-x-2">
+              <Button variant="ghost" className="text-white hover:text-orange-400 h-9 px-3 text-sm" asChild>
+                <Link href="/login">Login</Link>
+              </Button>
+              
+              <Button className="bg-orange-500 hover:bg-orange-600 text-white h-9 px-4 text-sm" asChild>
+                <Link href="/signup">Sign up</Link>
+              </Button>
+            </div>
+            
+            {/* Mobile Menu Button */}
+            <button 
+              className="md:hidden text-white p-1"
+              onClick={toggleMobileMenu}
+              aria-label="Toggle mobile menu"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
           </div>
-        )}
-
+        </div>
       </div>
-    </nav>
+      
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            ref={mobileMenuRef}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="md:hidden bg-[#0a1929] border-t border-[#1e3a52]/50"
+          >
+            <div className="container mx-auto px-4 py-4">
+              {/* Mobile Search */}
+              <div className="relative mb-4">
+                <Input 
+                  type="search"
+                  placeholder="Find your items..."
+                  className="w-full pl-10 h-10 rounded-full bg-[#0a1929] border-[#1e3a52] text-white placeholder:text-gray-400"
+                />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              </div>
+              
+              {/* Mobile Navigation */}
+              <nav className="space-y-4 mb-6">
+                {navItems.map((item, index) => (
+                  <div key={index} className="py-2">
+                    {item.dropdown ? (
+                      <div>
+                        <button 
+                          onClick={() => handleDropdown(item.name + '-mobile')}
+                          className="text-white flex justify-between w-full items-center text-base font-medium"
+                        >
+                          {item.name}
+                          <ChevronDown className="w-5 h-5" />
+                        </button>
+                        
+                        <AnimatePresence>
+                          {activeDropdown === item.name + '-mobile' && (
+                            <motion.div 
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="mt-2 pl-4 border-l border-[#1e3a52] space-y-2"
+                            >
+                              {item.items?.map((subItem, subIndex) => (
+                                <Link 
+                                  key={subIndex} 
+                                  href={subItem.href} 
+                                  className="block py-2 text-gray-300 hover:text-white text-sm"
+                                  onClick={() => setMobileMenuOpen(false)}
+                                >
+                                  {subItem.name}
+                                </Link>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    ) : (
+                      <Link 
+                        href={item.href} 
+                        className="text-white block text-base font-medium"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {item.name}
+                      </Link>
+                    )}
+                  </div>
+                ))}
+              </nav>
+              
+              {/* Mobile Action Icons */}
+              <div className="flex justify-between mb-6">
+                <Link href="/notifications" className="text-white flex flex-col items-center" onClick={() => setMobileMenuOpen(false)}>
+                  <Bell className="w-6 h-6 mb-1" />
+                  <span className="text-xs">Notifications</span>
+                </Link>
+                
+                <Link href="/messages" className="text-white flex flex-col items-center" onClick={() => setMobileMenuOpen(false)}>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  <span className="text-xs">Messages</span>
+                </Link>
+                
+                <Link href="/favorites" className="text-white flex flex-col items-center" onClick={() => setMobileMenuOpen(false)}>
+                  <Heart className="w-6 h-6 mb-1" />
+                  <span className="text-xs">Favorites</span>
+                </Link>
+              </div>
+              
+              {/* Mobile Login/Signup */}
+              <div className="grid grid-cols-2 gap-3">
+                <Button variant="outline" className="border-[#1e3a52] text-white hover:bg-[#1e3a52] w-full" asChild>
+                  <Link href="/login" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+                </Button>
+                
+                <Button className="bg-orange-500 hover:bg-orange-600 text-white w-full" asChild>
+                  <Link href="/signup" onClick={() => setMobileMenuOpen(false)}>Sign up</Link>
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </header>
   );
 };
