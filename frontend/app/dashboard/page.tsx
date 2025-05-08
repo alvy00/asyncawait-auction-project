@@ -22,34 +22,55 @@ const Dashboard = () => {
   //   winRatio: 72,
   // };
 
-  // useEffect(() => {
-
-  //   const fetchCurrentUser = async () => {
-  //     const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
-  //     try{
-  //       const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getUser', {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       });
-
-  //       if (!res.ok) {
-  //         const err = await res.json();
-  //         console.error("Failed to fetch user:", err.message || res.statusText);
-  //         return;
-  //       }
-        
-  //       const userData = await res.json();
-  //       const { data, error } = await supaba
-  //       console.log(userData)
-  //       setUser(userData);
-  //     }catch(e){
-  //       console.error("Error fetching user:", e);
-  //     }
-  //   }
-    
-  //   fetchCurrentUser();
-  // }, [])
+  useEffect(() => {
+    const fetchCurrentUserData = async () => {
+      const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
+  
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
+  
+      try {
+        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getUser', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        // Handle failed responses
+        if (!res.ok) {
+          const errorMessage = await res.text();
+          console.error("Failed to fetch user:", res.statusText, errorMessage);
+          return;
+        }
+  
+        // Ensure the response is JSON
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+          console.error("Expected JSON, got:", contentType);
+          return;
+        }
+  
+        const userData = await res.json();
+  
+        // Handle errors from userData (e.g., message field indicating user not found)
+        if (userData?.message) {
+          console.error("API returned error:", userData.message);
+          return;
+        }
+  
+        // Proceed if userData is valid
+        console.log(userData);
+        setUser(userData);
+      } catch (e) {
+        console.error("Error fetching user:", e);
+      }
+    };
+  
+    fetchCurrentUserData();
+  }, []);
+  
 
   if (!user) {
     return (
