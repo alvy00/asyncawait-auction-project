@@ -4,7 +4,7 @@ import supabase from '../../config/supabaseClient.js';
 
 const authRouter = express.Router();
 
-//Get User
+//Get User Database Data
 authRouter.get('/getuser', async (req, res) => {
     const authHeader = req.headers.authorization;
   
@@ -14,24 +14,26 @@ authRouter.get('/getuser', async (req, res) => {
   
     const token = authHeader.split(" ")[1];
   
-    const { data, errData } = await supabase.auth.getUser(token);
-    if (errData) {
-      console.error("Supabase auth error:", errData.message);
+    const { data: authData, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !authData?.user) {
+      console.error("Supabase auth error:", authError?.message);
       return res.status(401).json({ message: "User not authenticated" });
     }
-
-    const { userDatabaseData, errDB} = await supabase.from('users')
-                                                    .select('*')
-                                                    .eq('id', data.user.id)
-                                                    .single();
-    if (errDB) {
-        console.error("Supabase auth error:", errDB.message);
-        return res.status(401).json({ message: "User data not found" });
+  
+    const { data: userDatabaseData, error: dbError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', authData.user.id)
+      .single();
+  
+    if (dbError || !userDatabaseData) {
+      console.error("Supabase DB error:", dbError?.message);
+      return res.status(404).json({ message: "User data not found" });
     }
-    
+  
     console.log(userDatabaseData);
     return res.status(200).json(userDatabaseData);
-});
+  });
 
 
 
