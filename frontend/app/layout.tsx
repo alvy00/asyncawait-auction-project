@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Montserrat } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "../lib/auth-context";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -30,7 +32,11 @@ export default function RootLayout({
       <body
         className={`${playfair.variable} ${montserrat.variable} font-sans antialiased`}
       >
-        {children}
+        <AuthProvider>
+          <Toaster position='top-center'/>
+          {children}
+        </AuthProvider>
+        
       </body>
     </html>
   );

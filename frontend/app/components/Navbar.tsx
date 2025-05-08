@@ -1,16 +1,21 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Search, Menu, X, Bell, Heart, ChevronDown } from 'lucide-react';
+import { Button } from "../../components/ui/button";
+import { Input } from '../../components/ui/input';
+import { Search, Menu, X, Bell, Heart, ChevronDown, Home } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../../lib/auth-context';
+import toast from 'react-hot-toast';
+import { Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const { loggedIn, logout } = useAuth();  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -22,6 +27,7 @@ export const Navbar = () => {
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -62,6 +68,16 @@ export const Navbar = () => {
     { name: 'How it works', href: '/how-it-works' },
     { name: 'Contact', href: '/contact' },
   ];
+
+  useEffect(() => {
+    
+  }, [])
+
+  const handleLogOut = () => {
+    logout();
+    toast.success('Logged out successfully')
+    router.push('/');
+  };
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-[#0a1929]/95' : 'bg-transparent'} backdrop-blur-sm`}>      
