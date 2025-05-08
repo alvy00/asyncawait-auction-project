@@ -1,18 +1,18 @@
 "use client";
 import { useEffect } from 'react';
-import { Navbar } from './components/Navbar';
-import { HeroSection } from './components/HeroSection';
-import FeaturesSection from './components/FeaturesSection';
-import HowItWorksSection from './components/HowItWorksSection';
-import TestimonialsSection from './components/TestimonialsSection';
-import StatsSection from './components/StatsSection';
-import CTASection from './components/CTASection';
-import Footer from './components/Footer';
-import LiveAuctionsSection from './components/LiveAuctionsSection';
-import TrustedPartners from './components/TrustedPartners';
-import LimitedTimeOffer from './components/LimitedTimeOffer';
-import CategoryShowcase from './components/CategoryShowcase';
-import CategorySection from './components/CategorySection';
+import { Navbar } from '../components/Navbar';
+import { HeroSection } from '../components/HeroSection';
+import FeaturesSection from '../components/FeaturesSection';
+import HowItWorksSection from '../components/HowItWorksSection';
+import TestimonialsSection from '../components/TestimonialsSection';
+import StatsSection from '../components/StatsSection';
+import CTASection from '../components/CTASection';
+import Footer from '../components/Footer';
+import LiveAuctionsSection from '../components/LiveAuctionsSection';
+import TrustedPartners from '../components/TrustedPartners';
+import LimitedTimeOffer from '../components/LimitedTimeOffer';
+import CategoryShowcase from '../components/CategoryShowcase';
+import CategorySection from '../components/CategorySection';
 
 // Animated Gradient Bubbles Component
 const AnimatedBackground = () => {
@@ -81,15 +81,13 @@ export default function Home() {
   
   return (
     <>
-      <main className="relative overflow-hidden bg-[#0A111B] text-white">
+      <main className="relative overflow-hidden bg-[#0a0a18] text-white">
         <AnimatedBackground />
-        <Navbar />
         <HeroSection />
         <CategoryShowcase />
         <LiveAuctionsSection />
         <CategorySection />
         <TestimonialsSection />
-        <Footer />
       </main>
     </>
   );

@@ -88,9 +88,8 @@ export const Navbar = () => {
             <Image
               src="/logo-white.png"
               alt="AuctaSync Logo"
-              width={150}
-              height={40}
-              className="h-auto w-auto"
+              width={200}
+              height={80}
             />
           </Link>
 

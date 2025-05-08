@@ -70,16 +70,16 @@ const Footer = () => {
           <div className="col-span-1">
             <h3 className="text-lg font-medium mb-4">Payment Gateways</h3>
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white rounded-md p-2 flex items-center justify-center">
+              <div className="rounded-md p-2 flex items-center justify-center">
                 <Image src="/paypal.svg" alt="PayPal" width={80} height={30} className="h-6 w-auto" />
               </div>
-              <div className="bg-white rounded-md p-2 flex items-center justify-center">
+              <div className="rounded-md p-2 flex items-center justify-center">
                 <Image src="/visa.svg" alt="Visa" width={80} height={30} className="h-6 w-auto" />
               </div>
-              <div className="bg-white rounded-md p-2 flex items-center justify-center">
+              <div className="rounded-md p-2 flex items-center justify-center">
                 <Image src="/stripe.svg" alt="Stripe" width={80} height={30} className="h-6 w-auto" />
               </div>
-              <div className="bg-white rounded-md p-2 flex items-center justify-center">
+              <div className="rounded-md p-2 flex items-center justify-center">
                 <Image src="/verifone.svg" alt="Verifone" width={80} height={30} className="h-6 w-auto" />
               </div>
             </div>

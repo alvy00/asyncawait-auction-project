@@ -298,7 +298,13 @@ export const HeroSection = () => {
                         className={`${isActive ? 'pointer-events-auto' : 'pointer-events-none'}`}
                       >
                         {/* Card content */}
-                        <div className="relative h-full overflow-hidden rounded-xl sm:rounded-2xl bg-black/30 backdrop-blur-xl shadow-2xl border border-white/10 group">
+                        <div className="relative h-full overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-xl shadow-2xl border border-white/20 group">
+                          {/* Glassmorphism card highlights */}
+                          <div className="absolute inset-0 overflow-hidden rounded-xl sm:rounded-2xl">
+                            <div className="absolute -inset-1 bg-gradient-to-tr from-orange-500/10 via-purple-500/5 to-blue-500/10 opacity-30 group-hover:opacity-40 transition-opacity duration-700"></div>
+                            <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-white/5 to-transparent rotate-12 transform scale-2 opacity-20 group-hover:opacity-30 transition-opacity duration-700"></div>
+                          </div>
+                          
                           {/* Image container with zoom effect */}
                           <div className="relative h-[55%] overflow-hidden">
                             <Image 
@@ -309,14 +315,17 @@ export const HeroSection = () => {
                               priority={isActive}
                             />
                             
+                            {/* Glass overlay on image */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60"></div>
+                            
                             {/* Live tag */}
-                            <div className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-red-600 text-white text-xs font-medium px-2 sm:px-4 py-0.5 sm:py-1 z-10 rounded-lg flex items-center space-x-1 sm:space-x-2">
+                            <div className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-gradient-to-r from-red-600 to-red-500 text-white text-xs font-medium px-2 sm:px-4 py-0.5 sm:py-1 z-10 rounded-lg flex items-center space-x-1 sm:space-x-2 shadow-lg backdrop-blur-sm">
                               <span className="inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white animate-pulse"></span>
                               <span>Live</span>
                             </div>
                             
                             {/* Favorite button */}
-                            <button className="absolute top-2 sm:top-4 right-2 sm:right-4 bg-black/50 hover:bg-black/70 backdrop-blur-sm p-1.5 sm:p-2 rounded-full z-10 transition-transform duration-300 hover:scale-110">
+                            <button className="absolute top-2 sm:top-4 right-2 sm:right-4 bg-white/10 hover:bg-white/20 backdrop-blur-md p-1.5 sm:p-2 rounded-full z-10 transition-all duration-300 hover:scale-110 border border-white/20 shadow-lg">
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                               </svg>
@@ -324,7 +333,7 @@ export const HeroSection = () => {
                           </div>
                           
                           {/* Content with glass background effect */}
-                          <div className="p-3 sm:p-4 md:p-6 bg-gradient-to-b from-black/70 to-black relative z-10 h-[45%] flex flex-col justify-between">
+                          <div className="p-3 sm:p-4 md:p-6 bg-gradient-to-b from-black/50 via-black/70 to-black/80 backdrop-blur-md relative z-10 h-[45%] flex flex-col justify-between border-t border-white/10">
                             <div>
                               <h3 className="text-white text-base sm:text-lg md:text-2xl font-bold mb-0.5 sm:mb-1">{auction.title}</h3>
                               <p className="text-gray-300 text-xs sm:text-sm mb-2 sm:mb-3">{auction.subtitle}</p>
@@ -337,24 +346,24 @@ export const HeroSection = () => {
                             {/* Price and time */}
                             <div className="flex-grow">
                               <div className="flex items-center justify-between mb-3 sm:mb-4">
-                                <div className="text-white font-bold text-xl sm:text-2xl md:text-3xl">
+                                <div className="text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-orange-500 font-bold text-xl sm:text-2xl md:text-3xl">
                                   ${auction.currentBid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </div>
-                                <div className="text-white text-sm sm:text-base">
+                                <div className="text-white text-sm sm:text-base bg-white/5 backdrop-blur-sm px-2 py-1 rounded-lg border border-white/10">
                                   {isActive ? timeLeft : ''}
                                 </div>
                               </div>
 
                               {/* Seller and bid button */}
                               <div className="flex items-center justify-between">
-                                <div className="flex items-center text-white text-xs sm:text-sm">
+                                <div className="flex items-center text-white text-xs sm:text-sm bg-white/5 backdrop-blur-sm px-2 py-1 rounded-lg">
                                   <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                   </svg>
                                   {auction.seller}
                                 </div>
                                 <Button 
-                                  className="bg-transparent hover:bg-orange-600/20 text-white border border-orange-500 rounded-md text-xs sm:text-sm py-1 px-2 sm:py-1.5 sm:px-3 transition-all duration-300"
+                                  className="bg-gradient-to-r from-orange-500/80 to-orange-600/80 hover:from-orange-500 hover:to-orange-600 text-white border-none rounded-lg text-xs sm:text-sm py-1 px-2 sm:py-1.5 sm:px-3 transition-all duration-300 shadow-lg hover:shadow-orange-500/25"
                                   variant="outline"
                                 >
                                   Bid Now

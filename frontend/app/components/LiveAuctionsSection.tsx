@@ -3,9 +3,9 @@
 import { useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import AuctionCard from '@/components/AuctionCard';
+import { Button } from '../../components/ui/button';
 import { motion } from 'framer-motion';
+import AuctionCard from '../../components/AuctionCard';
 
 // Sample auction data matching the image
 const auctions = [
@@ -36,7 +36,6 @@ const auctions = [
     seller: "Jhon Smith",
     isLive: true
   },
-  // Add more items as needed
 ];
 
 const LiveAuctionsSection = () => {
