@@ -14,15 +14,23 @@ authRouter.get('/getuser', async (req, res) => {
   
     const token = authHeader.split(" ")[1];
   
-    const { data, error } = await supabase.auth.getUser(token);
-  
-    if (error) {
-      console.error("Supabase auth error:", error.message);
+    const { data, errData } = await supabase.auth.getUser(token);
+    if (errData) {
+      console.error("Supabase auth error:", errData.message);
       return res.status(401).json({ message: "User not authenticated" });
     }
+
+    const { userDatabaseData, errDB} = await supabase.from('users')
+                                                    .select('*')
+                                                    .eq('id', data.user.id)
+                                                    .single();
+    if (errDB) {
+        console.error("Supabase auth error:", errDB.message);
+        return res.status(401).json({ message: "User data not found" });
+    }
     
-    console.log(data.user);
-    return res.status(200).json(data.user);
+    console.log(userDatabaseData);
+    return res.status(200).json(userDatabaseData);
 });
 
 

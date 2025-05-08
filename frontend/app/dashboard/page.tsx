@@ -1,18 +1,63 @@
-import React from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
+"use client"
+
+import React, { useEffect, useState } from 'react';
 import { FaArrowLeft, FaEdit } from 'react-icons/fa';
 import Link from 'next/link';
 import BackButton from '../components/BackButton';
 
 const Dashboard = () => {
+  const [user, setUser] = useState<any>(null);
+
+
   // Example user data
-  const user = {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    money: 1200.50,
-    totalBids: 25,
-    bidsWon: 18,
-    winRatio: 72,
-  };
+  // const user = {
+  //   name: 'John Doe',
+  //   email: 'john.doe@example.com',
+  //   money: 1200.50,
+  //   totalBids: 25,
+  //   bidsWon: 18,
+  //   winRatio: 72,
+  // };
+
+  // useEffect(() => {
+
+  //   const fetchCurrentUser = async () => {
+  //     const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
+  //     try{
+  //       const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getUser', {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       });
+
+  //       if (!res.ok) {
+  //         const err = await res.json();
+  //         console.error("Failed to fetch user:", err.message || res.statusText);
+  //         return;
+  //       }
+        
+  //       const userData = await res.json();
+  //       const { data, error } = await supaba
+  //       console.log(userData)
+  //       setUser(userData);
+  //     }catch(e){
+  //       console.error("Error fetching user:", e);
+  //     }
+  //   }
+    
+  //   fetchCurrentUser();
+  // }, [])
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+        <p className="text-gray-700 dark:text-gray-300">Loading user...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-10 px-6">
@@ -34,7 +79,7 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow-sm">
               <h4 className="text-xl font-semibold text-gray-900 dark:text-white">Balance</h4>
-              <p className="text-lg font-bold text-gray-700 dark:text-gray-300">${user.money.toFixed(2)}</p>
+              <p className="text-lg font-bold text-gray-700 dark:text-gray-300">${user.money}</p>
             </div>
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow-sm">
               <h4 className="text-xl font-semibold text-gray-900 dark:text-white">Total Bids</h4>
