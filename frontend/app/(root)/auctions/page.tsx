@@ -4,8 +4,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
-import AuctionCard, { Auction } from "../components/AuctionCard";
-import BackButton from "../components/BackButton";
+import AuctionCard, { Auction } from "../../components/AuctionCard";
+import BackButton from "../../components/BackButton";
 
 const AuctionListingPage = () => {
   const [auctions, setAuctions] = useState<Auction[]>([]);
