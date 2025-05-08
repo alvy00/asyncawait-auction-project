@@ -80,7 +80,7 @@ export const Navbar = () => {
             className="absolute z-20 left-0 mt-2 w-56 rounded-lg bg-white shadow-lg border border-gray-100 py-2 opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200"
           >
             <Link
-              href="/auctions/live"
+              href="/auctions"
               className="block px-5 py-2 text-gray-700 hover:bg-orange-50 hover:text-orange-500 transition"
             >
               Live Auctions
@@ -131,7 +131,7 @@ export const Navbar = () => {
           {loggedIn ? (
             <>
               <Button variant="ghost" className="font-medium hover:text-orange-500" asChild>
-                <Link href="/profile">Profile</Link>
+                <Link href="/dashboard">Dashboard</Link>
               </Button>
               <Button
                 className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full transition"
@@ -201,7 +201,7 @@ export const Navbar = () => {
 
                   <div className="space-y-1">
                     <Link
-                      href="/auctions/live"
+                      href="/auctions"
                       className="block text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-500 rounded-md px-3 py-2 transition-colors"
                     >
                       Live Auctions
@@ -250,7 +250,7 @@ export const Navbar = () => {
                 {loggedIn ? (
                   <>
                     <Button variant="ghost" className="w-full justify-start text-gray-700 hover:text-orange-500 transition" asChild>
-                      <Link href="/profile">Profile</Link>
+                      <Link href="/dashboard">Dashboard</Link>
                     </Button>
                     <Button
                       className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-full transition"

@@ -25,7 +25,7 @@ export default function Home() {
   
   return (
     <>
-      <main className="overflow-hidden">
+      <main className="overflow-hidden ">
         <Navbar />
         <HeroSection />
         <StatsSection />
@@ -34,7 +34,6 @@ export default function Home() {
         <LiveAuctionsSection />
         <CategoryShowcase />
         <FeaturesSection />
-        <HowItWorksSection />
         <TestimonialsSection />
         <CTASection />
         <Footer />
