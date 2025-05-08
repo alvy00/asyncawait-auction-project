@@ -23,7 +23,7 @@ authRouter.get('/getuser', async (req, res) => {
     const { data: userDatabaseData, error: dbError } = await supabase
       .from('users')
       .select('*')
-      .eq('id', authData.user.id)
+      .eq('user_id', authData.user.id)
       .single();
   
     if (dbError || !userDatabaseData) {
