@@ -5,13 +5,16 @@
 import { useEffect, useState } from "react";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
-import { Button } from "../../../components/ui/button";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../../components/dialog"
+import { Button } from "../../../components/ui/button"
+import { FaTwitter, FaTelegramPlane } from "react-icons/fa"
 import { FaTag, FaDollarSign, FaRegCalendarAlt, FaImage, FaBoxOpen } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
 export default function AuctionCreationForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [imageUrls, setImageUrls] = useState<string[]>([""]);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const router = useRouter();
@@ -93,7 +96,8 @@ export default function AuctionCreationForm() {
       const r = await res.json();
       if (res.ok) {
         toast.success("Auction created successfully");
-        router.push('/auctions');
+        //router.push('`/auctions/success?id=${r.id}`');
+        setIsDialogOpen(true);
       } else {
         toast.error(r.message);
       }
@@ -110,7 +114,7 @@ export default function AuctionCreationForm() {
   if (!currentUser) {
     return (
       <div className="flex justify-center items-center h-screen text-xl text-gray-600">
-        Loading user...
+        Loading...
       </div>
     );
   }
@@ -280,6 +284,77 @@ export default function AuctionCreationForm() {
       >
         {isLoading ? "Creating auction..." : "Create Auction"}
       </Button>
+
+
+      <Dialog 
+        open={isDialogOpen} 
+        onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) {
+            router.push("/auctions");
+          }
+        }}
+        //trapFocus={true} 
+        //closeOnEscape={false} 
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Auction Created!</DialogTitle>
+            <DialogDescription>
+              Your auction is live! You can share it with others to get more bids.
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Shareable Link */}
+          <div className="space-y-4">
+            <Button
+              variant="outline"
+              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800"
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                toast.success("Link copied to clipboard!");
+              }}
+            >
+              Copy Link
+            </Button>
+          </div>
+
+          {/* Social Promotion Tips */}
+          <div className="flex items-center justify-between space-x-4 mt-4">
+            <Button
+              variant="outline"
+              className="w-1/2"
+              onClick={() =>
+                window.open("https://twitter.com/intent/tweet?url=" + window.location.href, "_blank")
+              }
+            >
+              <FaTwitter className="mr-2" />
+              Share on Twitter
+            </Button>
+
+            <Button
+              variant="outline"
+              className="w-1/2"
+              onClick={() =>
+                window.open("https://t.me/share/url?url=" + window.location.href, "_blank")
+              }
+            >
+              <FaTelegramPlane className="mr-2" />
+              Share on Telegram
+            </Button>
+          </div>
+
+          {/* Preview Button */}
+          <div className="mt-4">
+            <Button
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold"
+              onClick={() => router.push('/auctions')}
+            >
+              View Auction
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </form>
   );
 }
