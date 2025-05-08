@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ["lh3.googleusercontent.com", "images.unsplash.com",  "plus.unsplash.com"],
+    domains: ["lh3.googleusercontent.com", "images.unsplash.com","ui-avatars.com",  "plus.unsplash.com"],
   },
 };
 

@@ -1,73 +1,440 @@
+"use client";
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 
 export const HeroSection = () => {
+  // Featured auction data - sample data for multiple cards
+  const featuredAuctions = [
+    {
+      id: 1,
+      title: "ROLEX Submariner 2020 Edition",
+      subtitle: "Condition - 100% Fresh",
+      currentBid: 550.00,
+      endTime: new Date(Date.now() + 3600000 * 2 + 900000 + 43000), // 2h 15m 43s from now
+      image: "https://images.unsplash.com/photo-1620625515032-6ed0c1790c75?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      seller: "Weston Bennett"
+    },
+    {
+      id: 2,
+      title: "Patek Philippe Nautilus",
+      subtitle: "Limited Edition - Mint Condition",
+      currentBid: 1250.00,
+      endTime: new Date(Date.now() + 3600000 * 5 + 1800000), // 5h 30m from now
+      image: "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=1780&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      seller: "Emma Rodriguez"
+    },
+    {
+      id: 3,
+      title: "Omega Speedmaster Professional",
+      subtitle: "Moonwatch - New Release",
+      currentBid: 820.00,
+      endTime: new Date(Date.now() + 3600000 * 3 + 1200000), // 3h 20m from now
+      image: "https://images.unsplash.com/photo-1548171915-e79a380a2a4b?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      seller: "James Wilson"
+    },
+    {
+      id: 4,
+      title: "Audemars Piguet Royal Oak",
+      subtitle: "Rose Gold - Collector's Item",
+      currentBid: 2100.00,
+      endTime: new Date(Date.now() + 3600000 * 8), // 8h from now
+      image: "https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      seller: "Sophia Chen"
+    }
+  ];
+
+  // Active card index
+  const [activeIndex, setActiveIndex] = useState(0);
+  // Timer state for current active card
+  const [timeLeft, setTimeLeft] = useState("");
+  // Auto rotation interval
+  const rotationInterval = 5000; // 5 seconds
+
+  // Handle card navigation
+  const nextCard = () => {
+    setActiveIndex((prev) => (prev + 1) % featuredAuctions.length);
+  };
+
+  const prevCard = () => {
+    setActiveIndex((prev) => (prev - 1 + featuredAuctions.length) % featuredAuctions.length);
+  };
+
+  // Auto rotate cards
+  useEffect(() => {
+    const interval = setInterval(() => {
+      nextCard();
+    }, rotationInterval);
+    
+    return () => clearInterval(interval);
+  }, []);
+  
+  // Calculate time left for active auction
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const activeAuction = featuredAuctions[activeIndex];
+      const end = new Date(activeAuction.endTime);
+      const now = new Date();
+      const diff = end.getTime() - now.getTime();
+      
+      if (diff <= 0) return 'Auction Ended';
+      
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      return `${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
+    };
+
+    setTimeLeft(calculateTimeLeft());
+    const timer = setInterval(() => setTimeLeft(calculateTimeLeft()), 1000);
+    return () => clearInterval(timer);
+  }, [activeIndex, featuredAuctions]);
+
   return (
-    <section className="relative bg-gradient-to-br from-gray-900 to-gray-800 text-white">
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-black opacity-50"></div>
-        <Image 
-          src="https://images.unsplash.com/photo-1514195037031-83d60ed3b448?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
-          alt="Auction Background" 
-          fill
-          className="object-cover"
-          priority
-        />
+    <section className="relative min-h-[90vh] md:min-h-screen flex items-center overflow-hidden py-8 md:py-12">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 z-0">
+        {/* Large gradient circle */}
+        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] md:w-[800px] md:h-[800px] bg-orange-500/20 rounded-full filter blur-[120px] animate-pulse-slow"></div>
+        
+        {/* Small accent circles */}
+        <div className="absolute bottom-[10%] left-[5%] w-[200px] h-[200px] md:w-[300px] md:h-[300px] bg-purple-500/10 rounded-full filter blur-[80px] animate-float"></div>
+        <div className="absolute top-[30%] left-[10%] w-[150px] h-[150px] md:w-[200px] md:h-[200px] bg-blue-500/10 rounded-full filter blur-[60px] animate-float-delayed"></div>
+        
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
       </div>
-      <div className="container mx-auto px-4 py-24 md:py-32 relative z-10">
-        <div className="max-w-3xl backdrop-blur-sm bg-black/30 p-8 rounded-xl"> 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-shadow-lg font-serif">
-            Unlock Unbeatable Deals at AuctaSync
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 text-white">
-            Join 10,000+ trusted bidders. 100% money-back guarantee!
-          </p>
-          <div className="grid gap-8 md:grid-cols-3 mb-12">
-            <div className="flex items-start space-x-3">
-              <div className="bg-orange-500 p-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                </svg>
+      
+      {/* Content */}
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          {/* Left content - Text and CTA */}
+          <div className="lg:col-span-7 text-center lg:text-left">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8 }}
+              className="inline-block px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs sm:text-sm font-medium mb-4 sm:mb-6"
+            >
+              <span className="inline-block w-2 h-2 rounded-full bg-red-500 mr-2 animate-pulse"></span>
+              Live Auctions Available Now
+            </motion.div>
+            
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight tracking-tight mb-4"
+            >
+              Discover <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600">Exclusive</span> Auction Treasures
+            </motion.h1>
+            
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="text-base sm:text-lg md:text-xl text-gray-300 mt-4 sm:mt-6 mb-6 sm:mb-8 max-w-2xl mx-auto lg:mx-0"
+            >
+              Join our community of 10,000+ collectors and bid on premium items with complete buyer protection and real-time updates.
+            </motion.p>
+            
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="flex flex-wrap gap-3 sm:gap-4 md:gap-6 mb-8 sm:mb-12 justify-center lg:justify-start"
+            >
+              {/* Feature badges with improved styling */}
+              <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-md px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/10">
+                <div className="bg-orange-500 p-1 rounded-full">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span className="text-white text-xs sm:text-sm">Premium Items</span>
               </div>
-              <div>
-                <h3 className="font-semibold text-lg">Auction Excellence</h3>
-                <p className="text-white">Premium Quality Items</p>
+              
+              <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-md px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/10">
+                <div className="bg-orange-500 p-1 rounded-full">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span className="text-white text-xs sm:text-sm">Instant Support</span>
               </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <div className="bg-orange-500 p-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-9.618 5.04L2 9.5l5 5a8.001 8.001 0 0014 0l5-5-.382-1.516z" />
-                </svg>
+              
+              <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-md px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/10">
+                <div className="bg-orange-500 p-1 rounded-full">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span className="text-white text-xs sm:text-sm">Easy Refund Policy</span>
               </div>
-              <div>
-                <h3 className="font-semibold text-lg">Moneyback Guarantee</h3>
-                <p className="text-white">100% Buyer Protection</p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <div className="bg-orange-500 p-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg">24/7 Support</h3>
-                <p className="text-white">Instant Customer Support</p>
-              </div>
-            </div>
+            </motion.div>
+            
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="flex flex-wrap gap-3 sm:gap-4 justify-center lg:justify-start"
+            >
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-6 text-sm sm:text-base rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-orange-500/25"
+              >
+                Start Bidding Now
+              </Button>
+              
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="border-white/20 bg-white/5 backdrop-blur-md text-white hover:bg-white/10 px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-6 text-sm sm:text-base rounded-xl transition-all duration-300 transform hover:scale-105"
+              >
+                Explore Categories
+              </Button>
+            </motion.div>
           </div>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button size="lg" className="bg-orange-500 hover:bg-orange-600 shadow-lg">
-              Start Bidding Now
-            </Button>
-            <Button size="lg" className="bg-white text-orange-600 hover:bg-gray-100 border-0 shadow-lg">
-              How It Works
-            </Button>
+          
+          {/* Right content - Card deck with swipeable animation */}
+          <div className="lg:col-span-5">
+            <div className="relative mx-auto max-w-[280px] xs:max-w-[320px] sm:max-w-[340px] md:max-w-[380px] lg:max-w-full h-[400px] sm:h-[450px] md:h-[500px]">
+              {/* Card navigation controls */}
+              <div className="absolute top-1/2 -translate-y-1/2 -left-4 sm:-left-6 z-30">
+                <button 
+                  onClick={prevCard}
+                  className="bg-black/30 hover:bg-black/50 backdrop-blur-md text-white p-2 sm:p-3 rounded-full transition-all duration-300 hover:scale-110"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="absolute top-1/2 -translate-y-1/2 -right-4 sm:-right-6 z-30">
+                <button 
+                  onClick={nextCard}
+                  className="bg-black/30 hover:bg-black/50 backdrop-blur-md text-white p-2 sm:p-3 rounded-full transition-all duration-300 hover:scale-110"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+              
+              {/* Card indicators */}
+              <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex space-x-2 z-30">
+                {featuredAuctions.map((_, index) => (
+                  <button 
+                    key={index} 
+                    onClick={() => setActiveIndex(index)}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${index === activeIndex ? 'bg-orange-500 w-4' : 'bg-white/30'}`}
+                  />
+                ))}
+              </div>
+              
+              {/* Card deck */}
+              <div className="relative w-full h-full">
+                <AnimatePresence mode="popLayout">
+                  {featuredAuctions.map((auction, index) => {
+                    // Only render the active card and the next 2 cards (for stacking effect)
+                    if (index !== activeIndex && 
+                        index !== (activeIndex + 1) % featuredAuctions.length && 
+                        index !== (activeIndex + 2) % featuredAuctions.length) {
+                      return null;
+                    }
+                    
+                    // Calculate z-index and styles based on position relative to active card
+                    const isActive = index === activeIndex;
+                    const isNext = index === (activeIndex + 1) % featuredAuctions.length;
+                    const isNextNext = index === (activeIndex + 2) % featuredAuctions.length;
+                    
+                    const zIndex = isActive ? 20 : isNext ? 10 : 5;
+                    const scale = isActive ? 1 : isNext ? 0.95 : 0.9;
+                    const translateY = isActive ? 0 : isNext ? 15 : 30;
+                    const opacity = isActive ? 1 : isNext ? 0.7 : 0.5;
+                    
+                    return (
+                      <motion.div
+                        key={auction.id}
+                        initial={{ 
+                          scale: 0.8, 
+                          y: 60, 
+                          opacity: 0,
+                          rotateX: 5,
+                          rotateY: -5
+                        }}
+                        animate={{ 
+                          scale, 
+                          y: translateY, 
+                          opacity,
+                          rotateX: isActive ? 0 : 5,
+                          rotateY: isActive ? 0 : -5,
+                          zIndex
+                        }}
+                        exit={{ 
+                          scale: 1.1, 
+                          y: -60, 
+                          opacity: 0,
+                          zIndex: 30,
+                          transition: { duration: 0.4 }
+                        }}
+                        transition={{ 
+                          type: "spring", 
+                          stiffness: 300, 
+                          damping: 20,
+                          duration: 0.4
+                        }}
+                        style={{ 
+                          position: 'absolute',
+                          width: '100%',
+                          height: '100%',
+                          transformOrigin: 'bottom center',
+                          boxShadow: isActive ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : 'none'
+                        }}
+                        className={`${isActive ? 'pointer-events-auto' : 'pointer-events-none'}`}
+                      >
+                        {/* Card content */}
+                        <div className="relative h-full overflow-hidden rounded-xl sm:rounded-2xl bg-black/30 backdrop-blur-xl shadow-2xl border border-white/10 group">
+                          {/* Image container with zoom effect */}
+                          <div className="relative h-[55%] overflow-hidden">
+                            <Image 
+                              src={auction.image}
+                              alt={auction.title} 
+                              fill
+                              className="object-cover transition-transform duration-700 group-hover:scale-110"
+                              priority={isActive}
+                            />
+                            
+                            {/* Live tag */}
+                            <div className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-red-600 text-white text-xs font-medium px-2 sm:px-4 py-0.5 sm:py-1 z-10 rounded-lg flex items-center space-x-1 sm:space-x-2">
+                              <span className="inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white animate-pulse"></span>
+                              <span>Live</span>
+                            </div>
+                            
+                            {/* Favorite button */}
+                            <button className="absolute top-2 sm:top-4 right-2 sm:right-4 bg-black/50 hover:bg-black/70 backdrop-blur-sm p-1.5 sm:p-2 rounded-full z-10 transition-transform duration-300 hover:scale-110">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                              </svg>
+                            </button>
+                          </div>
+                          
+                          {/* Content with glass background effect */}
+                          <div className="p-3 sm:p-4 md:p-6 bg-gradient-to-b from-black/70 to-black relative z-10 h-[45%] flex flex-col justify-between">
+                            <div>
+                              <h3 className="text-white text-base sm:text-lg md:text-2xl font-bold mb-0.5 sm:mb-1">{auction.title}</h3>
+                              <p className="text-gray-300 text-xs sm:text-sm mb-2 sm:mb-3">{auction.subtitle}</p>
+                              
+                              <div className="text-gray-400 text-xs sm:text-sm mb-1">
+                                Current bid:
+                              </div>
+                            </div>
+                            
+                            {/* Price and time */}
+                            <div className="flex-grow">
+                              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                                <div className="text-white font-bold text-xl sm:text-2xl md:text-3xl">
+                                  ${auction.currentBid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </div>
+                                <div className="text-white text-sm sm:text-base">
+                                  {isActive ? timeLeft : ''}
+                                </div>
+                              </div>
+
+                              {/* Seller and bid button */}
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center text-white text-xs sm:text-sm">
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                  </svg>
+                                  {auction.seller}
+                                </div>
+                                <Button 
+                                  className="bg-transparent hover:bg-orange-600/20 text-white border border-orange-500 rounded-md text-xs sm:text-sm py-1 px-2 sm:py-1.5 sm:px-3 transition-all duration-300"
+                                  variant="outline"
+                                >
+                                  Bid Now
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
+              </div>
+              
+              {/* Decorative elements */}
+              <div className="absolute -bottom-5 sm:-bottom-10 -right-5 sm:-right-10 w-20 sm:w-40 h-20 sm:h-40 bg-orange-500/20 rounded-full filter blur-[30px] sm:blur-[50px] animate-pulse-slow"></div>
+              <div className="absolute -top-3 sm:-top-5 -left-3 sm:-left-5 w-10 sm:w-20 h-10 sm:h-20 bg-blue-500/20 rounded-full filter blur-[15px] sm:blur-[30px] animate-float"></div>
+            </div>
           </div>
         </div>
+        
+        {/* Stats counter - mobile optimized */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.7 }}
+          className="mt-8 sm:mt-12 md:mt-16 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 md:gap-8"
+        >
+          {[
+            { label: "Active Auctions", value: "10,000+" },
+            { label: "Registered Bidders", value: "50,000+" },
+            { label: "Items Sold", value: "125,000+" },
+            { label: "Satisfaction Rate", value: "99.8%" }
+          ].map((stat, index) => (
+            <div key={index} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-lg sm:rounded-xl p-2 sm:p-4 text-center">
+              <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-white mb-0 sm:mb-1">{stat.value}</div>
+              <div className="text-gray-400 text-xs sm:text-sm">{stat.label}</div>
+            </div>
+          ))}
+        </motion.div>
       </div>
+      
+      {/* Add custom styles for animations */}
+      <style jsx global>{`
+        @keyframes float {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-20px); }
+          100% { transform: translateY(0px); }
+        }
+        
+        @keyframes float-delayed {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-15px); }
+          100% { transform: translateY(0px); }
+        }
+        
+        @keyframes pulse-slow {
+          0% { opacity: 0.5; }
+          50% { opacity: 0.7; }
+          100% { opacity: 0.5; }
+        }
+        
+        .animate-float {
+          animation: float 8s ease-in-out infinite;
+        }
+        
+        .animate-float-delayed {
+          animation: float-delayed 10s ease-in-out infinite;
+        }
+        
+        .animate-pulse-slow {
+          animation: pulse-slow 4s ease-in-out infinite;
+        }
+        
+        .bg-grid-pattern {
+          background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                            linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+          background-size: 40px 40px;
+        }
+      `}</style>
     </section>
   );
 };
