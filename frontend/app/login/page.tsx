@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../../lib/auth-context';
 import { getSessionToken, clearSessionToken, isSessionExpired } from '../../lib/utils';
 import { FaEnvelope, FaFacebookF, FaGoogle, FaLock } from 'react-icons/fa';
+import BackButton from '../components/BackButton';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -79,7 +80,7 @@ export default function LoginPage() {
 
   return (
     <>
-
+      <BackButton />
       <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row ">
         {/* Left side - Login Form */}
         <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 lg:p-16">

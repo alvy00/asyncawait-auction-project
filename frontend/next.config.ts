@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
       "plus.unsplash.com",
       "i.pravatar.cc",
       "via.placeholder.com",
+      'cdn.pixabay.com',
     ],
   },
   webpack(config) {
