@@ -7,10 +7,12 @@ import React, { useEffect, useState } from 'react';
 import { FaArrowLeft, FaEdit } from 'react-icons/fa';
 import Link from 'next/link';
 import BackButton from '../components/BackButton';
+import { User } from '../../lib/interfaces';
+import { useRouter } from 'next/navigation';
 
 const Dashboard = () => {
-  const [user, setUser] = useState<any>(null);
-
+  const [user, setUser] = useState<User>(null);
+  const router = useRouter();
 
   // Example user data
   // const user = {
@@ -28,6 +30,7 @@ const Dashboard = () => {
   
       if (!token) {
         console.error("No token found");
+        router.push("/login");
         return;
       }
   
@@ -39,9 +42,8 @@ const Dashboard = () => {
         });
   
         // Handle failed responses
-        if (!res.ok) {
-          const errorMessage = await res.text();
-          console.error("Failed to fetch user:", res.statusText, errorMessage);
+        if (!res.ok || !res.body) {
+          console.error("Failed to fetch user or empty response");
           return;
         }
   
@@ -54,13 +56,12 @@ const Dashboard = () => {
   
         const userData = await res.json();
   
-        // Handle errors from userData (e.g., message field indicating user not found)
+        // Handle errors from userData
         if (userData?.message) {
           console.error("API returned error:", userData.message);
           return;
         }
   
-        // Proceed if userData is valid
         console.log(userData);
         setUser(userData);
       } catch (e) {
@@ -80,10 +81,7 @@ const Dashboard = () => {
     );
   }
 
-  const winRatio = user.total_bids > 0
-                    ? ((user.bids_won / user.total_bids) * 100).toFixed(2)
-                    : "0.00";
-
+  const winRatio = user.total_bids > 0 ? ((user.bids_won / user.total_bids) * 100).toFixed(2) : "0.00";
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-10 px-6">
