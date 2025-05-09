@@ -5,7 +5,7 @@
 import { useEffect, useState } from "react";
 import { Input } from "../../../../components/ui/input";
 import { Label } from "../../../../components/ui/label";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../../../components/dialog"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../../../components/ui/dialog"
 import { Button } from "../../../../components/ui/button"
 import { FaTwitter, FaTelegramPlane } from "react-icons/fa"
 import { FaTag, FaDollarSign, FaRegCalendarAlt, FaImage, FaBoxOpen } from "react-icons/fa";

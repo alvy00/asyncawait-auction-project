@@ -80,6 +80,11 @@ const Dashboard = () => {
     );
   }
 
+  const winRatio = user.total_bids > 0
+                    ? ((user.bids_won / user.total_bids) * 100).toFixed(2)
+                    : "0.00";
+
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-10 px-6">
       <BackButton />
@@ -104,15 +109,15 @@ const Dashboard = () => {
             </div>
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow-sm">
               <h4 className="text-xl font-semibold text-gray-900 dark:text-white">Total Bids</h4>
-              <p className="text-lg font-bold text-gray-700 dark:text-gray-300">{user.totalBids}</p>
+              <p className="text-lg font-bold text-gray-700 dark:text-gray-300">{user.total_bids}</p>
             </div>
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow-sm">
               <h4 className="text-xl font-semibold text-gray-900 dark:text-white">Bids Won</h4>
-              <p className="text-lg font-bold text-gray-700 dark:text-gray-300">{user.bidsWon}</p>
+              <p className="text-lg font-bold text-gray-700 dark:text-gray-300">{user.bids_won}</p>
             </div>
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow-sm">
               <h4 className="text-xl font-semibold text-gray-900 dark:text-white">Win Ratio</h4>
-              <p className="text-lg font-bold text-gray-700 dark:text-gray-300">{user.winRatio}%</p>
+              <p className="text-lg font-bold text-gray-700 dark:text-gray-300">{winRatio}%</p>
             </div>
           </div>
         </div>

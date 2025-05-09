@@ -1,9 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import Image from "next/image";
 import { Button } from "../../components/ui/button";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "../../components/ui/dialog";
+import { Switch } from "../../components/ui/switch";
 
-const FALLBACK_IMAGE = '/fallback.jpg'
+const FALLBACK_IMAGE = "/fallback.jpg";
 
 export interface Auction {
   item_name: string;
@@ -46,9 +50,52 @@ const Countdown = ({ endTime }: { endTime: string }) => {
 };
 
 const AuctionCard = ({ auction }: { auction: Auction }) => {
-  const imageSrc = auction.images?.[0]?.trim()
-    ? auction.images[0]
-    : FALLBACK_IMAGE;
+  const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : FALLBACK_IMAGE;
+
+  const [notifyOutbid, setNotifyOutbid] = useState(false);
+
+  const handleBidPlaced = (bidAmount: number, leaderboardPosition: number, totalBidders: number) => {
+    toast.custom((t) => (
+      <Dialog open={t.visible} onOpenChange={(open) => !open && toast.dismiss(t.id)}>
+        <DialogContent className="p-6 bg-white rounded-xl shadow-lg max-w-md mx-auto">
+          <DialogTitle className="text-center text-lg font-semibold text-green-600">
+            Bid Placed!
+          </DialogTitle>
+    
+          <DialogDescription className="mt-2 text-center text-sm text-gray-700">
+            <p>Your bid: <span className="font-bold text-green-600">${bidAmount}</span></p>
+          </DialogDescription>
+    
+          <DialogDescription className="mt-2 text-center text-sm text-gray-700">
+            <p>You’re <span className="font-semibold text-indigo-600">#{leaderboardPosition}</span> out of {totalBidders} bidders!</p>
+          </DialogDescription>
+    
+          <div className="flex items-center justify-center mt-4">
+            <label htmlFor="notify" className="text-sm text-gray-700 mr-2">Notify me if outbid</label>
+            <Switch
+              id="notify"
+              checked={notifyOutbid}
+              onCheckedChange={(checked) => setNotifyOutbid(checked)}
+              className="text-orange-500"
+            />
+          </div>
+    
+          <div className="mt-6 text-center">
+            <Button onClick={() => toast.dismiss(t.id)} className="bg-orange-500 text-white">
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    ));
+  };
+
+  const PlaceBid = () => {
+    const bidAmount = 150; // Example bid amount
+    const leaderboardPosition = 3; // Example leaderboard position
+    const totalBidders = 12; // Example total bidders
+    handleBidPlaced(bidAmount, leaderboardPosition, totalBidders);
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden transition-transform hover:scale-105 hover:shadow-lg">
@@ -77,8 +124,8 @@ const AuctionCard = ({ auction }: { auction: Auction }) => {
             {auction.status || "ongoing"}
           </span>
         </div>
-        <Button className="w-full mt-4 bg-orange-500 hover:bg-orange-600 text-white">
-          Place Bid
+        <Button className="w-full mt-4 bg-orange-500 hover:bg-orange-600 text-white" onClick={PlaceBid}>
+          Bid
         </Button>
       </div>
     </div>
