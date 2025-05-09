@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "../lib/auth-context";
 import { AnimatedBackground } from "./components/AnimatedBackground";
+import { Analytics } from '@vercel/analytics/next';
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -38,7 +39,7 @@ export default function RootLayout({
           <Toaster position='top-center'/>
           {children}
         </AuthProvider>
-        
+        <Analytics />
       </body>
     </html>
   );
