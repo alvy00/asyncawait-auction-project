@@ -3,6 +3,7 @@ import { Playfair_Display, Montserrat } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "../lib/auth-context";
+import { AnimatedBackground } from "./components/AnimatedBackground";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body
         className={`${playfair.variable} ${montserrat.variable} font-sans antialiased bg-[#0a0a18]`}
       >
+        <AnimatedBackground />
         <AuthProvider>
           <Toaster position='top-center'/>
           {children}

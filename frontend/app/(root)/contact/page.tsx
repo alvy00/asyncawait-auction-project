@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiMail, FiPhone, FiMapPin, FiSend, FiCheck } from 'react-icons/fi';
-import BackButton from '../../components/BackButton';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -51,19 +50,19 @@ const ContactPage = () => {
     {
       icon: <FiMail className="h-6 w-6" />,
       title: "Email Us",
-      details: "support@auctasync.com",
+      details: "auctasync@gmail.com",
       description: "Our team typically responds within 24 hours"
     },
     {
       icon: <FiPhone className="h-6 w-6" />,
       title: "Call Us",
-      details: "+1 (555) 123-4567",
-      description: "Available Monday-Friday, 9AM-6PM EST"
+      details: "+007007007007",
+      description: "Available Monday-Friday, 9AM-6PM"
     },
     {
       icon: <FiMapPin className="h-6 w-6" />,
       title: "Visit Us",
-      details: "123 Auction Avenue, New York, NY 10001",
+      details: "123 Auction-pur, Dhaka",
       description: "Our headquarters is open for scheduled appointments"
     }
   ];
@@ -81,8 +80,6 @@ const ContactPage = () => {
         {/* Additional accent - mid right */}
         <div className="absolute top-[40%] right-[-5%] w-[300px] h-[300px] bg-blue-500 rounded-full filter blur-[80px] opacity-10"></div>
       </div>
-      
-      <BackButton />
       
       {/* Hero Section */}
       <section className="relative pt-32 pb-20">

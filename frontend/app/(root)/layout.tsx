@@ -14,10 +14,10 @@ export default function HomeLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <body className="bg-[#0A111B]">
-        <Navbar />
-        {children}
-        <Footer />
-    </body>
+    <div className="bg-[#0A111B]">
+      <Navbar />
+      {children}
+      <Footer />
+    </div>
   );
 }
