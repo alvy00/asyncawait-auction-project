@@ -1,186 +1,174 @@
 "use client";
-import { useState, useEffect } from 'react';
+
+import { useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Button } from "../../components/ui/button";
+import { Button } from '../../components/ui/button';
+import { motion } from 'framer-motion';
+import AuctionCard from '../../components/AuctionCard';
 
+// Sample auction data matching the image
 const auctions = [
   {
     id: 1,
-    title: "Vintage Rolex Submariner",
-    description: "Rare 1960s Rolex Submariner in excellent condition",
-    currentBid: 15250,
-    endTime: "2025-05-06T12:00:00Z",
-    image: "https://images.unsplash.com/photo-1547996160-81dfa63595aa?auto=format&fit=crop&w=1287&q=80",
-    category: "Jewelry"
+    title: "ROLEX Submariner 2020 Edition (Condition - 100% Fresh)",
+    currentBid: 550.00,
+    endTime: new Date(Date.now() + 3600000 * 2 + 900000 + 43000), // 2h 15m 43s from now
+    image: "https://images.unsplash.com/photo-1620625515032-6ed0c1790c75?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    seller: "Weston Bennett",
+    isLive: true
   },
   {
     id: 2,
-    title: "Abstract Oil Painting",
-    description: "Original abstract artwork by contemporary artist",
-    currentBid: 2100,
-    endTime: "2025-05-04T23:00:00Z",
-    image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&w=1290&q=80",
-    category: "Art"
+    title: "Canon EOS 90D DSLR Camera (Body + 18-135mm Lens)",
+    currentBid: 645.00,
+    endTime: new Date(Date.now() + 3600000 * 2 + 900000 + 43000), // 2h 15m 43s from now
+    image: "https://images.unsplash.com/photo-1520991459559-9b3b6ec6a52b?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", 
+    seller: "Egans Lab",
+    isLive: true
   },
   {
     id: 3,
-    title: "Restored 1969 Ford Mustang",
-    description: "Fully restored classic American muscle car",
-    currentBid: 42500,
-    endTime: "2025-05-06T23:00:00Z",
-    image: "https://images.unsplash.com/photo-1567808291548-fc3ee04dbcf0?auto=format&fit=crop&w=1287&q=80",
-    category: "Cars"
-  },
-  {
-    id: 4,
-    title: "Beachfront Property",
-    description: "Luxury beachfront villa with private access",
-    currentBid: 1250000,
-    endTime: "2025-05-07T23:00:00Z",
-    image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1170&q=80",
-    category: "Real Estate"
-  },
-  {
-    id: 5,
-    title: "MacBook Pro M2 Max",
-    description: "Latest model MacBook Pro with all accessories",
-    currentBid: 2850,
-    endTime: "2025-05-04T21:00:00Z",
-    image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1626&q=80",
-    category: "Electronics"
-  },
-  {
-    id: 6,
-    title: "Rare Comic Book Collection",
-    description: "First editions of Marvel classics in mint condition",
-    currentBid: 8700,
-    endTime: "2025-05-06T09:00:00Z",
-    image: "https://images.unsplash.com/photo-1608889175123-8ee362201f81?auto=format&fit=crop&w=1160&q=80",
-    category: "Collectibles"
+    title: "Toyota Corolla SE 2020 – Automatic – Petrol",
+    currentBid: 8400.00,
+    endTime: new Date(Date.now() + 3600000 * 2 + 900000 + 43000), // 2h 15m 43s from now
+    image: "https://images.unsplash.com/photo-1638618164682-12b986ec2a75?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", 
+    seller: "Jhon Smith",
+    isLive: true
   },
 ];
 
-const CountdownTimer = ({ endTime }: { endTime: string }) => {
-  const [timeLeft, setTimeLeft] = useState({
-    days: "--",
-    hours: "--",
-    minutes: "--",
-    seconds: "--",
-  });
-
-  useEffect(() => {
-    function calculateTimeLeft(endTime: string) {
-      const difference = new Date(endTime).getTime() - Date.now();
-
-      if (difference <= 0) {
-        return {
-          days: "00",
-          hours: "00",
-          minutes: "00",
-          seconds: "00",
-        };
-      }
-
-      return {
-        days: String(Math.floor(difference / (1000 * 60 * 60 * 24))).padStart(2, "0"),
-        hours: String(Math.floor((difference / (1000 * 60 * 60)) % 24)).padStart(2, "0"),
-        minutes: String(Math.floor((difference / 1000 / 60) % 60)).padStart(2, "0"),
-        seconds: String(Math.floor((difference / 1000) % 60)).padStart(2, "0"),
-      };
-    }
-
-    const updateTimer = () => setTimeLeft(calculateTimeLeft(endTime));
-    updateTimer();
-    const timer = setInterval(updateTimer, 1000);
-    return () => clearInterval(timer);
-  }, [endTime]);
-
-  const isOver = timeLeft.days === "00" && timeLeft.hours === "00" && timeLeft.minutes === "00" && timeLeft.seconds === "00";
-
-  return isOver ? (
-    <span className="text-red-500 font-semibold">Auction Ended</span>
-  ) : (
-    <div className="flex space-x-2 text-sm font-medium">
-      {timeLeft.days !== "00" && (
-        <div className="flex flex-col items-center">
-          <span className="text-lg font-bold">{timeLeft.days}</span>
-          <span className="text-xs text-gray-500">days</span>
+const LiveAuctionsSection = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const maxVisibleItems = 3; // Maximum number of items visible at once
+  const totalSlides = Math.ceil(auctions.length / maxVisibleItems);
+  
+  // Handle bid action
+  const handleBid = (id: string | number) => {
+    console.log(`Placing bid on item ${id}`);
+    // Implement bid functionality here
+  };
+  
+  // Navigation functions
+  const goToPrevSlide = () => {
+    setCurrentSlide((prev) => (prev === 0 ? totalSlides - 1 : prev - 1));
+  };
+  
+  const goToNextSlide = () => {
+    setCurrentSlide((prev) => (prev === totalSlides - 1 ? 0 : prev + 1));
+  };
+  
+  return (
+    <section className="py-12 md:py-16  relative overflow-hidden">
+      <div className="container mx-auto px-4 relative z-10">
+        {/* Header with title and subtitle */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 md:mb-10">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold">
+              <span className="text-white">Featured</span>
+              <span className="text-white ml-2">Auction</span>
+            </h2>
+            <p className="text-gray-400 text-sm md:text-base mt-1">Handpicked deals from trusted sellers</p>
+          </div>
+          
+          {/* Navigation arrows for desktop */}
+          <div className="hidden md:flex items-center space-x-3">
+            <button 
+              onClick={goToPrevSlide}
+              className="w-10 h-10 rounded-full border border-gray-600 flex items-center justify-center text-white hover:bg-gray-800 transition-colors"
+              aria-label="Previous slide"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+            </button>
+            <button 
+              onClick={goToNextSlide}
+              className="w-10 h-10 rounded-full border border-gray-600 flex items-center justify-center text-white hover:bg-gray-800 transition-colors"
+              aria-label="Next slide"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
         </div>
-      )}
-      <div className="flex flex-col items-center">
-        <span className="text-lg font-bold">{timeLeft.hours}</span>
-        <span className="text-xs text-gray-500">hrs</span>
+        
+        {/* Auction cards grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+          {auctions.map((auction) => (
+            <div key={auction.id} className="bg-[#1a1f2a] rounded-lg overflow-hidden">
+              <AuctionCard
+                id={auction.id}
+                title={auction.title}
+                currentBid={auction.currentBid}
+                endTime={auction.endTime}
+                image={auction.image}
+                seller={auction.seller}
+                isLive={auction.isLive}
+                onBid={handleBid}
+                className="h-full"
+              />
+              
+              {/* Custom bid button and seller info at the bottom of each card */}
+              <div className="p-4 pt-0">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center text-gray-400 text-xs">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    {auction.seller}
+                  </div>
+                </div>
+                
+                <Button 
+                  onClick={() => handleBid(auction.id)}
+                  className="w-full bg-transparent hover:bg-gray-700 text-white border border-gray-600 transition-all duration-300"
+                >
+                  Bid Now
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {/* View All Action link */}
+        <div className="flex justify-center mt-8">
+          <Link 
+            href="/auctions"
+            className="text-white text-sm font-medium flex items-center border-b border-gray-600 pb-1 hover:border-white transition-colors"
+          >
+            View All Action
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </Link>
+        </div>
+        
+        {/* Mobile navigation arrows */}
+        <div className="flex md:hidden justify-between items-center mt-6">
+          <button 
+            onClick={goToPrevSlide}
+            className="w-10 h-10 rounded-full border border-gray-600 flex items-center justify-center text-white hover:bg-gray-800 transition-colors"
+            aria-label="Previous slide"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+          </button>
+          <button 
+            onClick={goToNextSlide}
+            className="w-10 h-10 rounded-full border border-gray-600 flex items-center justify-center text-white hover:bg-gray-800 transition-colors"
+            aria-label="Next slide"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+            </svg>
+          </button>
+        </div>
       </div>
-      <div className="flex flex-col items-center">
-        <span className="text-lg font-bold">{timeLeft.minutes}</span>
-        <span className="text-xs text-gray-500">min</span>
-      </div>
-      <div className="flex flex-col items-center">
-        <span className="text-lg font-bold">{timeLeft.seconds}</span>
-        <span className="text-xs text-gray-500">sec</span>
-      </div>
-    </div>
+    </section>
   );
 };
-
-const AuctionCard = ({ auction }: { auction: typeof auctions[0] }) => (
-  <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg transition-transform duration-300 hover:shadow-xl hover:-translate-y-1">
-    <div className="relative h-48 overflow-hidden">
-      <div className="absolute top-2 right-2 z-10 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-        {auction.category}
-      </div>
-      <Image 
-        src={auction.image} 
-        alt={auction.title}
-        width={400}
-        height={200}
-        className="w-full h-full object-cover"
-      />
-    </div>
-    <div className="p-5">
-      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 truncate">{auction.title}</h3>
-      <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">{auction.description}</p>
-      <div className="flex justify-between items-center mb-4">
-        <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Current Bid</p>
-          <p className="text-xl font-bold text-orange-500">${auction.currentBid.toLocaleString()}</p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 text-right">Ends in</p>
-          <CountdownTimer endTime={auction.endTime} />
-        </div>
-      </div>
-      <div className="flex space-x-2">
-        <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white">Place Bid</Button>
-        <Button variant="outline" className="border-gray-300 dark:border-gray-600">Watch</Button>
-      </div>
-    </div>
-  </div>
-);
-
-const LiveAuctionsSection = () => (
-  <section className="py-16 bg-gray-50 dark:bg-gray-900">
-    <div className="container mx-auto px-4">
-      <div className="flex justify-between items-center mb-10">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Live Auctions</h2>
-          <p className="text-gray-600 dark:text-gray-300 mt-2">Bid on these hot items before they&apos;re gone!</p>
-        </div>
-        <Link href="/auctions/live" className="text-orange-500 hover:text-orange-600 font-medium flex items-center">
-          View All
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-          </svg>
-        </Link>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {auctions.map((auction) => (
-          <AuctionCard key={auction.id} auction={auction} />
-        ))}
-      </div>
-    </div>
-  </section>
-);
 
 export default LiveAuctionsSection;

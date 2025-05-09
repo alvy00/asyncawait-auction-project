@@ -3,15 +3,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Input } from "../../../components/ui/input";
-import { Label } from "../../../components/ui/label";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../../components/ui/dialog"
-import { Button } from "../../../components/ui/button"
+import { Input } from "../../../../components/ui/input";
+import { Label } from "../../../../components/ui/label";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../../../components/ui/dialog"
+import { Button } from "../../../../components/ui/button"
 import { FaTwitter, FaTelegramPlane } from "react-icons/fa"
 import { FaTag, FaDollarSign, FaRegCalendarAlt, FaImage, FaBoxOpen } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import BackButton from "../../components/BackButton";
+import BackButton from "../../../components/BackButton";
 
 export default function AuctionCreationForm() {
   const [isLoading, setIsLoading] = useState(false);
