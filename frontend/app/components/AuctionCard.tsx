@@ -3,25 +3,11 @@ import { Button } from "../../components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "../../components/ui/dialog";
 import Image from "next/image";
 import toast from "react-hot-toast";
+import { Auction } from "../../lib/interfaces";
 
 const FALLBACK_IMAGE = "/fallback.jpg";
 
-export interface Auction {
-  id: string;
-  item_name: string;
-  description: string;
-  category: "electronics" | "art" | "fashion" | "vehicles" | "other";
-  starting_price: number;
-  buy_now?: number;
-  start_time: string;
-  end_time: string;
-  status?: "ongoing" | "ended";
-  images?: string[];
-  seller: string;
-  condition: "new" | "used" | "refurbished";
-}
-
-const Countdown = ({ endTime }: { endTime: string }) => {
+const Countdown = ({ endTime, onComplete }: { endTime: string, onComplete?: () => void }) => {
   const [timeLeft, setTimeLeft] = useState("");
 
   const updateCountdown = () => {
@@ -30,7 +16,8 @@ const Countdown = ({ endTime }: { endTime: string }) => {
     const diff = end.getTime() - now.getTime();
 
     if (diff <= 0) {
-      setTimeLeft("Ended");
+      setTimeLeft("---");
+      onComplete?.();
       return;
     }
 
@@ -70,15 +57,13 @@ const handleBidPlaced = (bidAmount: number, leaderboardPosition: number, totalBi
   ));
 };
 
-const AuctionCard = ({ auction}: { auction: Auction }) => {
+const AuctionCard = ({ auction, auctionCreator}: { auction: Auction, auctionCreator: string }) => {
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : FALLBACK_IMAGE;
-
-
-
-  
+  const [isEnded, setIsEnded] = useState(false);
 
   return (
     <div className="bg-[#1a1f2a] rounded-lg overflow-hidden shadow-md transition-transform hover:scale-105 hover:shadow-lg">
+      
       <div className="relative h-48 w-full">
         <Image
           src={imageSrc}
@@ -88,6 +73,7 @@ const AuctionCard = ({ auction}: { auction: Auction }) => {
           className="w-full h-full object-cover"
         />
       </div>
+
       <div className="p-4">
         <h3 className="text-lg font-semibold text-gray-800 mb-1 text-white">{auction.item_name}</h3>
         <p className="text-sm text-gray-400 mb-2 capitalize">
@@ -96,10 +82,15 @@ const AuctionCard = ({ auction}: { auction: Auction }) => {
         <p className="text-orange-500 font-bold text-xl mb-2">
           Starting at ${auction.starting_price.toLocaleString()}
         </p>
+
         <div className="text-sm text-gray-600 flex justify-between items-center mb-3">
-          <Countdown endTime={auction.end_time} />
-          <span className="text-gray-500 capitalize">
-            {auction.status || "ongoing"}
+          <Countdown endTime={auction.end_time} onComplete={() => setIsEnded(true)}/>
+          <span
+            className={`capitalize font-medium ${
+              isEnded ? "text-red-500" : "text-green-600"
+            }`}
+          >
+            {isEnded ? "Ended" : (auction.status || "Ongoing")}
           </span>
         </div>
         
@@ -108,7 +99,7 @@ const AuctionCard = ({ auction}: { auction: Auction }) => {
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
-          {/* {auction.seller} */}
+          {auctionCreator}
         </div>
 
         {/* Bid button */}
@@ -118,6 +109,7 @@ const AuctionCard = ({ auction}: { auction: Auction }) => {
         >
           Bid Now
         </Button>
+
       </div>
     </div>
   );

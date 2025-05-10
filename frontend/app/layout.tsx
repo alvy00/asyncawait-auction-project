@@ -37,7 +37,10 @@ export default function RootLayout({
         <AnimatedBackground />
         <AuthProvider>
           <Toaster position='top-center'/>
-          {children}
+          <main className="pt-16">
+            {children}
+          </main>
+          
         </AuthProvider>
         <Analytics />
       </body>

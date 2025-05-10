@@ -2,42 +2,41 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { FaArrowLeft } from "react-icons/fa";
-import AuctionCard, { Auction } from "../../../components/AuctionCard";
-import BackButton from "../../../components/BackButton";
+import AuctionCard from "../../../components/AuctionCard";
+import { Auction } from "../../../../lib/interfaces";
 
 const LiveAuctionsPage = () => {
     const [auctions, setAuctions] = useState<Auction[]>([]);
 
+    // fetching auctions
     useEffect(() => {
         const fetchAllAuctions = async () => {
-        try {
-            const res = await fetch(
-            "https://asyncawait-auction-project.onrender.com/api/auctions",
-            {
-                method: "GET",
-                headers: {
-                "Content-type": "application/json",
-                },
+            try{
+                const res = await fetch(
+                "https://asyncawait-auction-project.onrender.com/api/auctions",
+                {
+                    method: "GET",
+                    headers: {
+                    "Content-type": "application/json",
+                    },
+                }
+                );
+
+                if (!res.ok) {
+                const r = await res.json();
+                console.error(r.message || r.statusText);
+                return;
+                }
+
+                const data = await res.json();
+                setAuctions(data);
+            }catch(e){
+                console.error(e);
             }
-            );
+        };
 
-            if (!res.ok) {
-            const r = await res.json();
-            console.error(r.message || r.statusText);
-            return;
-            }
-
-            const data = await res.json();
-            setAuctions(data);
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    fetchAllAuctions();
-  }, []);
+        fetchAllAuctions();
+    }, []);
 
     return (
         <>
@@ -53,7 +52,7 @@ const LiveAuctionsPage = () => {
                         key={index}
                         className="hover:scale-105 transform transition-all duration-300 ease-in-out"
                         >
-                        <AuctionCard auction={auction} />
+                        <AuctionCard auction={auction} auctionCreator={auction.creator}/>
                         </div>
                     ))
                     ) : (
