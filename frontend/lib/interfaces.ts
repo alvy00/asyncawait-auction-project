@@ -7,6 +7,18 @@ export interface User {
     bids_won: number;
 }
 
-// export interface Auction {
-    
-// }
+export interface Auction{
+  auction_id: string;
+  creator: string;
+  item_name: string;
+  description: string;
+  category: "electronics" | "art" | "fashion" | "vehicles" | "other";
+  starting_price: number;
+  buy_now?: number;
+  start_time: string;
+  end_time: string;
+  status?: "ongoing" | "ended";
+  images?: string[];
+  seller: string;
+  condition: "new" | "used" | "refurbished";
+}
