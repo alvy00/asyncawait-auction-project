@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import AuctionCard from "../../../components/AuctionCard";
 import { Auction } from "../../../../lib/interfaces";
+import { FaSpinner } from "react-icons/fa";
 
 const LiveAuctionsPage = () => {
     const [auctions, setAuctions] = useState<Auction[]>([]);
@@ -56,8 +57,9 @@ const LiveAuctionsPage = () => {
                         </div>
                     ))
                     ) : (
-                    <p className="text-center text-gray-600 col-span-full text-xl">
-                        No auctions available at the moment.
+                    <p className="text-center text-gray-600 col-span-full text-xl flex items-center justify-center gap-2 animate-pulse">
+                        <FaSpinner className="animate-spin" />
+                        Loading auctions...
                     </p>
                     )}
                 </div>

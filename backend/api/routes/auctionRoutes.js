@@ -9,7 +9,15 @@ const auctionRouter = express.Router();
 // Get all auctions
 auctionRouter.get('/', async (req, res) => {
     try {
+        const currentTime = new Date();
         const { data, error } = await supabase.from('auctions').select('*');
+
+        // Update status of auctions
+        await supabase
+        .from('auctions')
+        .update({ status: 'ended' })
+        .eq('status', 'ongoing')
+        .lt('end_time', currentTime);
 
         if (error) {
             return res.status(400).json({ message: error.message });
@@ -81,33 +89,63 @@ auctionRouter.post('/create', async (req, res) => {
 
 // Place Bid
 auctionRouter.post('/bid', async (req, res) => {
-    try{
-        const { auction_id, amount} = req.body;
+    try {
+        const { auction_id, amount } = req.body;
         const user = await getUser(req);
-        if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
-        const {data: auction, error: auctionErr} = await supabase.from('auctions').select('*').eq('auction_id', auction_id).single();
-        if(auctionErr) return res.status(400).json({message: 'Auction not found!'});
-        if(new Date() > new Date(auction.end_time)) return res.status(400).json({message: 'Auction has ended :('});
-        if(amount <= auction.highest_bid) return res.status(401).json({message: `Bid must be higher than current highest bid which is $${auction.highest_bid}`});
+        if (!user) {
+            console.error('Unauthorized user');
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        const { data: auction, error: auctionErr } = await supabase
+            .from('auctions')
+            .select('*')
+            .eq('auction_id', auction_id)
+            .single();
+
+        if (auctionErr) {
+            console.error('Auction not found:', auctionErr);
+            return res.status(400).json({ message: 'Auction not found!' });
+        }
+
+        if (new Date() > new Date(auction.end_time)) {
+            console.error('Auction has ended');
+            return res.status(400).json({ message: 'Auction has ended :(' });
+        }
+
+        if (amount <= auction.highest_bid) {
+            console.error(`Bid is too low. Current highest bid is ${auction.highest_bid}`);
+            return res.status(401).json({ message: `Bid must be higher than the current highest bid ($${auction.highest_bid})` });
+        }
+
+        if (isNaN(amount) || amount <= 0) {
+            console.error('Invalid bid amount:', amount);
+            return res.status(400).json({ message: 'Please enter a valid bid amount' });
+        }
 
         // Start a transaction
-        const { data: bid, error: bidErr, status } = await supabase
+        const { data: bid, error: bidErr } = await supabase
             .rpc('place_bid_transaction', {
-                auction_id,
-                user_id: user.user_id,
-                bid_amount: amount,
-                highest_bid: auction.highest_bid
+                p_auction_id: auction_id,
+                p_bid_amount: amount,
+                p_highest_bid: auction.highest_bid,
+                p_user_id: user.id
             });
 
-        if (status === 'error') return res.status(400).json({ message: 'Bid could not be placed!' });
+        if (bidErr) {
+            console.error('Error placing bid:', bidErr);
+            return res.status(400).json({ message: 'Bid could not be placed!' });
+        }
 
-        return res.status(200).json({message: 'Bid placed!'});
+        console.log('Bid placed successfully:', bid);
+        return res.status(200).json({ message: 'Bid placed!' });
 
-    }catch(e){
-        console.error(e);
+    } catch (e) {
+        console.error('Error in place bid route:', e);
         return res.status(500).json({ message: 'Something went wrong!' });
     }
-})
+});
+
 
 export default auctionRouter;
