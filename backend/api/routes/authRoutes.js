@@ -4,7 +4,7 @@ import supabase from '../../config/supabaseClient.js';
 
 const authRouter = express.Router();
 
-//Get User Database Data
+//Get Current Logged IN User's Database Data
 authRouter.get('/getuser', async (req, res) => {
     const authHeader = req.headers.authorization;
   
@@ -33,8 +33,24 @@ authRouter.get('/getuser', async (req, res) => {
   
     console.log(userDatabaseData);
     return res.status(200).json(userDatabaseData);
-  });
+});
 
+
+// Get User's DB Data w/ user_id
+authRouter.post('/fetchuser', async (req, res) => {
+    const { user_id } = req.body;
+
+    const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq("user_id", user_id)
+        .single(); // <-- fix: call the function
+
+    if (error) return res.status(400).json({ message: "DB error", error });
+
+    //console.log(data);
+    return res.json(data);
+});
 
 
 //User SignUP
