@@ -15,6 +15,8 @@ export interface Auction{
   category: "electronics" | "art" | "fashion" | "vehicles" | "other";
   starting_price: number;
   buy_now?: number;
+  highest_bid?: number;
+  highest_bidder_id?: string;
   start_time: string;
   end_time: string;
   status?: "ongoing" | "ended";

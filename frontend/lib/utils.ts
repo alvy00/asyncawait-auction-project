@@ -32,6 +32,20 @@ export const isSessionExpired = (): boolean => {
   const expiry = parseInt(expiryStr, 10);
   return Date.now() > expiry;
 };
+
+
+export const getUserIdFromToken = (token: string | null): string | null => {
+  if (!token) return null;
+
+  try {
+    const payload = token.split(".")[1];
+    const decodedPayload = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
+    return decodedPayload.userId || null; // adjust based on your payload key
+  } catch (error) {
+    console.error("Failed to decode token", error);
+    return null;
+  }
+}
 //--------------------
 
 
