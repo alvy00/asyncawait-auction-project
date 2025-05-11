@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import BackButton from '../../components/BackButton';
 
 const TermsPage = () => {
   // Terms sections data
@@ -62,8 +61,6 @@ const TermsPage = () => {
         {/* Additional accent - mid right */}
         <div className="absolute top-[40%] right-[-5%] w-[300px] h-[300px] bg-purple-500 rounded-full filter blur-[80px] opacity-10"></div>
       </div>
-      
-      <BackButton />
       
       {/* Hero Section */}
       <section className="relative pt-32 pb-12">
