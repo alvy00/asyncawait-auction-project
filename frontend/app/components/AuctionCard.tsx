@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+"use client";
+
 import React, { useState, useEffect } from "react";
 import { Button } from "../../components/ui/button";
 import Image from "next/image";

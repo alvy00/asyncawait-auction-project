@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import BackButton from '../../components/BackButton';
 
 const PrivacyPolicyPage = () => {
   // Privacy policy sections data
@@ -62,8 +61,6 @@ const PrivacyPolicyPage = () => {
         {/* Additional accent - mid left */}
         <div className="absolute top-[40%] left-[-5%] w-[300px] h-[300px] bg-blue-500 rounded-full filter blur-[80px] opacity-10"></div>
       </div>
-      
-      <BackButton />
       
       {/* Hero Section */}
       <section className="relative pt-32 pb-12">
