@@ -35,16 +35,61 @@ const Countdown = ({ endTime, onComplete }: { endTime: string; onComplete?: () =
   return <span>{timeLeft}</span>;
 };
 
+
 const AuctionCard = ({ auction, auctionCreator }: { auction: Auction; auctionCreator: string }) => {
-  const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : FALLBACK_IMAGE;
+  const [winner, setWinner] = useState(null);
   const [isEnded, setIsEnded] = useState(false);
   const [isBidding, setIsBidding] = useState(false);
   const [bidAmount, setBidAmount] = useState(0);
+  const [highestBid, setHighestBid] = useState(auction.highest_bid);
+
+  const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : FALLBACK_IMAGE;
   const token = typeof window !== "undefined" ? localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken") : null;
+
+
+  useEffect(() => {
+    const getHighestBidder = async () => {
+      const userId = auction?.highest_bidder_id;
+
+      if (!userId) {
+        console.log("Missing highest_bidder_id");
+        return;
+      }
+
+      try {
+
+        // https://asyncawait-auction-project.onrender.com/api/fetchuser
+        // http://localhost:8000/api/fetchuser
+        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/fetchuser', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ user_id: userId }),
+        });
+
+        if (!res.ok) {
+          const errorBody = await res.text(); // Use .text() to see raw response
+          console.error('Failed to fetch user. Status:', res.status, 'Response:', errorBody);
+          return;
+        }
+
+        const data = await res.json();
+        //console.log('Fetched user:', data.name);
+        setWinner(data.name);
+        return data;
+      } catch (err) {
+        console.error('Fetch exception:', err);
+      }
+    };
+
+    getHighestBidder();
+  }, [auction?.highest_bidder_id])
+  
 
   const handleBidSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+  
     try {
         const formData = new FormData(e.currentTarget);
         
@@ -72,8 +117,8 @@ const AuctionCard = ({ auction, auctionCreator }: { auction: Auction; auctionCre
         }
 
         toast.success(`Bid of $${bidAmount} placed successfully!`);
+        setHighestBid(bidAmount);
         setIsBidding(false);
-
 
       } catch (err) {
         console.error("Bid submission error:", err);
@@ -113,22 +158,34 @@ const AuctionCard = ({ auction, auctionCreator }: { auction: Auction; auctionCre
             </span>
           </p>
         ) : (
-<p className="text-base font-medium text-gray-300 mb-2">
-  <span
-    className="text-orange-500 font-semibold text-xl transition-all duration-500 ease-in-out
-      animate-pulse
-      hover:scale-105 hover:text-orange-400"
-  >
-    Current Bid: <span className="text-white">${auction.highest_bid.toLocaleString()}</span>
-  </span>
-</p>
+          <span className="text-base font-medium text-gray-300 mb-2">
+            <span
+              className="text-orange-500 font-semibold text-xl transition-all duration-500 ease-in-out
+                        animate-pulse
+                        hover:scale-105 hover:text-orange-400"
+            >
+              {isEnded ? (
+                <span>
+                  {winner ? (
+                    <span>{winner} won the Auction!</span>
+                  ) : (
+                    <span>Auction expired</span>
+                  )}
+                </span>
+              ) : (
+                <span>
+                  Current Bid: <span className="text-white">${highestBid}</span>
+                </span>
+              )}
+            </span>
+          </span>
 
         )}
         
         <div className="text-sm text-gray-600 flex justify-between items-center mb-3">
           <Countdown endTime={auction.end_time} onComplete={() => setIsEnded(true)} />
           <span className={`capitalize font-medium ${isEnded ? "text-red-500" : "text-green-600"}`}>
-            {isEnded ? "Ended" : auction.status || "Ongoing"}
+            {auction.status.toUpperCase()}
           </span>
         </div>
 
