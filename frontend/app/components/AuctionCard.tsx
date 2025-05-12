@@ -192,61 +192,56 @@ const AuctionCard = ({ auction, auctionCreator }: { auction: Auction; auctionCre
           <div className="p-6 pb-0 relative z-10">
             <h3 className="text-white text-2xl font-bold mb-2">{(auction.item_name).toUpperCase()}</h3>
             
-            
-            {/* Bidding starts / Current Bid Label */}
-{!isEnded && (
-  <div className="text-gray-400 text-sm mb-2 font-medium">
-    {!auction.highest_bid ? (
-      <span className="text-gray-300">Bidding starts at:</span>
-    ) : (
-      <span className="text-gray-300">Current bid:</span>
-    )}
-  </div>
-)}
+          {/* Bidding starts / Current Bid Label */}
+          <div className={`text-gray-400 text-xs mb-1 font-medium ${isEnded ? "opacity-0" : ""}`}>
+            {!auction.highest_bid ? (
+              <span className="text-gray-300">Bidding starts at:</span>
+            ) : (
+              <span className="text-gray-300">Current bid:</span>
+            )}
+          </div>
 
-{/* Price and Time - better spacing */}
-<div className="flex items-center justify-between mb-6 animate-fadeIn">
-  {/* Price - only show if auction is not ended */}
-  {!isEnded && (
-    <div className="text-white font-extrabold text-4xl sm:text-3xl md:text-5xl transition-all duration-300 hover:text-orange-500">
-      {!auction.highest_bid ? (
-        `$${auction.starting_price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-      ) : (
-        `$${highestBid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-      )}
-    </div>
-  )}
+          {/* Price and Time - better spacing */}
+          <div className="flex items-center justify-between mb-3 animate-fadeIn min-h-[60px]"> 
+            {/* Price - only show if auction is not ended */}
+            {!isEnded && (
+              <div className="text-white font-extrabold text-2xl sm:text-xl md:text-3xl transition-all duration-300 hover:text-orange-500">
+                {!auction.highest_bid ? (
+                  `$${auction.starting_price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                ) : (
+                  `$${highestBid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                )}
+              </div>
+            )}
 
-  {/* Countdown / Auction Status */}
-  <div className="text-white text-lg sm:text-base font-medium space-x-2">
-    {isEnded ? (
-      winner ? (
-        <span className="text-green-400 font-bold animate-pulse">🎉 {winner} won the Auction!</span>
-      ) : (
-        <span className="text-red-400 font-semibold">❌ Auction expired</span>
-      )
-    ) : (
-      <Countdown endTime={auction.end_time} onComplete={() => setIsEnded(true)} />
-    )}
-  </div>
-</div>
+            {/* Countdown / Auction Status */}
+            <div className="text-white text-xs sm:text-sm font-medium space-x-1">
+              {isEnded ? (
+                winner ? (
+                  <span className="text-green-400 font-bold animate-pulse">🎉 {winner} won the Auction!</span>
+                ) : (
+                  <span className="text-red-400 font-semibold">❌ Auction expired</span>
+                )
+              ) : (
+                <Countdown endTime={auction.end_time} onComplete={() => setIsEnded(true)} />
+              )}
+            </div>
+          </div>
 
-<style jsx>{`
-  .animate-fadeIn {
-    animation: fadeIn 1s ease-in-out;
-  }
+          <style jsx>{`
+            .animate-fadeIn {
+              animation: fadeIn 1s ease-in-out;
+            }
 
-  @keyframes fadeIn {
-    0% {
-      opacity: 0;
-    }
-    100% {
-      opacity: 1;
-    }
-  }
-`}</style>
-
-
+            @keyframes fadeIn {
+              0% {
+                opacity: 0;
+              }
+              100% {
+                opacity: 1;
+              }
+            }
+          `}</style>
 
             {/* Seller and bid button - with orange border button */}
             <div className="flex items-center justify-between">
