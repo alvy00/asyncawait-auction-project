@@ -148,4 +148,35 @@ auctionRouter.post('/bid', async (req, res) => {
 });
 
 
+auctionRouter.post('/bidhistory', async (req, res) => {
+  const { user_id } = req.body;
+
+  if (!user_id) {
+    return res.status(400).json({ error: 'Missing user_id in request body' });
+  }
+
+  const { data, error } = await supabase
+    .from('bids')
+    .select('*')
+    .eq('user_id', user_id);
+
+  if (error) {
+    console.error('Error fetching bids:', error.message);
+    return res.status(500).json({ error: 'Failed to fetch bid history' });
+  }
+
+  // Format date
+  const formatted = data.map((bid) => ({
+    ...bid,
+    created_at: new Date(bid.created_at).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }), // e.g., "May 10, 2025"
+  }));
+
+  return res.status(200).json(formatted);
+});
+
+
 export default auctionRouter;
