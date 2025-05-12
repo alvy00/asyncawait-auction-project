@@ -122,6 +122,89 @@ const Dashboard = () => {
             </div>
 
           </div>
+
+
+          {/* User Bid History */}
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-md p-6 space-y-4 mt-5 transition-colors duration-300 max-w-4xl mx-auto overflow-hidden">
+            <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
+              Your Bid History
+            </h2>
+
+            <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
+              {/* Example Bid Item */}
+              <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 dark:text-gray-300 font-medium">
+                    Auction: <span className="font-semibold">Rare Painting</span>
+                  </span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    May 10, 2025
+                  </span>
+                </div>
+                <div className="mt-2 text-lg font-bold text-blue-600 dark:text-blue-400">
+                  Bid: $120.00
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  Status: <span className="text-green-600 dark:text-green-400">Leading</span>
+                </div>
+              </div>
+
+              {/* You can duplicate the above card for more bid entries */}
+              <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 dark:text-gray-300 font-medium">
+                    Auction: <span className="font-semibold">Rare Painting</span>
+                  </span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    May 10, 2025
+                  </span>
+                </div>
+                <div className="mt-2 text-lg font-bold text-blue-600 dark:text-blue-400">
+                  Bid: $120.00
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  Status: <span className="text-green-600 dark:text-green-400">Leading</span>
+                </div>
+              </div>
+
+              <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 dark:text-gray-300 font-medium">
+                    Auction: <span className="font-semibold">Rare Painting</span>
+                  </span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    May 10, 2025
+                  </span>
+                </div>
+                <div className="mt-2 text-lg font-bold text-blue-600 dark:text-blue-400">
+                  Bid: $120.00
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  Status: <span className="text-green-600 dark:text-green-400">Leading</span>
+                </div>
+              </div>
+
+              <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 dark:text-gray-300 font-medium">
+                    Auction: <span className="font-semibold">Rare Painting</span>
+                  </span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    May 10, 2025
+                  </span>
+                </div>
+                <div className="mt-2 text-lg font-bold text-blue-600 dark:text-blue-400">
+                  Bid: $120.00
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  Status: <span className="text-green-600 dark:text-green-400">Leading</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+
         </div>
     </>
 

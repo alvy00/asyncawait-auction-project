@@ -23,4 +23,22 @@ export interface Auction{
   images?: string[];
   seller: string;
   condition: "new" | "used" | "refurbished";
+  onFavorite?: (id: string | number, isFavorite: boolean) => void;
+  isFavorite?: boolean;
+}
+
+export interface AuctionCardProps {
+  id: string | number;
+  title: string;
+  description?: string;
+  currentBid: number;
+  endTime: Date | string;
+  image: string;
+  category?: string;
+  seller?: string;
+  isLive?: boolean;
+  className?: string;
+  onBid?: (id: string | number) => void;
+  onFavorite?: (id: string | number, isFavorite: boolean) => void;
+  isFavorite?: boolean;
 }

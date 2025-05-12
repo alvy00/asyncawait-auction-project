@@ -41,9 +41,10 @@ const LiveAuctionsPage = () => {
 
     return (
         <>
-            <section className="py-16 bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen">
+            <section className="py-16 bg-gradient-to-r from-black via-[#0a0a18] to-[#0a0a18] text-white min-h-screen"
+>
                 <div className="container mx-auto px-4">
-                <h1 className="text-4xl font-extrabold text-gray-900 mb-10 text-center">
+                <h1 className="text-4xl font-extrabold text-gray-900 mb-10 text-center text-white">
                     Explore All Auctions
                 </h1>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
