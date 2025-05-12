@@ -19,7 +19,7 @@ const BidHistoryCard = ({ item_name, bid }: { item_name: string; bid: number }) 
             </div>
 
             <div className="mt-2 text-lg font-bold text-blue-600 dark:text-blue-400">
-                Bid: {bid}
+                Bid: ${bid}
             </div>
 
             <div className="text-sm text-gray-500 dark:text-gray-400">
