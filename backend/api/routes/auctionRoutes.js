@@ -87,6 +87,33 @@ auctionRouter.post('/create', async (req, res) => {
 });
 
 
+// Get Auction Details by ID
+auctionRouter.post('/aucdetails', async (req, res) => {
+  const { auction_id } = req.body;
+
+  if (!auction_id) return res.status(400).json({ message: "Missing 'auction_id' in request body." });
+
+
+  try {
+    const { data, error } = await supabase
+      .from('auctions')
+      .select('*')
+      .eq('auction_id', auction_id)
+      .single();
+
+    if (error) {
+      console.error("Supabase error:", error.message);
+      return res.status(500).json({ message: "Error fetching auction details." });
+    }
+
+    return res.status(200).json(data);
+  } catch (err) {
+    console.error("Server error:", err);
+    return res.status(500).json({ message: "Unexpected server error." });
+  }
+});
+
+
 // Place Bid
 auctionRouter.post('/bid', async (req, res) => {
     try {
@@ -148,6 +175,7 @@ auctionRouter.post('/bid', async (req, res) => {
 });
 
 
+// Get User Bid History
 auctionRouter.post('/bidhistory', async (req, res) => {
   const { user_id } = req.body;
 

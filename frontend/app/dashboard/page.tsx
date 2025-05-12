@@ -66,7 +66,10 @@ const Dashboard = () => {
       const fetchCurrentUserBidHistory = async () => {
         try {
           const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
-          const res = await fetch('http://localhost:8000/api/auctions/bidhistory', {
+
+          // https://asyncawait-auction-project.onrender.com/api/auctions/bidhistory
+          // http://localhost:8000/api/auctions/bidhistory
+          const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/bidhistory', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -86,6 +89,7 @@ const Dashboard = () => {
     }
   }, [userId]);
 
+
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
@@ -96,7 +100,6 @@ const Dashboard = () => {
 
   const winRatio = user.total_bids > 0 ? ((user.bids_won / user.total_bids) * 100).toFixed(2) : "0.00";
 
-  // Pagination logic
   const indexOfLastBid = currentPage * bidsPerPage;
   const indexOfFirstBid = indexOfLastBid - bidsPerPage;
   const currentBids = bidsHistory.slice(indexOfFirstBid, indexOfLastBid);
@@ -159,7 +162,7 @@ const Dashboard = () => {
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
             {currentBids.length > 0 ? (
               currentBids.map((bid, index) => (
-                <BidHistoryCard key={index} item_name={bid.auction_id} bid={bid.bid_amount} />
+                <BidHistoryCard key={index} item_name={bid.item_name} bid={bid.bid_amount} />
               ))
             ) : (
               <p className="text-gray-700 dark:text-gray-300">No bids placed yet.</p>
