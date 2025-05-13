@@ -18,7 +18,7 @@ const sampleAuctions = [
     highest_bidder_id: null,
     end_time: new Date(Date.now() + 3600000 * 2 + 900000 + 43000).toISOString(), // 2h 15m 43s from now
     images: ["https://images.unsplash.com/photo-1620625515032-6ed0c1790c75?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"],
-    creator_name: "Weston Bennett",
+    creator: "Weston Bennett",
     status: "ongoing",
     category: "watches"
   },
@@ -30,7 +30,7 @@ const sampleAuctions = [
     highest_bidder_id: null,
     end_time: new Date(Date.now() + 3600000 * 3 + 1200000).toISOString(), // 3h 20m from now
     images: ["https://images.unsplash.com/photo-1520991459559-9b3b6ec6a52b?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"],
-    creator_name: "Egans Lab",
+    creator: "Egans Lab",
     status: "ongoing",
     category: "electronics"
   },
@@ -42,7 +42,7 @@ const sampleAuctions = [
     highest_bidder_id: null,
     end_time: new Date(Date.now() + 3600000 * 5).toISOString(), // 5h from now
     images: ["https://images.unsplash.com/photo-1638618164682-12b986ec2a75?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"],
-    creator_name: "Jhon Smith",
+    creator: "Jhon Smith",
     status: "ongoing",
     category: "vehicles"
   },
@@ -55,38 +55,42 @@ const LiveAuctionsSection = () => {
   const maxVisibleItems = 3; // Maximum number of items visible at once
   
   // Fetch featured auctions
+  // useEffect(() => {
+  //   const fetchFeaturedAuctions = async () => {
+  //     try {
+  //       const res = await fetch(
+  //         "https://asyncawait-auction-project.onrender.com/api/auctions/featured",
+  //         {
+  //           method: "GET",
+  //           headers: {
+  //             "Content-type": "application/json",
+  //           },
+  //         }
+  //       );
+
+  //       if (!res.ok) {
+  //         // If API fails, use sample data
+  //         setAuctions(sampleAuctions);
+  //         return;
+  //       }
+
+  //       const data = await res.json();
+  //       setAuctions(data.length > 0 ? data : sampleAuctions);
+  //     } catch (e) {
+  //       console.error(e);
+  //       // Fallback to sample data on error
+  //       setAuctions(sampleAuctions);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+
+  //   fetchFeaturedAuctions();
+  // }, []);
+
   useEffect(() => {
-    const fetchFeaturedAuctions = async () => {
-      try {
-        const res = await fetch(
-          "https://asyncawait-auction-project.onrender.com/api/auctions/featured",
-          {
-            method: "GET",
-            headers: {
-              "Content-type": "application/json",
-            },
-          }
-        );
-
-        if (!res.ok) {
-          // If API fails, use sample data
-          setAuctions(sampleAuctions);
-          return;
-        }
-
-        const data = await res.json();
-        setAuctions(data.length > 0 ? data : sampleAuctions);
-      } catch (e) {
-        console.error(e);
-        // Fallback to sample data on error
-        setAuctions(sampleAuctions);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchFeaturedAuctions();
-  }, []);
+    setAuctions(sampleAuctions);
+  }, [])
   
   const totalSlides = Math.ceil(auctions.length / maxVisibleItems);
   
@@ -147,7 +151,7 @@ const LiveAuctionsSection = () => {
             >
               <AuctionCard
                 auction={auction}
-                auctionCreator={auction.creator_name || "Anonymous"}
+                auctionCreator={auction.creator || "Anonymous"}
               />
             </motion.div>
           ))}
