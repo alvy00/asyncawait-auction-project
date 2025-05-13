@@ -19,26 +19,36 @@ export interface Auction{
   highest_bidder_id?: string;
   start_time: string;
   end_time: string;
-  status?: "ongoing" | "ended";
+  status?: "upcoming" | "ongoing" | "ended";
   images?: string[];
-  seller: string;
   condition: "new" | "used" | "refurbished";
   onFavorite?: (id: string | number, isFavorite: boolean) => void;
   isFavorite?: boolean;
 }
 
-export interface AuctionCardProps {
-  id: string | number;
-  title: string;
-  description?: string;
-  currentBid: number;
-  endTime: Date | string;
+export interface PastAuctionCardProps{
+  item_name: string;
+  winner: string;
+  sold_price: number;
   image: string;
-  category?: string;
-  seller?: string;
-  isLive?: boolean;
-  className?: string;
-  onBid?: (id: string | number) => void;
-  onFavorite?: (id: string | number, isFavorite: boolean) => void;
-  isFavorite?: boolean;
-}
+  ended_on: string;
+};
+
+export interface UpcomingAuctionCardProps{
+  auction: {
+    auction_id: number;
+    item_name: string;
+    description: string;
+    images: string[];
+    start_time: string;
+    end_time: string;
+    starting_price: number;
+    status: 'upcoming' | 'ongoing' | 'ended';
+    highest_bid: number | null;
+    highest_bidder_id: number | null;
+    creator: string;
+    category: string;
+    condition: 'New' | 'Used';
+  };
+  auctionCreator: string;
+};

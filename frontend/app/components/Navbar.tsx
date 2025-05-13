@@ -61,7 +61,7 @@ export const Navbar = () => {
   const navItems = [
     { name: 'Home', href: '/' },
     { name: 'Auctions', href: '#', dropdown: true, items: [
-      { name: 'Live Auctions', href: '/auctions/live' },
+      { name: 'All Auctions', href: '/auctions/all' },
       { name: 'Upcoming Auctions', href: '/auctions/upcoming' },
       { name: 'Past Auctions', href: '/auctions/past' },
     ]},

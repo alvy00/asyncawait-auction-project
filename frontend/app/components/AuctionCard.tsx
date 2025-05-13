@@ -24,13 +24,13 @@ const AuctionCard = ({ auction, auctionCreator }: { auction: Auction; auctionCre
   const [isFavorite, setIsFavorite] = useState(false);
 
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(formatTimeLeft(auction.end_time));
-    }, 1000);
+  // useEffect(() => {
+  //   const timer = setInterval(() => {
+  //     setTimeLeft(formatTimeLeft(auction.end_time));
+  //   }, 1000);
     
-    return () => clearInterval(timer);
-  }, [auction.end_time]);
+  //   return () => clearInterval(timer);
+  // }, [auction.end_time]);
 
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : FALLBACK_IMAGE;
   const token = typeof window !== "undefined" ? localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken") : null;
@@ -205,7 +205,7 @@ const AuctionCard = ({ auction, auctionCreator }: { auction: Auction; auctionCre
           <div className="flex items-center justify-between mb-3 animate-fadeIn min-h-[60px]"> 
             {/* Price - only show if auction is not ended */}
             {!isEnded && (
-              <div className="text-white font-extrabold text-2xl sm:text-xl md:text-3xl transition-all duration-300 hover:text-orange-500">
+              <div className="text-white font-extrabold text-xl sm:text-lg md:text-2xl transition-all duration-300 tracking-wide shadow-lg bg-gradient-to-r from-orange-400 to-yellow-500 p-2 rounded-lg">
                 {!auction.highest_bid ? (
                   `$${auction.starting_price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                 ) : (
