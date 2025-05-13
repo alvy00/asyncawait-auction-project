@@ -66,7 +66,7 @@ export default function Home() {
   
   return (
     <>
-      <main className="relative overflow-hidden bg-[#0a0a18] text-white">
+      <main className="relative overflow-hidden text-white">
         {/* <AnimatedBackground /> */}
         <HeroSection />
         <CategoryShowcase />

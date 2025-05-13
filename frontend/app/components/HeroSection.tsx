@@ -199,14 +199,15 @@ export const HeroSection = () => {
             </motion.div>
           </div>
           
-          {/* Right content - Card deck with swipeable animation */}
+          {/* Right content - Card deck with optimized mobile animation */}
           <div className="lg:col-span-5">
             <div className="relative mx-auto max-w-[280px] xs:max-w-[320px] sm:max-w-[340px] md:max-w-[380px] lg:max-w-full h-[400px] sm:h-[450px] md:h-[500px]">
-              {/* Card navigation controls */}
-              <div className="absolute top-1/2 -translate-y-1/2 -left-4 sm:-left-6 z-30">
+              {/* Card navigation controls - Improved touch targets for mobile */}
+              <div className="absolute top-1/2 -translate-y-1/2 -left-2 sm:-left-6 z-30">
                 <button 
                   onClick={prevCard}
-                  className="bg-black/30 hover:bg-black/50 backdrop-blur-md text-white p-2 sm:p-3 rounded-full transition-all duration-300 hover:scale-110"
+                  className="bg-black/30 hover:bg-black/50 backdrop-blur-md text-white p-3 sm:p-3 rounded-full transition-all duration-300 hover:scale-110 touch-manipulation"
+                  aria-label="Previous card"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -214,10 +215,11 @@ export const HeroSection = () => {
                 </button>
               </div>
               
-              <div className="absolute top-1/2 -translate-y-1/2 -right-4 sm:-right-6 z-30">
+              <div className="absolute top-1/2 -translate-y-1/2 -right-2 sm:-right-6 z-30">
                 <button 
                   onClick={nextCard}
-                  className="bg-black/30 hover:bg-black/50 backdrop-blur-md text-white p-2 sm:p-3 rounded-full transition-all duration-300 hover:scale-110"
+                  className="bg-black/30 hover:bg-black/50 backdrop-blur-md text-white p-3 sm:p-3 rounded-full transition-all duration-300 hover:scale-110 touch-manipulation"
+                  aria-label="Next card"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -225,33 +227,34 @@ export const HeroSection = () => {
                 </button>
               </div>
               
-              {/* Card indicators */}
-              <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex space-x-2 z-30">
+              {/* Card indicators - Improved for mobile touch */}
+              <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex space-x-3 z-30">
                 {featuredAuctions.map((_, index) => (
                   <button 
                     key={index} 
                     onClick={() => setActiveIndex(index)}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${index === activeIndex ? 'bg-orange-500 w-4' : 'bg-white/30'}`}
+                    className={`h-2.5 rounded-full transition-all duration-300 touch-manipulation ${
+                      index === activeIndex ? 'bg-orange-500 w-6' : 'bg-white/30 w-2.5'
+                    }`}
+                    aria-label={`Go to slide ${index + 1}`}
                   />
                 ))}
               </div>
               
-              {/* Card deck */}
-              <div className="relative w-full h-full">
-                <AnimatePresence mode="popLayout">
+              {/* Card deck - Optimized for mobile performance */}
+              <div className="relative w-full h-full will-change-transform">
+                <AnimatePresence initial={false} mode="popLayout">
                   {featuredAuctions.map((auction, index) => {
-                    // Only render the active card and the next 2 cards (for stacking effect)
-                    if (index !== activeIndex && 
-                        index !== (activeIndex + 1) % featuredAuctions.length && 
-                        index !== (activeIndex + 2) % featuredAuctions.length) {
-                      return null;
-                    }
-                    
-                    // Calculate z-index and styles based on position relative to active card
+                    // Only render visible cards to improve performance
                     const isActive = index === activeIndex;
                     const isNext = index === (activeIndex + 1) % featuredAuctions.length;
                     const isNextNext = index === (activeIndex + 2) % featuredAuctions.length;
                     
+                    if (!isActive && !isNext && !isNextNext) {
+                      return null;
+                    }
+                    
+                    // Simplified animation values for better mobile performance
                     const zIndex = isActive ? 20 : isNext ? 10 : 5;
                     const scale = isActive ? 1 : isNext ? 0.95 : 0.9;
                     const translateY = isActive ? 0 : isNext ? 15 : 30;
@@ -261,58 +264,60 @@ export const HeroSection = () => {
                       <motion.div
                         key={auction.id}
                         initial={{ 
-                          scale: 0.8, 
-                          y: 60, 
+                          scale: 0.9, 
+                          y: 40, 
                           opacity: 0,
-                          rotateX: 5,
-                          rotateY: -5
+                          rotateX: 0,
+                          rotateY: 0
                         }}
                         animate={{ 
                           scale, 
                           y: translateY, 
                           opacity,
-                          rotateX: isActive ? 0 : 5,
-                          rotateY: isActive ? 0 : -5,
+                          rotateX: 0, // Removed 3D transforms for mobile
+                          rotateY: 0, // Removed 3D transforms for mobile
                           zIndex
                         }}
                         exit={{ 
-                          scale: 1.1, 
-                          y: -60, 
+                          scale: 0.9, 
+                          y: -40, 
                           opacity: 0,
                           zIndex: 30,
-                          transition: { duration: 0.4 }
+                          transition: { duration: 0.3, ease: "easeInOut" }
                         }}
                         transition={{ 
-                          type: "spring", 
-                          stiffness: 300, 
-                          damping: 20,
-                          duration: 0.4
+                          type: "tween", // Changed from spring for more predictable mobile animation
+                          duration: 0.3,
+                          ease: "easeOut"
                         }}
                         style={{ 
                           position: 'absolute',
                           width: '100%',
                           height: '100%',
-                          transformOrigin: 'bottom center',
-                          boxShadow: isActive ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : 'none'
+                          transformOrigin: 'center center',
+                          willChange: 'transform, opacity', // Performance optimization
+                          boxShadow: isActive ? '0 15px 30px -10px rgba(0, 0, 0, 0.5)' : 'none'
                         }}
-                        className={`${isActive ? 'pointer-events-auto' : 'pointer-events-none'}`}
+                        className={`${isActive ? 'pointer-events-auto' : 'pointer-events-none'} transform-gpu`} // Added transform-gpu for hardware acceleration
                       >
                         {/* Card content */}
-                        <div className="relative h-full overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-xl shadow-2xl border border-white/20 group">
-                          {/* Glassmorphism card highlights */}
+                        <div className="relative h-full overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/10 via-white/7 to-white/5 backdrop-blur-md shadow-2xl border border-white/20 group">
+                          {/* Simplified glassmorphism effects for better mobile performance */}
                           <div className="absolute inset-0 overflow-hidden rounded-xl sm:rounded-2xl">
-                            <div className="absolute -inset-1 bg-gradient-to-tr from-orange-500/10 via-purple-500/5 to-blue-500/10 opacity-30 group-hover:opacity-40 transition-opacity duration-700"></div>
-                            <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-white/5 to-transparent rotate-12 transform scale-2 opacity-20 group-hover:opacity-30 transition-opacity duration-700"></div>
+                            <div className="absolute -inset-1 bg-gradient-to-tr from-orange-500/10 via-purple-500/5 to-blue-500/10 opacity-30 group-hover:opacity-40 transition-opacity duration-500"></div>
                           </div>
                           
-                          {/* Image container with zoom effect */}
+                          {/* Image container with optimized zoom effect */}
                           <div className="relative h-[55%] overflow-hidden">
                             <Image 
                               src={auction.image}
                               alt={auction.title} 
                               fill
-                              className="object-cover transition-transform duration-700 group-hover:scale-110"
+                              sizes="(max-width: 768px) 90vw, (max-width: 1200px) 50vw, 33vw" // Responsive image sizing
+                              className="object-cover transition-transform duration-700 group-hover:scale-110 transform-gpu" // Added transform-gpu
                               priority={isActive}
+                              loading="eager" // Ensure images load quickly
+                              quality={isActive ? 85 : 75} // Lower quality for background cards
                             />
                             
                             {/* Glass overlay on image */}
@@ -324,15 +329,15 @@ export const HeroSection = () => {
                               <span>Live</span>
                             </div>
                             
-                            {/* Favorite button */}
-                            <button className="absolute top-2 sm:top-4 right-2 sm:right-4 bg-white/10 hover:bg-white/20 backdrop-blur-md p-1.5 sm:p-2 rounded-full z-10 transition-all duration-300 hover:scale-110 border border-white/20 shadow-lg">
+                            {/* Favorite button - Improved touch target */}
+                            <button className="absolute top-2 sm:top-4 right-2 sm:right-4 bg-white/10 hover:bg-white/20 backdrop-blur-md p-2 sm:p-2 rounded-full z-10 transition-all duration-300 hover:scale-110 border border-white/20 shadow-lg touch-manipulation">
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                               </svg>
                             </button>
                           </div>
                           
-                          {/* Content with glass background effect */}
+                          {/* Content with simplified glass background effect */}
                           <div className="p-3 sm:p-4 md:p-6 bg-gradient-to-b from-black/50 via-black/70 to-black/80 backdrop-blur-md relative z-10 h-[45%] flex flex-col justify-between border-t border-white/10">
                             <div>
                               <h3 className="text-white text-base sm:text-lg md:text-2xl font-bold mb-0.5 sm:mb-1">{auction.title}</h3>
@@ -377,10 +382,6 @@ export const HeroSection = () => {
                   })}
                 </AnimatePresence>
               </div>
-              
-              {/* Decorative elements */}
-              <div className="absolute -bottom-5 sm:-bottom-10 -right-5 sm:-right-10 w-20 sm:w-40 h-20 sm:h-40 bg-orange-500/20 rounded-full filter blur-[30px] sm:blur-[50px] animate-pulse-slow"></div>
-              <div className="absolute -top-3 sm:-top-5 -left-3 sm:-left-5 w-10 sm:w-20 h-10 sm:h-20 bg-blue-500/20 rounded-full filter blur-[15px] sm:blur-[30px] animate-float"></div>
             </div>
           </div>
         </div>
