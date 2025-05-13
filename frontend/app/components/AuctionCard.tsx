@@ -227,13 +227,12 @@ const AuctionCard = ({ auction, auctionCreator }: { auction: Auction; auctionCre
                   {auctionCreator}
                 </div>
               )}
-
               {/* Bid Area with smooth transition */}
               <div className="relative h-12 w-[160px] transition-all duration-500">
                 {!token ? (
                   <Button
                     disabled
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg 
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md 
                               bg-gray-800 border border-gray-700 text-gray-400 opacity-60 
                               cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30"
                   >
@@ -250,28 +249,30 @@ const AuctionCard = ({ auction, auctionCreator }: { auction: Auction; auctionCre
                   </Button>
                 ) : (
                   <div className="relative w-full h-full">
-                    {/* Bid Now Button */}
+                    {/* Bid Now Button (animated out when bidding) */}
                     <button
                       onClick={() => setIsBidding(true)}
                       disabled={isEnded}
-                      className={`absolute inset-0 w-full h-full flex items-center justify-center rounded-lg border font-medium text-white backdrop-blur-sm transition-all duration-500 ease-in-out
+                      className={`absolute inset-0 w-full h-full flex items-center justify-center rounded-md border font-medium text-white backdrop-blur-sm transition-all duration-500 ease-in-out
                         ${isBidding
                           ? "opacity-0 translate-x-4 scale-95 blur-sm pointer-events-none"
                           : isEnded
                             ? "opacity-60 cursor-not-allowed border-gray-700 bg-gray-900 text-gray-500"
-                            : "bg-gradient-to-r from-orange-500/80 to-orange-600/80 hover:from-orange-500 hover:to-orange-600 border-none shadow-lg hover:shadow-orange-500/25"}
+                            : "opacity-100 translate-x-0 scale-100 border-gray-600 bg-gray-800 hover:bg-gray-700"}
+                        z-10
                       `}
                     >
                       Bid Now
                     </button>
 
-                    {/* Bid Form */}
+                    {/* Bid Form (animated in when bidding) */}
                     <form
                       onSubmit={handleBidSubmit}
                       className={`absolute inset-0 w-full h-full flex items-center justify-center gap-2 transition-all duration-500 ease-in-out
                         ${isBidding
                           ? "opacity-100 translate-x-0 scale-100 blur-none"
                           : "opacity-0 -translate-x-4 scale-95 blur-sm pointer-events-none"}
+                        z-0
                       `}
                     >
                       <input
@@ -283,11 +284,11 @@ const AuctionCard = ({ auction, auctionCreator }: { auction: Auction; auctionCre
                           ? auction.starting_price
                           : Math.max(auction.starting_price, auction.highest_bid) + 1}
                         placeholder="Your bid"
-                        className="w-2/3 max-w-[100px] p-2 rounded-lg border bg-gray-800 text-white border-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-400 transition"
+                        className="w-2/3 max-w-[100px] p-2 rounded-lg border bg-gray-800 text-white border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400 transition"
                       />
                       <button
                         type="submit"
-                        className="px-3 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-lg border-none shadow-lg hover:shadow-orange-500/25 transition-all duration-300"
+                        className="px-3 py-2 bg-gray-800 text-white font-semibold rounded-lg border border-gray-700 shadow hover:bg-gray-700 hover:border-gray-500 transition-all duration-300 ease-in-out"
                       >
                         Bid
                       </button>
@@ -295,14 +296,15 @@ const AuctionCard = ({ auction, auctionCreator }: { auction: Auction; auctionCre
                   </div>
                 )}
               </div>
+
             </div>
           </div>
         </div>
       </div>
 
       {/* Decorative elements */}
-      <div className="absolute -bottom-5 -right-5 w-40 h-40 bg-orange-500/20 rounded-full filter blur-[50px] animate-pulse-slow"></div>
-      <div className="absolute -top-5 -left-5 w-20 h-20 bg-blue-500/20 rounded-full filter blur-[30px] animate-float"></div>
+      {/* <div className="absolute -bottom-5 -right-5 w-40 h-40 bg-orange-500/20 rounded-full filter blur-[50px] animate-pulse-slow"></div>
+      <div className="absolute -top-5 -left-5 w-20 h-20 bg-blue-500/20 rounded-full filter blur-[30px] animate-float"></div> */}
     </motion.div>
   );
 };
