@@ -87,6 +87,33 @@ auctionRouter.post('/create', async (req, res) => {
 });
 
 
+// Get Auction Details by ID
+auctionRouter.post('/aucdetails', async (req, res) => {
+  const { auction_id } = req.body;
+
+  if (!auction_id) return res.status(400).json({ message: "Missing 'auction_id' in request body." });
+
+
+  try {
+    const { data, error } = await supabase
+      .from('auctions')
+      .select('*')
+      .eq('auction_id', auction_id)
+      .single();
+
+    if (error) {
+      console.error("Supabase error:", error.message);
+      return res.status(500).json({ message: "Error fetching auction details." });
+    }
+
+    return res.status(200).json(data);
+  } catch (err) {
+    console.error("Server error:", err);
+    return res.status(500).json({ message: "Unexpected server error." });
+  }
+});
+
+
 // Place Bid
 auctionRouter.post('/bid', async (req, res) => {
     try {
@@ -145,6 +172,38 @@ auctionRouter.post('/bid', async (req, res) => {
         console.error('Error in place bid route:', e);
         return res.status(500).json({ message: 'Something went wrong!' });
     }
+});
+
+
+// Get User Bid History
+auctionRouter.post('/bidhistory', async (req, res) => {
+  const { user_id } = req.body;
+
+  if (!user_id) {
+    return res.status(400).json({ error: 'Missing user_id in request body' });
+  }
+
+  const { data, error } = await supabase
+    .from('bids')
+    .select('*')
+    .eq('user_id', user_id);
+
+  if (error) {
+    console.error('Error fetching bids:', error.message);
+    return res.status(500).json({ error: 'Failed to fetch bid history' });
+  }
+
+  // Format date
+  const formatted = data.map((bid) => ({
+    ...bid,
+    created_at: new Date(bid.created_at).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }), // e.g., "May 10, 2025"
+  }));
+
+  return res.status(200).json(formatted);
 });
 
 

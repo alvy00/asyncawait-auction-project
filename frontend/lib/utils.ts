@@ -39,13 +39,20 @@ export const getUserIdFromToken = (token: string | null): string | null => {
 
   try {
     const payload = token.split(".")[1];
-    const decodedPayload = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
-    return decodedPayload.userId || null; // adjust based on your payload key
+
+    const base64Url = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padding = base64Url.length % 4 === 0 ? "" : "=".repeat(4 - (base64Url.length % 4));
+    const base64 = base64Url + padding;
+
+    const decodedPayload = JSON.parse(atob(base64));
+
+    return decodedPayload.userId || null;
   } catch (error) {
     console.error("Failed to decode token", error);
     return null;
   }
-}
+};
+
 //--------------------
 
 
