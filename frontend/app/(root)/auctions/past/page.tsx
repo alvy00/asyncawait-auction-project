@@ -254,7 +254,7 @@ const PastAuctions = () => {
 
 export default PastAuctions;
 
-// Add custom styles for animations if not already defined elsewhere
+//  styles for animations
 const styles = `
   @keyframes float {
     0% { transform: translateY(0px); }

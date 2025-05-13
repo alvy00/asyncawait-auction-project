@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import AuctionCard from "../../../components/AuctionCard";
 import { Auction } from "../../../../lib/interfaces";
-import { FaSpinner, FaSearch, FaFilter, FaSortAmountUp, FaCalendarAlt } from "react-icons/fa";
+import { FaSpinner, FaSearch, FaFilter, FaSortAmountDown, FaCalendarAlt } from "react-icons/fa";
 import { motion } from "framer-motion";
 
 const UpcomingAuctionsPage = () => {
@@ -11,6 +11,9 @@ const UpcomingAuctionsPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [activeFilter, setActiveFilter] = useState("all");
+    
+    // sorting options
+    const [sortBy, setSortBy] = useState("date");
 
     // Categories for filter pills
     const categories = ["all", "watches", "jewelry", "art", "collectibles", "fashion"];
@@ -53,6 +56,17 @@ const UpcomingAuctionsPage = () => {
         const matchesSearch = auction.item_name.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesFilter = activeFilter === "all" || auction.category?.toLowerCase() === activeFilter;
         return matchesSearch && matchesFilter;
+    });
+
+    // Sort auctions based on selected sort option
+    const sortedAuctions = [...filteredAuctions].sort((a, b) => {
+        if (sortBy === "date") {
+            return new Date(a.end_time).getTime() - new Date(b.end_time).getTime(); // Ascending for upcoming
+        } else if (sortBy === "price") {
+            return a.starting_price - b.starting_price; // Ascending for upcoming
+        } else { // popularity - could be based on anticipated interest
+            return (b.views || 0) - (a.views || 0); // Descending for popularity
+        }
     });
 
     // Animation variants for staggered children
@@ -115,66 +129,98 @@ const UpcomingAuctionsPage = () => {
                     
                     {/* Search and filter section */}
                     <div className="mb-10">
-                        <div className="flex flex-col md:flex-row gap-4 mb-6">
-                            {/* Search bar */}
-                            <div className="relative flex-grow">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <FaSearch className="text-gray-400" />
-                                </div>
-                                <input
-                                    type="text"
-                                    placeholder="Search upcoming auctions..."
-                                    className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
+                        {/* Search bar */}
+                        <div className="relative max-w-md mx-auto mb-6">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <FaSearch className="h-5 w-5 text-gray-400" />
                             </div>
-                            
-                            {/* Sort button */}
-                            <button className="flex items-center gap-2 px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white hover:bg-gray-700/50 transition-all duration-300">
-                                <FaSortAmountUp />
-                                <span>Sort</span>
-                            </button>
-                            
-                            {/* Filter button */}
-                            <button className="flex items-center gap-2 px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white hover:bg-gray-700/50 transition-all duration-300">
-                                <FaFilter />
-                                <span>Filter</span>
-                            </button>
+                            <input
+                                type="text"
+                                className="block w-full pl-10 pr-3 py-3 border border-white/10 rounded-xl bg-white/5 backdrop-blur-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
+                                placeholder="Search upcoming auctions..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
                         </div>
                         
-                        {/* Category filter pills */}
-                        <div className="flex flex-wrap gap-2">
-                            {categories.map((category) => (
-                                <button
-                                    key={category}
-                                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeFilter === category ? 'bg-orange-500 text-white' : 'bg-gray-800/50 text-gray-300 border border-gray-700 hover:bg-gray-700/50'}`}
-                                    onClick={() => setActiveFilter(category)}
+                        {/* Filter and sort controls */}
+                        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+                            {/* Filter pills */}
+                            <div className="flex flex-wrap justify-center gap-2">
+                                {categories.map((category, index) => (
+                                    <motion.button
+                                        key={category}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.5 + index * 0.1 }}
+                                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeFilter === category 
+                                            ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/20' 
+                                            : 'bg-white/5 backdrop-blur-sm text-gray-300 hover:bg-white/10 border border-white/10'}`}
+                                        onClick={() => setActiveFilter(category)}
+                                    >
+                                        {category.charAt(0).toUpperCase() + category.slice(1)}
+                                    </motion.button>
+                                ))}
+                            </div>
+
+                            {/* Sort dropdown */}
+                            <motion.div 
+                                className="flex items-center gap-2 bg-white/5 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.8 }}
+                            >
+                                <FaSortAmountDown className="text-gray-400" />
+                                <select 
+                                    className="bg-transparent text-gray-300 focus:outline-none"
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value)}
                                 >
-                                    {category.charAt(0).toUpperCase() + category.slice(1)}
-                                </button>
-                            ))}
+                                    <option value="date" className="bg-gray-800">Start Date</option>
+                                    <option value="price" className="bg-gray-800">Starting Price</option>
+                                    <option value="popularity" className="bg-gray-800">Popularity</option>
+                                </select>
+                            </motion.div>
                         </div>
                     </div>
                     
                     {/* Auctions grid with loading state */}
                     {isLoading ? (
-                        <div className="flex justify-center items-center py-20">
-                            <FaSpinner className="animate-spin text-orange-500 text-4xl" />
+                        <div className="flex flex-col items-center justify-center py-20">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+                                className="text-orange-500 mb-4"
+                            >
+                                <FaSpinner className="animate-spin h-12 w-12" />
+                            </motion.div>
+                            <motion.p 
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.5, delay: 0.2 }}
+                                className="text-gray-300 text-lg"
+                            >
+                                Loading upcoming auctions...
+                            </motion.p>
                         </div>
-                    ) : filteredAuctions.length > 0 ? (
+                    ) : sortedAuctions.length > 0 ? (
                         <motion.div 
                             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                             variants={containerVariants}
                             initial="hidden"
                             animate="show"
                         >
-                            {filteredAuctions.map((auction) => {
+                            {sortedAuctions.map((auction) => {
                                 // Find the auction creator
-                                const auctionCreator = auction.creator_name || "Anonymous";
+                                const auctionCreator = auction.creator || "Anonymous";
                                 
                                 return (
-                                    <motion.div key={auction.auction_id} variants={itemVariants}>
+                                    <motion.div 
+                                        key={auction.auction_id} 
+                                        variants={itemVariants}
+                                        className="hover:scale-105 transform transition-all duration-300 ease-in-out"
+                                    >
                                         <AuctionCard 
                                             auction={auction} 
                                             auctionCreator={auctionCreator} 
@@ -193,7 +239,7 @@ const UpcomingAuctionsPage = () => {
                 </div>
             </section>
             
-            {/* Add custom animations */}
+            {/* custom animations */}
             <style jsx global>{`
                 @keyframes float {
                     0% { transform: translateY(0px); }
