@@ -8,7 +8,9 @@ export const auctionSchema = z.object({
     buy_now: z.number().nonnegative().optional(),
     start_time: z.coerce.date(),
     end_time: z.coerce.date(),
-    status: z.enum(['ongoing', 'ended']).optional(),
+    status: z.string().optional().refine(value => ['upcoming', 'live', 'ended'].includes(value), {
+            message: 'Invalid status value. Allowed values are "upcoming", "live", and "ended".'
+    }),
     images: z.array(z.string().url().min(1)).optional(),
     condition: z.enum(['new', 'used', 'refurbished']),
 })
