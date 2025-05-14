@@ -61,71 +61,68 @@ export default function AuctionCreationForm() {
   const addImageField = () => setImageUrls((prev) => [...prev, ""]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
+    e.preventDefault();
+    setIsLoading(true);
 
-  // Set loading state to true when the form is being submitted
-  setIsLoading(true);
+    try {
+      const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
+      const formData = new FormData(e.currentTarget);
 
-  try {
-    const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
-    const formData = new FormData(e.currentTarget);
+      const startTime = new Date(formData.get('start_time') as string);
+      const endTime = new Date(formData.get('end_time') as string);
 
-    const startTime = new Date(formData.get('start_time') as string);
-    const endTime = new Date(formData.get('end_time') as string);
+      const startTimeUTC = new Date(startTime.toISOString());
+      const endTimeUTC = new Date(endTime.toISOString());
 
-    // Ensure the times are all in UTC for consistency
-    const startTimeUTC = new Date(startTime.toISOString());
-    const endTimeUTC = new Date(endTime.toISOString());
+      const now = new Date();
 
-    const now = new Date(); // Current time
+      let auctionStatus = 'upcoming';
 
-    let auctionStatus = 'upcoming'; // Default status
+      if (endTime < now) {
+        auctionStatus = 'ended';
+      } else if (startTime <= now) {
+        auctionStatus = 'live';
+      }
 
-    if (endTime < now) {
-      auctionStatus = 'ended'; // If the auction end time has passed
-    } else if (startTime <= now) {
-      auctionStatus = 'live'; // If the auction start time has passed
+      const auctionBody = {
+        creator: currentUser.name,
+        item_name: formData.get('item_name') as string,
+        description: formData.get('description') as string,
+        category: formData.get('category') as 'electronics' | 'art' | 'fashion' | 'vehicles' | 'other',
+        starting_price: parseFloat(formData.get('starting_price') as string),
+        buy_now: formData.get('buy_now') ? parseFloat(formData.get('buy_now') as string) : undefined,
+        start_time: startTimeUTC.toISOString(),
+        end_time: endTimeUTC.toISOString(),
+        status: auctionStatus,
+        images: imageUrls.filter(url => url.trim() !== ""),
+        condition: formData.get('condition') as 'new' | 'used' | 'refurbished',
+      };
+
+      const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/create', {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(auctionBody),
+      });
+
+      const r = await res.json();
+
+      if (res.ok) {
+        toast.success("Auction created successfully");
+        setIsDialogOpen(true);
+      } else {
+        toast.error(r.message || "Failed to create auction");
+      }
+    } catch (e) {
+      toast.error("Auction creation failed");
+      console.error("Error creating auction", e);
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    // Now use this dynamically set status
-    const body = {
-      creator: currentUser.name,
-      item_name: formData.get('item_name') as string,
-      description: formData.get('description') as string,
-      category: formData.get('category') as 'electronics' | 'art' | 'fashion' | 'vehicles' | 'other',
-      starting_price: parseFloat(formData.get('starting_price') as string),
-      buy_now: formData.get('buy_now') ? parseFloat(formData.get('buy_now') as string) : undefined,
-      start_time: startTimeUTC.toISOString(), // Ensure these are in UTC
-      end_time: endTimeUTC.toISOString(),     // Ensure these are in UTC
-      status: auctionStatus, // Use dynamic status
-      images: imageUrls.filter(url => url.trim() !== ""),
-      condition: formData.get('condition') as 'new' | 'used' | 'refurbished',
-    };
-
-    const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/create', {
-      method: 'POST',
-      headers: {
-        'Content-type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(body),
-    });
-
-    const r = await res.json();
-    if (res.ok) {
-      toast.success("Auction created successfully");
-      setIsDialogOpen(true);
-    } else {
-      toast.error(r.message);
-    }
-  } catch (e) {
-    toast.error("Auction creation failed");
-    console.error("Error creating auction", e);
-  } finally {
-    // Set loading to false when the request finishes
-    setIsLoading(false);
-  }
-};
 
 
   // if (!currentUser) {
