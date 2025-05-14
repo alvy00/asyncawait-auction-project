@@ -121,7 +121,6 @@ auctionRouter.post('/aucdetails', async (req, res) => {
 });
 
 
-
 // Place Bid
 auctionRouter.post('/bid', async (req, res) => {
     try {
@@ -224,5 +223,78 @@ auctionRouter.post('/bidhistory', async (req, res) => {
   return res.status(200).json(formatted);
 });
 
+
+// Favourite Auctions
+auctionRouter.post('/favourite', async (req, res) => {
+    try{
+        const { auction_id, user_id } = req.body;
+
+        const { data, error } = await supabase
+            .from('user_favorites')
+            .insert([{ user_id: user_id, auction_id: auction_id }]);
+
+        if (error) {
+            console.error('Error favoriting auction:', error);
+            return res.status(400).json({ message: 'Error favoriting auction', error });
+        }
+
+        return res.status(200).json({ message: 'Auction favorited successfully', data });
+    }catch(e){
+        console.error('Error in favorite auction route:', e);
+        return res.status(500).json({ message: 'Something went wrong' });
+    }
+});
+
+
+// Unfavorite Auctions
+auctionRouter.post('/unfavourite', async (req, res) => {
+  try {
+    const { auction_id, user_id } = req.body;
+
+    const { data, error } = await supabase
+      .from('user_favorites')
+      .delete()
+      .eq('user_id', user_id)
+      .eq('auction_id', auction_id);
+
+    if (error) {
+      console.error('Error unfavoriting auction:', error);
+      return res.status(400).json({ message: 'Error unfavoriting auction', error });
+    }
+
+    return res.status(200).json({ message: 'Auction unfavorited successfully', data });
+  } catch (e) {
+    console.error('Error in unfavorite auction route:', e);
+    return res.status(500).json({ message: 'Something went wrong' });
+  }
+});
+
+
+// Fetch All Favourite Auction IDs for a User
+auctionRouter.post('/favauctions', async (req, res) => {
+  try {
+    const user_id = req.body;
+
+    if (!user_id) {
+      return res.status(400).json({ message: 'Missing user_id' });
+    }
+
+    const { data, error } = await supabase
+      .from('user_favorites')
+      .select('auction_id')
+      .eq('user_id', user_id);
+
+    if (error) {
+      console.error('Supabase error:', error.message);
+      return res.status(500).json({ message: 'Failed to fetch favourites', error });
+    }
+
+    const auctionIds = data.map(fav => fav.auction_id);
+    return res.status(200).json(auctionIds);
+  } catch (e) {
+    console.error('Server error:', e);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 export default auctionRouter;
