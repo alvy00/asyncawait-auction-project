@@ -142,11 +142,16 @@ const AuctionCard = ({ auction, auctionCreator }: { auction: Auction; auctionCre
           {/* Glass overlay on image */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60"></div>
           
-          {/* Live tag */}
-          {auction.status === 'ongoing' ? (
+          {/* Status tag */}
+          {auction.status === 'live' ? (
             <div className="absolute top-4 left-4 bg-gradient-to-r from-red-600 to-red-500 text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center space-x-2 shadow-lg backdrop-blur-sm">
               <span className="inline-block w-2 h-2 rounded-full bg-white animate-pulse"></span>
               <span>Live</span>
+            </div>
+          ) : auction.status === 'upcoming' ? (
+            <div className="absolute top-4 left-4 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center space-x-2 shadow-lg backdrop-blur-sm">
+              <span className="inline-block w-2 h-2 rounded-full bg-white animate-pulse"></span>
+              <span>Upcoming</span>
             </div>
           ) : (
             <div className="absolute top-4 left-4 bg-gray-600 text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center space-x-2 shadow-lg backdrop-blur-sm">
