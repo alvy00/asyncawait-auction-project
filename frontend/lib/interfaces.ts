@@ -43,7 +43,7 @@ export interface UpcomingAuctionCardProps{
     start_time: string;
     end_time: string;
     starting_price: number;
-    status: 'upcoming' | 'ongoing' | 'ended';
+    status: 'upcoming' | 'live' | 'ended';
     highest_bid: number | null;
     highest_bidder_id: number | null;
     creator: string;
