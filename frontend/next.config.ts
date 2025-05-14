@@ -16,6 +16,9 @@ const nextConfig: NextConfig = {
       "i.pravatar.cc",
       "via.placeholder.com",
       'cdn.pixabay.com',
+      'www.michellesburt.com',
+      'imgs.search.brave.com',
+      't3.ftcdn.net',
     ],
   },
   webpack(config) {

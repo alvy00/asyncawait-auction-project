@@ -7,7 +7,7 @@ export interface User {
     bids_won: number;
 }
 
-export interface Auction{
+export interface Auction {
   auction_id: string;
   creator: string;
   item_name: string;
@@ -19,7 +19,7 @@ export interface Auction{
   highest_bidder_id?: string;
   start_time: string;
   end_time: string;
-  status?: "upcoming" | "ongoing" | "ended";
+  status?: string;
   images?: string[];
   condition: "new" | "used" | "refurbished";
   onFavorite?: (id: string | number, isFavorite: boolean) => void;
@@ -43,7 +43,7 @@ export interface UpcomingAuctionCardProps{
     start_time: string;
     end_time: string;
     starting_price: number;
-    status: 'upcoming' | 'ongoing' | 'ended';
+    status: 'upcoming' | 'live' | 'ended';
     highest_bid: number | null;
     highest_bidder_id: number | null;
     creator: string;

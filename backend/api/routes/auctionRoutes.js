@@ -35,6 +35,8 @@ auctionRouter.get('/', async (req, res) => {
 auctionRouter.post('/create', async (req, res) => {
     try {
         const user = await getUser(req);
+
+        //const { user_id } = req.body;
         //console.log(user)
 
         if (!user) return res.status(401).json({ error: 'Unauthorized' });
@@ -46,7 +48,9 @@ auctionRouter.post('/create', async (req, res) => {
                 issues: result.error.issues,
             });
         }
-       // console.log(result)
+
+
+       console.log(result)
         const { data, error } = await supabase
             .from('auctions')
             .insert([
@@ -55,8 +59,11 @@ auctionRouter.post('/create', async (req, res) => {
                     ...result.data,
                 },
             ]).select();
+
         console.log("Supabase Response:", { data, error });
         //console.log(user);
+
+        console.log("Inserted auction from Supabase:", data);
 
         if (error) {
             return res.status(500).json({
@@ -112,6 +119,7 @@ auctionRouter.post('/aucdetails', async (req, res) => {
     return res.status(500).json({ message: "Unexpected server error." });
   }
 });
+
 
 
 // Place Bid
