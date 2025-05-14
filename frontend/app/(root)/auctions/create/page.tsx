@@ -62,15 +62,21 @@ export default function AuctionCreationForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    //console.log(currentUser.id);
-    // if (!currentUser) {
-    //   toast.error("You need to be logged in to create an auction.");
-    //   return;
-    // }
 
     try{
       const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
       const formData = new FormData(e.currentTarget);
+
+      const startTime = new Date(formData.get('start_time') as string);
+      const endTime = new Date(formData.get('end_time') as string);
+      const now = new Date();
+
+      let status: 'upcoming' | 'live' | 'ended';
+      if (now < startTime) status = 'upcoming';
+      else if (now >= startTime && now <= endTime) status = 'live';
+      else status = 'ended';
+
+
       const body = {
         creator: currentUser.name,
         item_name: formData.get('item_name') as string,
@@ -80,7 +86,7 @@ export default function AuctionCreationForm() {
         buy_now: formData.get('buy_now') ? parseFloat(formData.get('buy_now') as string) : undefined,
         start_time: new Date(formData.get('start_time') as string).toISOString(),
         end_time: new Date(formData.get('end_time') as string).toISOString(),
-        status: 'ongoing',
+        status,
         images: imageUrls.filter(url => url.trim() !== ""),
         condition: formData.get('condition') as 'new' | 'used' | 'refurbished',
       };
