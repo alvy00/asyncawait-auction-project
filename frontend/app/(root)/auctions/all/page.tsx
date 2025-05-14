@@ -9,7 +9,9 @@ import { motion } from "framer-motion";
 import { FaSearch, FaFilter, FaSortAmountUp } from "react-icons/fa";
 
 const LiveAuctionsPage = () => {
+    const [user, setUser] = useState(null);
     const [auctions, setAuctions] = useState<Auction[]>([]);
+    const [favAuctionIDs, setFavAuctionIDs] = useState(null); 
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [activeFilter, setActiveFilter] = useState("all");
@@ -49,6 +51,67 @@ const LiveAuctionsPage = () => {
 
         fetchAllAuctions();
     }, []);
+
+    // fetch user
+    useEffect(() => {
+        const getUser = async () => {
+            const token = localStorage.getItem('sessionToken') || sessionStorage.getItem('sessionToken');
+            if (!token) {
+            console.warn('No token found');
+            return;
+            }
+
+            try {
+
+            // https://asyncawait-auction-project.onrender.com/api/getuser
+            // http://localhost:8000/api/getuser
+            const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getuser', {
+                method: 'GET',
+                headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                console.error('Failed to fetch user:', err.message);
+                return;
+            }
+
+            const data = await res.json();
+            setUser(data);
+            } catch (e) {
+            console.error('Error fetching user:', e);
+            }
+        };
+        getUser();
+
+    }, []);
+
+    // fetch favourited auction ids
+    useEffect(() => {
+        const fetchFavAuctionIDs = async () => {
+            try{
+            // https://asyncawait-auction-project.onrender.com/api/auctions/favauctions
+            // http://localhost:8000/api/auctions/favauctions
+            const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/favauctions', {
+                method: 'POST',
+                headers: {
+                'Content-type': 'application/json',
+                },
+                body: JSON.stringify({user_id: user.user_id}),
+            })
+
+            const data = await res.json();
+            setFavAuctionIDs(data);
+            }catch(e){
+            console.error(e);
+            }
+        }
+        fetchFavAuctionIDs();
+    }, [user]);
+
 
     // Filter auctions based on search term and active filter
     const filteredAuctions = auctions.filter(auction => {
@@ -188,7 +251,7 @@ const LiveAuctionsPage = () => {
                                     className="hover:scale-105 transform transition-all duration-300 ease-in-out"
                                     variants={itemVariants}
                                 >
-                                    <AuctionCard auction={auction} auctionCreator={auction.creator}/>
+                                    <AuctionCard auction={auction} auctionCreator={auction.creator} isFavourited={favAuctionIDs?.includes(auction.auction_id)}/>
                                 </motion.div>
                             ))}
                         </motion.div>

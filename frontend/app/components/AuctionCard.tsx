@@ -8,22 +8,57 @@ import toast from "react-hot-toast";
 import { Auction } from "../../lib/interfaces";
 import { AnimatePresence, motion } from "framer-motion";
 import { title } from "process";
-import { cn } from "../../lib/utils";
+import { cn, getUserIdFromToken } from "../../lib/utils";
 import { Countdown } from "./Countdown";
+import { FaBolt, FaClock, FaFlagCheckered } from "react-icons/fa";
 
 const FALLBACK_IMAGE = "/fallback.jpg";
 
-const AuctionCard = ({ auction, auctionCreator }: { auction: Auction; auctionCreator: string }) => {
+const AuctionCard = ({ auction, auctionCreator, isFavourited }: { auction: Auction; auctionCreator: string, isFavourited: boolean }) => {
   const [winner, setWinner] = useState(null);
   const [isEnded, setIsEnded] = useState(false);
   const [isBidding, setIsBidding] = useState(false);
   const [bidAmount, setBidAmount] = useState(0);
   const [highestBid, setHighestBid] = useState(auction.highest_bid);
   const [isHovered, setIsHovered] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(isFavourited);
+  const [user, setUser] = useState(null);
 
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : FALLBACK_IMAGE;
   const token = typeof window !== "undefined" ? localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken") : null;
+
+  // fetch user
+  useEffect(() => {
+    const getUser = async () => {
+      const token = localStorage.getItem('sessionToken') || sessionStorage.getItem('sessionToken');
+      if (!token) {
+        console.warn('No token found');
+        return;
+      }
+
+      try {
+        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getuser', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          console.error('Failed to fetch user:', err.message);
+          return;
+        }
+
+        const data = await res.json();
+        setUser(data);
+      } catch (e) {
+        console.error('Error fetching user:', e);
+      }
+    };
+    getUser();
+  }, []);
 
   useEffect(() => {
     const getHighestBidder = async () => {
@@ -108,9 +143,69 @@ const AuctionCard = ({ auction, auctionCreator }: { auction: Auction; auctionCre
   };
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
-      e.stopPropagation();
-      toast.success('Favorited')
-      
+    e.stopPropagation();
+
+    const favourite = async () => {
+      try {
+        const body = {
+          auction_id: auction.auction_id,
+          user_id: user.user_id,
+        };
+
+        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/favourite', {
+          method: 'POST',
+          headers: {
+            'Content-type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        });
+
+        if (!res.ok) {
+          throw new Error('Failed to add to favourites');
+        }
+
+        const data = await res.json();
+        console.log('Favourite response:', data);
+
+        setIsFavorite(true);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    const unfavourite = async () => {
+      try {
+        const body = {
+          auction_id: auction.auction_id,
+          user_id: user.user_id,
+        };
+
+        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/unfavourite', {
+          method: 'POST',
+          headers: {
+            'Content-type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        });
+
+        if (!res.ok) {
+          throw new Error('Failed to remove from favourites');
+        }
+
+        const data = await res.json();
+        console.log('Unfavourite response:', data);
+
+        setIsFavorite(false);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    if (!isFavorite) {
+      favourite();
+    } else {
+      unfavourite();
+    }
   };
 
   return (
@@ -142,22 +237,23 @@ const AuctionCard = ({ auction, auctionCreator }: { auction: Auction; auctionCre
           {/* Glass overlay on image */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60"></div>
           
-          {/* Status tag */}
-          {auction.status === 'live' ? (
-            <div className="absolute top-4 left-4 bg-gradient-to-r from-red-600 to-red-500 text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center space-x-2 shadow-lg backdrop-blur-sm">
-              <span className="inline-block w-2 h-2 rounded-full bg-white animate-pulse"></span>
-              <span>Live</span>
-            </div>
-          ) : auction.status === 'upcoming' ? (
-            <div className="absolute top-4 left-4 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center space-x-2 shadow-lg backdrop-blur-sm">
-              <span className="inline-block w-2 h-2 rounded-full bg-white animate-pulse"></span>
-              <span>Upcoming</span>
-            </div>
-          ) : (
-            <div className="absolute top-4 left-4 bg-gray-600 text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center space-x-2 shadow-lg backdrop-blur-sm">
-              <span>Ended</span>
-            </div>
-          )}
+{/* Status tag */}
+{auction.status === 'live' ? (
+  <div className="absolute top-4 left-4 bg-gradient-to-r from-red-600 to-red-500 text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
+    <FaBolt className="text-white animate-pulse" />
+    <span>Live</span>
+  </div>
+) : auction.status === 'upcoming' ? (
+  <div className="absolute top-4 left-4 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
+    <FaClock className="text-white" />
+    <span>Upcoming</span>
+  </div>
+) : (
+  <div className="absolute top-4 left-4 bg-gray-600 text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
+    <FaFlagCheckered className="text-white" />
+    <span>Ended</span>
+  </div>
+)}
           
           {/* Favorite button - Updated to show on group hover */}
           <motion.button
