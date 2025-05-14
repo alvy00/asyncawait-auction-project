@@ -125,6 +125,7 @@ auctionRouter.post('/aucdetails', async (req, res) => {
 // Place Bid
 auctionRouter.post('/bid', async (req, res) => {
     try {
+        //const { auction_id, amount, highest_bid, user_id } = req.body;
         const { auction_id, amount } = req.body;
         const user = await getUser(req);
 
@@ -168,9 +169,18 @@ auctionRouter.post('/bid', async (req, res) => {
                 p_user_id: user.id
             });
 
+        // // Start a MOCK Transaction
+        // const { data: bid, error: bidErr } = await supabase
+        //     .rpc('place_bid_transaction', {
+        //         p_auction_id: auction_id,
+        //         p_bid_amount: amount,
+        //         p_highest_bid: highest_bid,
+        //         p_user_id: user_id
+        //     });
+
         if (bidErr) {
             console.error('Error placing bid:', bidErr);
-            return res.status(400).json({ message: 'Bid could not be placed!' });
+            return res.status(400).json({ message: 'Bid could not be placed!', error: bidErr });
         }
 
         console.log('Bid placed successfully:', bid);
