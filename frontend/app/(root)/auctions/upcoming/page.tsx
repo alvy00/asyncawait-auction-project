@@ -18,37 +18,35 @@ const UpcomingAuctionsPage = () => {
     // Categories for filter pills
     const categories = ["all", "watches", "jewelry", "art", "collectibles", "fashion"];
 
-    // fetching upcoming auctions
+    // fetch upcoming auctions
     useEffect(() => {
-        const fetchUpcomingAuctions = async () => {
-            setIsLoading(true);
-            try {
-                const res = await fetch(
-                    "https://asyncawait-auction-project.onrender.com/api/auctions/upcoming",
-                    {
-                        method: "GET",
-                        headers: {
-                            "Content-type": "application/json",
-                        },
-                    }
-                );
+    const fetchUpcomingAuctions = async () => {
+        setIsLoading(true);
+        try {
+        const res = await fetch("https://asyncawait-auction-project.onrender.com/api/auctions", {
+            method: "GET",
+            headers: {
+            "Content-type": "application/json",
+            },
+        });
 
-                if (!res.ok) {
-                    const r = await res.json();
-                    console.error(r.message || r.statusText);
-                    return;
-                }
+        if (!res.ok) {
+            const error = await res.json();
+            console.error(error.message || error.statusText);
+            return;
+        }
 
-                const data = await res.json();
-                setAuctions(data);
-            } catch (e) {
-                console.error(e);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+        const data = await res.json();
+        const upcomingAuctions = data.filter((auction) => auction.status === "upcoming");
+        setAuctions(upcomingAuctions);
+        } catch (e) {
+        console.error("Error fetching upcoming auctions", e);
+        } finally {
+        setIsLoading(false);
+        }
+    };
 
-        fetchUpcomingAuctions();
+    fetchUpcomingAuctions();
     }, []);
 
     // Filter auctions based on search term and active filter
