@@ -62,10 +62,15 @@ export default function AuctionCreationForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
 
     try {
       const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
+
+      if (!token) {
+        toast.error("No session token found");
+        return;
+      }
+
       const formData = new FormData(e.currentTarget);
 
       const startTime = new Date(formData.get('start_time') as string);
@@ -117,11 +122,12 @@ export default function AuctionCreationForm() {
       }
     } catch (e) {
       toast.error("Auction creation failed");
-      console.error("Error creating auction", e);
+      console.error("Error creating auction:", e);
     } finally {
       setIsLoading(false);
     }
   };
+
 
 
 
