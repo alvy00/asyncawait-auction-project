@@ -14,14 +14,20 @@ import { FaBolt, FaClock, FaFlagCheckered } from "react-icons/fa";
 
 const FALLBACK_IMAGE = "/fallback.jpg";
 
-const AuctionCard = ({ auction, auctionCreator, isFavourited, onToggleFavorite }: { auction: Auction; auctionCreator: string, isFavourited: boolean, onToggleFavorite: () => void }) => {
+interface AuctionCardProps {
+  auction: Auction;
+  auctionCreator: string;
+  isFavourited: boolean;
+  onToggleFavorite: () => void;
+}
+
+const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFavourited, onToggleFavorite })  => {
   const [winner, setWinner] = useState(null);
   const [isEnded, setIsEnded] = useState(false);
   const [isBidding, setIsBidding] = useState(false);
   const [bidAmount, setBidAmount] = useState(0);
   const [highestBid, setHighestBid] = useState(auction.highest_bid);
   const [isHovered, setIsHovered] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(isFavourited);
   const [user, setUser] = useState(null);
 
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : FALLBACK_IMAGE;
@@ -60,11 +66,7 @@ const AuctionCard = ({ auction, auctionCreator, isFavourited, onToggleFavorite }
     getUser();
   }, []);
 
-  // re-render favourite icon
-  useEffect(() => {
-    setIsFavorite(isFavourited);
-  }, [isFavourited]);
-
+  // get highest bidder
   useEffect(() => {
     const getHighestBidder = async () => {
       const userId = auction?.highest_bidder_id;
@@ -103,6 +105,7 @@ const AuctionCard = ({ auction, auctionCreator, isFavourited, onToggleFavorite }
     getHighestBidder();
   }, [auction?.highest_bidder_id])
   
+  // submit bid
   const handleBidSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   
@@ -142,55 +145,25 @@ const AuctionCard = ({ auction, auctionCreator, isFavourited, onToggleFavorite }
       }
   };
 
+  // animation
   const handleMouseLeave = () => {
     setIsBidding(false);
     setIsHovered(false);
   };
 
-const handleFavoriteClick = async (e: React.MouseEvent) => {
-  e.stopPropagation();
+  // handle fav click
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
 
-  if (!user?.user_id) {
-    toast.error("Please log in to favorite auctions.");
-    return;
-  }
-
-  const endpoint = isFavorite ? 'unfavourite' : 'favourite';
-
-  try {
-    const body = {
-      auction_id: auction.auction_id,
-      user_id: user.user_id,
-    };
-
-    const res = await fetch(`https://asyncawait-auction-project.onrender.com/api/auctions/${endpoint}`, {
-      method: 'POST',
-      headers: {
-        'Content-type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!res.ok) throw new Error(`Failed to ${endpoint}`);
-
-    const data = await res.json();
-    console.log(`${endpoint} response:`, data);
-
-    if (endpoint === 'favourite') {
-      localStorage.setItem(`auction-${auction.auction_id}-favorite`, 'true');
-      setIsFavorite(true);
-    } else {
-      localStorage.removeItem(`auction-${auction.auction_id}-favorite`);
-      setIsFavorite(false);
+    if (!user?.user_id) {
+      toast.error("Please log in to favorite auctions.");
+      return;
     }
 
-    onToggleFavorite?.();
-  } catch (e) {
-    console.error(e);
-    toast.error("Could not update favorites.");
-  }
-};
+    onToggleFavorite();
+  };
 
+  
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -238,6 +211,7 @@ const handleFavoriteClick = async (e: React.MouseEvent) => {
             </div>
           )}
           
+          
           {/* Favorite button - Updated to show on group hover */}
           <motion.button
             initial={{ opacity: 0, scale: 0.8 }}
@@ -249,7 +223,7 @@ const handleFavoriteClick = async (e: React.MouseEvent) => {
             onClick={handleFavoriteClick}
             className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 backdrop-blur-md p-2 rounded-full z-10 transition-all duration-300 hover:scale-110 border border-white/20 shadow-lg"
           >
-            {isFavorite ? (
+            {isFavourited ? (
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
               </svg>
