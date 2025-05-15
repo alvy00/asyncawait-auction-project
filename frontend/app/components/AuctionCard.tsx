@@ -14,7 +14,7 @@ import { FaBolt, FaClock, FaFlagCheckered } from "react-icons/fa";
 
 const FALLBACK_IMAGE = "/fallback.jpg";
 
-const AuctionCard = ({ auction, auctionCreator, isFavourited }: { auction: Auction; auctionCreator: string, isFavourited: boolean }) => {
+const AuctionCard = ({ auction, auctionCreator, isFavourited, onToggleFavorite }: { auction: Auction; auctionCreator: string, isFavourited: boolean, onToggleFavorite: () => void }) => {
   const [winner, setWinner] = useState(null);
   const [isEnded, setIsEnded] = useState(false);
   const [isBidding, setIsBidding] = useState(false);
@@ -59,6 +59,11 @@ const AuctionCard = ({ auction, auctionCreator, isFavourited }: { auction: Aucti
     };
     getUser();
   }, []);
+
+  // re-render favourite icon
+  useEffect(() => {
+    setIsFavorite(isFavourited);
+  }, [isFavourited]);
 
   useEffect(() => {
     const getHighestBidder = async () => {
@@ -142,71 +147,49 @@ const AuctionCard = ({ auction, auctionCreator, isFavourited }: { auction: Aucti
     setIsHovered(false);
   };
 
-  const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+const handleFavoriteClick = async (e: React.MouseEvent) => {
+  e.stopPropagation();
 
-    const favourite = async () => {
-      try {
-        const body = {
-          auction_id: auction.auction_id,
-          user_id: user.user_id,
-        };
+  if (!user?.user_id) {
+    toast.error("Please log in to favorite auctions.");
+    return;
+  }
 
-        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/favourite', {
-          method: 'POST',
-          headers: {
-            'Content-type': 'application/json',
-          },
-          body: JSON.stringify(body),
-        });
+  const endpoint = isFavorite ? 'unfavourite' : 'favourite';
 
-        if (!res.ok) {
-          throw new Error('Failed to add to favourites');
-        }
-
-        const data = await res.json();
-        console.log('Favourite response:', data);
-
-        setIsFavorite(true);
-      } catch (e) {
-        console.error(e);
-      }
+  try {
+    const body = {
+      auction_id: auction.auction_id,
+      user_id: user.user_id,
     };
 
-    const unfavourite = async () => {
-      try {
-        const body = {
-          auction_id: auction.auction_id,
-          user_id: user.user_id,
-        };
+    const res = await fetch(`https://asyncawait-auction-project.onrender.com/api/auctions/${endpoint}`, {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
 
-        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/unfavourite', {
-          method: 'POST',
-          headers: {
-            'Content-type': 'application/json',
-          },
-          body: JSON.stringify(body),
-        });
+    if (!res.ok) throw new Error(`Failed to ${endpoint}`);
 
-        if (!res.ok) {
-          throw new Error('Failed to remove from favourites');
-        }
+    const data = await res.json();
+    console.log(`${endpoint} response:`, data);
 
-        const data = await res.json();
-        console.log('Unfavourite response:', data);
-
-        setIsFavorite(false);
-      } catch (e) {
-        console.error(e);
-      }
-    };
-
-    if (!isFavorite) {
-      favourite();
+    if (endpoint === 'favourite') {
+      localStorage.setItem(`auction-${auction.auction_id}-favorite`, 'true');
+      setIsFavorite(true);
     } else {
-      unfavourite();
+      localStorage.removeItem(`auction-${auction.auction_id}-favorite`);
+      setIsFavorite(false);
     }
-  };
+
+    onToggleFavorite?.();
+  } catch (e) {
+    console.error(e);
+    toast.error("Could not update favorites.");
+  }
+};
 
   return (
     <motion.div 
@@ -237,23 +220,23 @@ const AuctionCard = ({ auction, auctionCreator, isFavourited }: { auction: Aucti
           {/* Glass overlay on image */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60"></div>
           
-{/* Status tag */}
-{auction.status === 'live' ? (
-  <div className="absolute top-4 left-4 bg-gradient-to-r from-red-600 to-red-500 text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
-    <FaBolt className="text-white animate-pulse" />
-    <span>Live</span>
-  </div>
-) : auction.status === 'upcoming' ? (
-  <div className="absolute top-4 left-4 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
-    <FaClock className="text-white" />
-    <span>Upcoming</span>
-  </div>
-) : (
-  <div className="absolute top-4 left-4 bg-gray-600 text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
-    <FaFlagCheckered className="text-white" />
-    <span>Ended</span>
-  </div>
-)}
+          {/* Status tag */}
+          {auction.status === 'live' ? (
+            <div className="absolute top-4 left-4 bg-gradient-to-r from-red-600 to-red-500 text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
+              <FaBolt className="text-white animate-pulse" />
+              <span>Live</span>
+            </div>
+          ) : auction.status === 'upcoming' ? (
+            <div className="absolute top-4 left-4 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
+              <FaClock className="text-white" />
+              <span>Upcoming</span>
+            </div>
+          ) : (
+            <div className="absolute top-4 left-4 bg-gray-600 text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
+              <FaFlagCheckered className="text-white" />
+              <span>Ended</span>
+            </div>
+          )}
           
           {/* Favorite button - Updated to show on group hover */}
           <motion.button

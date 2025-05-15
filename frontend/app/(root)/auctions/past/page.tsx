@@ -6,7 +6,7 @@ import { Auction } from "../../../../lib/interfaces";
 import { FaSpinner, FaSearch, FaHistory, FaSortAmountDown } from "react-icons/fa";
 import { motion } from "framer-motion";
 
-const PastAuctions = () => {
+const PastAuctionsPage = () => {
     const [auctions, setAuctions] = useState<Auction[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -229,7 +229,7 @@ const PastAuctions = () => {
                                 className="hover:scale-105 transform transition-all duration-300 ease-in-out"
                                 variants={itemVariants}
                             >
-                                <AuctionCard auction={auction} auctionCreator={auction.creator}/>
+                                <AuctionCard auction={auction} auctionCreator={auction.creator} isFavourited={false}/>
                             </motion.div>
                         ))}
                     </motion.div>
@@ -252,7 +252,7 @@ const PastAuctions = () => {
     );
 };
 
-export default PastAuctions;
+export default PastAuctionsPage;
 
 //  styles for animations
 const styles = `
