@@ -273,7 +273,7 @@ auctionRouter.post('/unfavourite', async (req, res) => {
 // Fetch All Favourite Auction IDs for a User
 auctionRouter.post('/favauctions', async (req, res) => {
   try {
-    const user_id = req.body;
+    const { user_id } = req.body;
 
     if (!user_id) {
       return res.status(400).json({ message: 'Missing user_id' });
@@ -290,6 +290,7 @@ auctionRouter.post('/favauctions', async (req, res) => {
     }
 
     const auctionIds = data.map(fav => fav.auction_id);
+    console.log(auctionIds);
     return res.status(200).json(auctionIds);
   } catch (e) {
     console.error('Server error:', e);

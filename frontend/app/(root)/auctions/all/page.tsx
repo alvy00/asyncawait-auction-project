@@ -7,11 +7,20 @@ import { Auction } from "../../../../lib/interfaces";
 import { FaSpinner } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { FaSearch, FaFilter, FaSortAmountUp } from "react-icons/fa";
+import { useUser } from "../../../../lib/user-context";
 
 const LiveAuctionsPage = () => {
-    const [user, setUser] = useState(null);
+    const { user } = useUser();
     const [auctions, setAuctions] = useState<Auction[]>([]);
-    const [favAuctionIDs, setFavAuctionIDs] = useState(null); 
+    const [favAuctionIDs, setFavAuctionIDs] = useState<string[]>(() => {
+        if (typeof window !== "undefined") {
+            const storedFavs = localStorage.getItem("favAuctionIDs");
+            return storedFavs ? JSON.parse(storedFavs) : [];
+        }
+        return [];
+    });
+    const [isFavsLoaded, setIsFavsLoaded] = useState(false);
+    const [isFavsHydrated, setIsFavsHydrated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [activeFilter, setActiveFilter] = useState("all");
@@ -19,7 +28,7 @@ const LiveAuctionsPage = () => {
     // Categories for filter pills
     const categories = ["all", "watches", "jewelry", "art", "collectibles", "fashion"];
 
-    // fetching auctions
+    // Fetch auctions
     useEffect(() => {
         const fetchAllAuctions = async () => {
             setIsLoading(true);
@@ -52,66 +61,67 @@ const LiveAuctionsPage = () => {
         fetchAllAuctions();
     }, []);
 
-    // fetch user
+    // Fetch fav auction IDs only if user is available
+    
+
+    const toggleFavorite = (auctionId: string) => {
+        let updatedFavs: string[];
+        if (favAuctionIDs.includes(auctionId)) {
+            // Unfavorite
+            updatedFavs = favAuctionIDs.filter(id => id !== auctionId);
+        } else {
+            // Favorite
+            updatedFavs = [...favAuctionIDs, auctionId];
+        }
+
+        setFavAuctionIDs(updatedFavs);
+
+        if (typeof window !== "undefined") {
+            localStorage.setItem("favAuctionIDs", JSON.stringify(updatedFavs));
+        }
+
+        // (Optional) You could also POST to your backend here to persist to the DB
+    };
+
     useEffect(() => {
-        const getUser = async () => {
-            const token = localStorage.getItem('sessionToken') || sessionStorage.getItem('sessionToken');
-            if (!token) {
-            console.warn('No token found');
-            return;
+        if (typeof window !== "undefined") {
+            const storedFavs = localStorage.getItem("favAuctionIDs");
+            if (storedFavs) {
+                setFavAuctionIDs(JSON.parse(storedFavs));
             }
+            setIsFavsHydrated(true); // allow AuctionCards to load with initial state
+        }
+    }, []);
+    // fetch fav auction ids
+    useEffect(() => {
+    if (!user?.user_id) return;
 
-            try {
-
-            // https://asyncawait-auction-project.onrender.com/api/getuser
-            // http://localhost:8000/api/getuser
-            const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getuser', {
-                method: 'GET',
+    const fetchFavAuctionIDs = async () => {
+        try {
+            const res = await fetch("https://asyncawait-auction-project.onrender.com/api/auctions/favauctions", {
+                method: "POST",
                 headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
+                    "Content-type": "application/json",
                 },
+                body: JSON.stringify({ user_id: user.user_id }),
             });
 
-            if (!res.ok) {
-                const err = await res.json();
-                console.error('Failed to fetch user:', err.message);
-                return;
-            }
-
             const data = await res.json();
-            setUser(data);
-            } catch (e) {
-            console.error('Error fetching user:', e);
+            const favs = data.favourites || [];
+            setFavAuctionIDs(favs);
+
+            if (typeof window !== "undefined") {
+                localStorage.setItem("favAuctionIDs", JSON.stringify(favs));
             }
-        };
-        getUser();
-
-    }, []);
-
-    // fetch favourited auction ids
-    useEffect(() => {
-        const fetchFavAuctionIDs = async () => {
-            try{
-            // https://asyncawait-auction-project.onrender.com/api/auctions/favauctions
-            // http://localhost:8000/api/auctions/favauctions
-            const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/favauctions', {
-                method: 'POST',
-                headers: {
-                'Content-type': 'application/json',
-                },
-                body: JSON.stringify({user_id: user.user_id}),
-            })
-
-            const data = await res.json();
-            setFavAuctionIDs(data);
-            }catch(e){
+        } catch (e) {
             console.error(e);
-            }
+        } finally {
+            setIsFavsLoaded(true); // <-- Mark favs as loaded
         }
-        fetchFavAuctionIDs();
-    }, [user]);
+    };
 
+    fetchFavAuctionIDs();
+    }, [user?.user_id]);
 
     // Filter auctions based on search term and active filter
     const filteredAuctions = auctions.filter(auction => {
@@ -137,188 +147,146 @@ const LiveAuctionsPage = () => {
     };
 
     return (
-        <>
-            <section className="py-16 min-h-screen relative overflow-hidden">
-                {/* Animated background elements */}
-                <div className="absolute inset-0 z-0">
-                    {/* Large gradient circle */}
-                    <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-orange-500/10 rounded-full filter blur-[120px] animate-pulse-slow"></div>
-                    
-                    {/* Small accent circles */}
-                    <div className="absolute bottom-[20%] left-[5%] w-[300px] h-[300px] bg-purple-500/5 rounded-full filter blur-[80px] animate-float"></div>
-                    <div className="absolute top-[30%] left-[10%] w-[200px] h-[200px] bg-blue-500/5 rounded-full filter blur-[60px] animate-float-delayed"></div>
-                    
-                    {/* Grid pattern overlay */}
-                    <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-                </div>
-                
-                <div className="container mx-auto px-4 relative z-10">
-                    {/* Hero section with animated title */}
-                    <motion.div 
+        <section className="py-16 min-h-screen relative overflow-hidden">
+            {/* Animated background elements */}
+            <div className="absolute inset-0 z-0">
+                {/* Large gradient circle */}
+                <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-orange-500/10 rounded-full filter blur-[120px] animate-pulse-slow"></div>
+
+                {/* Small accent circles */}
+                <div className="absolute bottom-[20%] left-[5%] w-[300px] h-[300px] bg-purple-500/5 rounded-full filter blur-[80px] animate-float"></div>
+                <div className="absolute top-[30%] left-[10%] w-[200px] h-[200px] bg-blue-500/5 rounded-full filter blur-[60px] animate-float-delayed"></div>
+
+                {/* Grid pattern overlay */}
+                <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+            </div>
+
+            <div className="container mx-auto px-4 relative z-10">
+                {/* Hero section with animated title */}
+                <motion.div 
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="text-center mb-12"
+                >
+                    <motion.h1 
+                        className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300"
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        className="text-center mb-12"
+                        transition={{ duration: 0.6, delay: 0.2 }}
                     >
-                        <motion.h1 
-                            className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300"
-                            initial={{ opacity: 0, y: -20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: 0.2 }}
+                        Discover Live <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600">Auctions</span>
+                    </motion.h1>
+                    <motion.p 
+                        className="text-gray-300 text-lg md:text-xl max-w-3xl mx-auto"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.6, delay: 0.3 }}
+                    >
+                        Bid on exclusive items from around the world with our real-time auction platform
+                    </motion.p>
+                </motion.div>
+
+                {/* Search and filter section */}
+                <motion.div 
+                    className="mb-10"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.4 }}
+                >
+                    {/* Search bar */}
+                    <div className="relative max-w-md mx-auto mb-6">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <FaSearch className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                            type="text"
+                            className="block w-full pl-10 pr-3 py-3 border border-white/10 rounded-xl bg-white/5 backdrop-blur-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
+                            placeholder="Search auctions..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+
+                    {/* Filter pills */}
+                    <div className="flex flex-wrap justify-center gap-2 mb-6">
+                        {categories.map((category, index) => (
+                            <motion.button
+                                key={category}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.5 + index * 0.1 }}
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeFilter === category 
+                                    ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/20' 
+                                    : 'bg-white/5 backdrop-blur-sm text-gray-300 hover:bg-white/10 border border-white/10'}`}
+                                onClick={() => setActiveFilter(category)}
+                            >
+                                {category.charAt(0).toUpperCase() + category.slice(1)}
+                            </motion.button>
+                        ))}
+                    </div>
+                </motion.div>
+
+                {/* Auctions grid with staggered animation */}
+                {isLoading || !isFavsHydrated || !isFavsLoaded ? (
+                    <div className="flex flex-col items-center justify-center py-20">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+                            className="text-orange-500 mb-4"
                         >
-                            Discover Live <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600">Auctions</span>
-                        </motion.h1>
+                            <FaSpinner className="animate-spin h-12 w-12" />
+                        </motion.div>
                         <motion.p 
-                            className="text-gray-300 text-lg md:text-xl max-w-3xl mx-auto"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            transition={{ duration: 0.6, delay: 0.3 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                            className="text-gray-300 text-lg"
                         >
-                            Bid on exclusive items from around the world with our real-time auction platform
+                            Discovering exceptional auctions...
                         </motion.p>
-                    </motion.div>
-
-                    {/* Search and filter section */}
+                    </div>
+                ) : filteredAuctions.length > 0 ? (
                     <motion.div 
-                        className="mb-10"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.4 }}
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="show"
                     >
-                        {/* Search bar */}
-                        <div className="relative max-w-md mx-auto mb-6">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <FaSearch className="h-5 w-5 text-gray-400" />
-                            </div>
-                            <input
-                                type="text"
-                                className="block w-full pl-10 pr-3 py-3 border border-white/10 rounded-xl bg-white/5 backdrop-blur-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
-                                placeholder="Search auctions..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                        </div>
-
-                        {/* Filter pills */}
-                        <div className="flex flex-wrap justify-center gap-2 mb-6">
-                            {categories.map((category, index) => (
-                                <motion.button
-                                    key={category}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.5 + index * 0.1 }}
-                                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeFilter === category 
-                                        ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/20' 
-                                        : 'bg-white/5 backdrop-blur-sm text-gray-300 hover:bg-white/10 border border-white/10'}`}
-                                    onClick={() => setActiveFilter(category)}
-                                >
-                                    {category.charAt(0).toUpperCase() + category.slice(1)}
-                                </motion.button>
-                            ))}
-                        </div>
-                    </motion.div>
-
-                    {/* Auctions grid with staggered animation */}
-                    {isLoading ? (
-                        <div className="flex flex-col items-center justify-center py-20">
+                        {filteredAuctions.map((auction, index) => (
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
-                                className="text-orange-500 mb-4"
+                                key={index}
+                                className="hover:scale-105 transform transition-all duration-300 ease-in-out"
+                                variants={itemVariants}
                             >
-                                <FaSpinner className="animate-spin h-12 w-12" />
+                                <AuctionCard
+                                    auction={auction}
+                                    auctionCreator={auction.creator}
+                                    isFavourited={favAuctionIDs.includes(auction.auction_id)}
+                                    onToggleFavorite={() => toggleFavorite(auction.auction_id)}
+                                />
+                                
                             </motion.div>
-                            <motion.p 
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ duration: 0.5, delay: 0.2 }}
-                                className="text-gray-300 text-lg"
-                            >
-                                Discovering exceptional auctions...
-                            </motion.p>
+                        ))}
+                    </motion.div>
+                ) : (
+                    <motion.div 
+                        className="text-center py-20"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                    >
+                        <div className="inline-block p-6 rounded-full bg-white/5 backdrop-blur-md mb-6">
+                            <FaSearch className="h-12 w-12 text-gray-400" />
                         </div>
-                    ) : filteredAuctions.length > 0 ? (
-                        <motion.div 
-                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
-                            variants={containerVariants}
-                            initial="hidden"
-                            animate="show"
-                        >
-                            {filteredAuctions.map((auction, index) => (
-                                <motion.div
-                                    key={index}
-                                    className="hover:scale-105 transform transition-all duration-300 ease-in-out"
-                                    variants={itemVariants}
-                                >
-                                    <AuctionCard auction={auction} auctionCreator={auction.creator} isFavourited={favAuctionIDs?.includes(auction.auction_id)}/>
-                                </motion.div>
-                            ))}
-                        </motion.div>
-                    ) : (
-                        <motion.div 
-                            className="text-center py-20"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.5 }}
-                        >
-                            <div className="inline-block p-6 rounded-full bg-white/5 backdrop-blur-md mb-6">
-                                <FaSearch className="h-12 w-12 text-gray-400" />
-                            </div>
-                            <h3 className="text-2xl font-bold text-white mb-2">No auctions found</h3>
-                            <p className="text-gray-400">Try adjusting your search or filter criteria</p>
-                        </motion.div>
-                    )}
-                </div>
-            </section>
-        </>
+                        <h3 className="text-2xl font-bold text-white mb-2">No auctions found</h3>
+                        <p className="text-gray-400">Try adjusting your search or filter criteria</p>
+                    </motion.div>
+                )}
+            </div>
+        </section>
     );
 }
 
 export default LiveAuctionsPage;
-
-// Add custom styles for animations if not already defined elsewhere
-const styles = `
-  @keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
-    100% { transform: translateY(0px); }
-  }
-  
-  @keyframes float-delayed {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-15px); }
-    100% { transform: translateY(0px); }
-  }
-  
-  @keyframes pulse-slow {
-    0% { opacity: 0.5; }
-    50% { opacity: 0.7; }
-    100% { opacity: 0.5; }
-  }
-  
-  .animate-float {
-    animation: float 8s ease-in-out infinite;
-  }
-  
-  .animate-float-delayed {
-    animation: float-delayed 10s ease-in-out infinite;
-  }
-  
-  .animate-pulse-slow {
-    animation: pulse-slow 4s ease-in-out infinite;
-  }
-  
-  .bg-grid-pattern {
-    background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-                      linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-    background-size: 20px 20px;
-  }
-`;
-
-// Add styles to document
-if (typeof document !== 'undefined') {
-  const styleSheet = document.createElement("style");
-  styleSheet.textContent = styles;
-  document.head.appendChild(styleSheet);
-}
