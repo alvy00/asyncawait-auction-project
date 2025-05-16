@@ -155,42 +155,47 @@ export const Navbar = () => {
               </div>
             </div>
             
-            {/* Notification Icon */}
-            <Link
-              href=".."
-              className="text-white hidden md:block hover:text-gray-400 hover:bg-gray-800 hover:scale-110 transition-all p-2 rounded-full"
-            >
-              <Bell className="w-5 h-5" />
-            </Link>
+            {loggedIn && (
+              <>
+                  {/* Notification Icon */}
+                  <Link
+                    href=".."
+                    className="text-white hidden md:block hover:text-gray-400 hover:bg-gray-800 hover:scale-110 transition-all p-2 rounded-full"
+                  >
+                    <Bell className="w-5 h-5" />
+                  </Link>
 
-            {/* Messages Icon */}
-            <Link
-              href=".."
-              className="text-white hidden md:block hover:text-gray-400 hover:bg-gray-800 hover:scale-110 transition-all p-2 rounded-full"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
-              </svg>
-            </Link>
+                  {/* Messages Icon */}
+                  <Link
+                    href=".."
+                    className="text-white hidden md:block hover:text-gray-400 hover:bg-gray-800 hover:scale-110 transition-all p-2 rounded-full"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </Link>
 
-            {/* Favorites Icon */}
-            <Link
-              href="/favourites"
-              className="text-white hidden md:block hover:text-gray-400 hover:bg-gray-800 hover:scale-110 transition-all p-2 rounded-full"
-            >
-              <Heart className="w-5 h-5" />
-            </Link>
+                  {/* Favorites Icon */}
+                  <Link
+                    href="/favourites"
+                    className="text-white hidden md:block hover:text-gray-400 hover:bg-gray-800 hover:scale-110 transition-all p-2 rounded-full"
+                  >
+                    <Heart className="w-5 h-5" />
+                  </Link>
+              </>
+            )}
+
             
             {/* Login/Signup/Dashboard/Logout Buttons */}
             <div className="hidden md:flex items-center space-x-2">

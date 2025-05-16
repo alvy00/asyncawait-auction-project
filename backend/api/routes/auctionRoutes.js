@@ -121,6 +121,30 @@ auctionRouter.post('/aucdetails', async (req, res) => {
 });
 
 
+// GET /auctions/:id
+auctionRouter.get('/:id', async (req, res) => {
+  const auction_id = req.params.id;
+
+  try {
+    const { data, error } = await supabase
+      .from('auctions')
+      .select('*')
+      .eq('auction_id', auction_id)
+      .single();
+
+    if (error) {
+      console.error("Supabase error:", error.message);
+      return res.status(500).json({ message: "Error fetching auction details." });
+    }
+
+    return res.status(200).json(data);
+  } catch (err) {
+    console.error("Server error:", err);
+    return res.status(500).json({ message: "Unexpected server error." });
+  }
+});
+
+
 // Place Bid
 auctionRouter.post('/bid', async (req, res) => {
     try {
