@@ -1,6 +1,15 @@
 import Link from 'next/link';
 import Image from 'next/image';
 
+const footerLinks = [
+  { label: 'Home', href: '/' },
+  { label: 'About Us', href: '/about' },
+  { label: 'How it Works', href: '/how-it-works'},
+  { label: 'Contact', href: '/contact' },
+  { label: 'Terms of Service', href: '/terms' },
+  { label: 'Privacy Policy', href: '/privacy-policy' }
+]
+
 const Footer = () => {
   return (
     <footer className="bg-[#0a0a18] text-white py-12">
@@ -56,10 +65,10 @@ const Footer = () => {
           <div className="col-span-1">
             <h3 className="text-lg font-medium mb-4">Support</h3>
             <ul className="space-y-2">
-              {['Terms & Conditions', 'Privacy Policy', 'About us', 'Contact Us', 'FAQ', 'Support Center'].map((item) => (
-                <li key={item}>
-                  <Link href="/" className="text-gray-300 hover:text-white transition-colors text-sm">
-                    {item}
+              {footerLinks.map((item) => (
+                <li key={item.label}>
+                  <Link href={item.href} className="text-gray-300 hover:text-white transition-colors text-sm">
+                    {item.label}
                   </Link>
                 </li>
               ))}

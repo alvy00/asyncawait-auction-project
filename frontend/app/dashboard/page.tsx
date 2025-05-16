@@ -1,20 +1,24 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
-import { FaEdit } from 'react-icons/fa';
 import Link from 'next/link';
 import { User } from '../../lib/interfaces';
 import { useRouter } from 'next/navigation';
-import { Navbar } from '../components/Navbar';
-import BidHistoryCard from '../components/BidHistoryCard';
+import { FaChartPie, FaExternalLinkAlt, FaFileInvoiceDollar } from 'react-icons/fa';
+import { motion } from 'framer-motion';
+
+// Component imports
+import WinRatioChart from './_components/WinRatioChart';
+import StatCard from './_components/StatCard';
+import ActionButton from './_components/ActionButton';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const Dashboard = () => {
-  const [user, setUser] = useState<User>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const [bidsHistory, setBidHistory] = useState<any[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const bidsPerPage = 20;
-
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
   const router = useRouter();
 
   useEffect(() => {
@@ -27,173 +31,172 @@ const Dashboard = () => {
 
     const fetchCurrentUserData = async () => {
       try {
+        setLoading(true);
         const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getUser', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        if (!res.ok || !res.body) {
-          console.error("Failed to fetch user or empty response");
-          return;
-        }
-
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-          console.error("Expected JSON, got:", contentType);
-          return;
+        if (!res.ok) {
+          throw new Error(`Failed to fetch user: ${res.status}`);
         }
 
         const userData = await res.json();
 
         if (userData?.message) {
-          console.error("API returned error:", userData.message);
-          return;
+          throw new Error(userData.message);
         }
 
         setUser(userData);
         setUserId(userData.user_id);
       } catch (e) {
         console.error("Error fetching user:", e);
+        setError(e instanceof Error ? e.message : 'An unknown error occurred');
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchCurrentUserData();
-  }, []);
+  }, [router]);
 
-  useEffect(() => {
-    if (userId) {
-      const fetchCurrentUserBidHistory = async () => {
-        try {
-          const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
-          // https://asyncawait-auction-project.onrender.com/api/auctions/bidhistory
-          // http://localhost:8000/api/auctions/bidhistory
-          const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/bidhistory', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ user_id: userId }),
-          });
-
-          const r = await res.json();
-          setBidHistory(r);
-        } catch (e) {
-          console.error('Error fetching bid history:', e);
-        }
-      };
-
-      fetchCurrentUserBidHistory();
-    }
-  }, [userId]);
-
-
-  if (!user) {
+  if (error || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-        <p className="text-gray-700 dark:text-gray-300">Loading user...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#021f49] to-[#010915]">
+        <div className="bg-[#040c16]/50 p-8 rounded-lg shadow-lg text-white max-w-md w-full">
+          <h2 className="text-2xl font-bold mb-4">Error Loading Dashboard</h2>
+          <p className="text-red-400">{error || 'Failed to load user data'}</p>
+          <button 
+            onClick={() => router.push('/login')} 
+            className="mt-6 bg-[#7b62fb] hover:bg-[#6a52e5] text-white py-2 px-4 rounded-md transition-colors"
+          >
+            Return to Login
+          </button>
+        </div>
       </div>
     );
   }
 
-  const winRatio = user.total_bids > 0 ? ((user.bids_won / user.total_bids) * 100).toFixed(2) : "0.00";
-
-  const indexOfLastBid = currentPage * bidsPerPage;
-  const indexOfFirstBid = indexOfLastBid - bidsPerPage;
-  const currentBids = bidsHistory.slice(indexOfFirstBid, indexOfLastBid);
-  const totalPages = Math.ceil(bidsHistory.length / bidsPerPage);
+  const winRatio = user.total_bids > 0 ? Math.round((user.bids_won / user.total_bids) * 100) : 0;
 
   return (
-    <>
-      <Navbar />
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-10 px-6">
-        <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 shadow-xl rounded-2xl overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-[#021f49] to-[#010915] text-white p-6 rounded-xl">
+      {/* Welcome Header */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-8"
+      >
+        <h1 className="text-3xl font-bold">Welcome to <span className="text-[#ef863f]">Dashboard!</span></h1>
+        <h2 className="text-4xl font-bold mt-2">{user.name}</h2>
+      </motion.div>
 
-          {/* Header Section */}
-          <div className="flex items-center justify-center p-8 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
-            <div className="text-center text-white">
-              <h2 className="text-3xl font-extrabold">{user.name}</h2>
-              <p className="mt-2 text-sm">{user.email}</p>
-            </div>
+      {/* Action Buttons */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="mb-8 flex flex-wrap gap-3"
+      >
+        <ActionButton 
+          href="/auctions/details"
+          icon={<FaFileInvoiceDollar />}
+          label="View Auctions Details"
+        />
+        <ActionButton 
+          href="/bid/details"
+          icon={<FaExternalLinkAlt />}
+          label="View Bid Details"
+        />
+        <ActionButton 
+          href="/payment/details"
+          icon={<FaChartPie />}
+          label="View Payment Details"
+        />
+      </motion.div>
+
+      {/* Main Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left Column - Win Ratio Chart */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="lg:col-span-5 flex justify-center items-center"
+        >
+          <WinRatioChart 
+            winRatio={winRatio} 
+            bidsWon={user.bids_won} 
+            bidsLost={user.total_bids - user.bids_won} 
+            totalBids={user.total_bids} 
+          />
+        </motion.div>
+
+        {/* Right Column - Stats Cards */}
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="lg:col-span-7"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <StatCard 
+              title="Balance" 
+              value={`$${user.money.toLocaleString()}`} 
+              icon={<FaFileInvoiceDollar className="text-green-400" />} 
+            />
+            
+            <StatCard 
+              title="Auctions Created" 
+              value="03" 
+              icon={<FaExternalLinkAlt className="text-blue-400" />} 
+            />
+            
+            <StatCard 
+              title="Total Bids" 
+              value={user.total_bids.toString()} 
+              icon={<FaChartPie className="text-purple-400" />} 
+            />
+            
+            <StatCard 
+              title="Bids Won" 
+              value={user.bids_won.toString()} 
+              icon={<FaChartPie className="text-yellow-400" />} 
+            />
+            
+            <StatCard 
+              title="Win Ratio" 
+              value={`${winRatio.toFixed(2)}%`} 
+              icon={<FaChartPie className="text-orange-400" />} 
+              className="md:col-span-2"
+            />
           </div>
-
-          {/* Stats Section */}
-          <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-            <h3 className="text-2xl font-semibold text-gray-800 dark:text-white mb-4">User Stats</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow-sm">
-                <h4 className="text-xl font-semibold text-gray-900 dark:text-white">Balance</h4>
-                <p className="text-lg font-bold text-gray-700 dark:text-gray-300">${user.money}</p>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow-sm">
-                <h4 className="text-xl font-semibold text-gray-900 dark:text-white">Total Bids</h4>
-                <p className="text-lg font-bold text-gray-700 dark:text-gray-300">{user.total_bids}</p>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow-sm">
-                <h4 className="text-xl font-semibold text-gray-900 dark:text-white">Bids Won</h4>
-                <p className="text-lg font-bold text-gray-700 dark:text-gray-300">{user.bids_won}</p>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow-sm">
-                <h4 className="text-xl font-semibold text-gray-900 dark:text-white">Win Ratio</h4>
-                <p className="text-lg font-bold text-gray-700 dark:text-gray-300">{winRatio}%</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Button: New Auction */}
-          <div className="border-t border-gray-200 dark:border-gray-700 px-6 py-4 text-right">
-            <Link href="/auctions/create">
-              <button className="flex items-center bg-green-500 hover:bg-green-600 text-white text-sm font-medium px-6 py-3 rounded-full transform transition-all duration-200 ease-in-out hover:scale-105">
-                <FaEdit className="h-5 w-5 mr-2" />
-                Create New Auction
-              </button>
-            </Link>
-          </div>
-        </div>
-
-        {/* User Bid History */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-md p-6 space-y-4 mt-5 transition-colors duration-300 max-w-4xl mx-auto overflow-hidden">
-          <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
-            Your Bid History
-          </h2>
-
-          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
-            {currentBids.length > 0 ? (
-              currentBids.map((bid, index) => (
-                <BidHistoryCard key={index} item_name={bid.item_name} bid={bid.bid_amount} />
-              ))
-            ) : (
-              <p className="text-gray-700 dark:text-gray-300">No bids placed yet.</p>
-            )}
-          </div>
-
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <div className="flex justify-center items-center space-x-4 pt-6">
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-white rounded disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <span className="text-gray-700 dark:text-gray-300 text-sm">
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-white rounded disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-          )}
-        </div>
+        </motion.div>
       </div>
-    </>
+
+      {/* Create New Auction Button */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+        className="mt-12 flex justify-center"
+      >
+        <Link href="/auctions/create">
+          <button className="bg-green-500 hover:bg-green-600 text-white font-medium px-6 py-3 rounded-full flex items-center gap-2 transform transition-all duration-200 hover:scale-105 shadow-lg">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Create New Auction
+          </button>
+        </Link>
+      </motion.div>
+    </div>
   );
 };
 
