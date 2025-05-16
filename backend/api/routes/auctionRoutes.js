@@ -298,4 +298,5 @@ auctionRouter.post('/favauctions', async (req, res) => {
   }
 });
 
+
 export default auctionRouter;

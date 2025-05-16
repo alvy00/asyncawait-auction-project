@@ -186,7 +186,7 @@ export const Navbar = () => {
 
             {/* Favorites Icon */}
             <Link
-              href=".."
+              href="/favourites"
               className="text-white hidden md:block hover:text-gray-400 hover:bg-gray-800 hover:scale-110 transition-all p-2 rounded-full"
             >
               <Heart className="w-5 h-5" />
