@@ -39,7 +39,7 @@ export default function RootLayout({
         <UserProvider>
         <AuthProvider>
           <Toaster position='top-center'/>
-          <main className="pt-16">
+          <main className="">
             {children}
           </main>
         </AuthProvider>
