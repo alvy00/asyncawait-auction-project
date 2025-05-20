@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -5,6 +6,7 @@ import AuctionCard from "../../../components/AuctionCard";
 import { Auction } from "../../../../lib/interfaces";
 import { FaSpinner, FaSearch, FaFilter, FaSortAmountDown, FaCalendarAlt } from "react-icons/fa";
 import { motion } from "framer-motion";
+import UpcomingAuctionCard from "../../../components/UpcomingAuctionCard";
 
 const UpcomingAuctionsPage = () => {
     const [auctions, setAuctions] = useState<Auction[]>([]);
@@ -36,8 +38,12 @@ const UpcomingAuctionsPage = () => {
             return;
         }
 
+        const now = new Date();
         const data = await res.json();
-        const upcomingAuctions = data.filter((auction) => auction.status === "upcoming");
+        const upcomingAuctions = data.filter(auction => {
+            const startTime = new Date(auction.start_time);
+            return now < startTime;
+        });
         setAuctions(upcomingAuctions);
         } catch (e) {
         console.error("Error fetching upcoming auctions", e);
@@ -219,10 +225,11 @@ const UpcomingAuctionsPage = () => {
                                         variants={itemVariants}
                                         className="hover:scale-105 transform transition-all duration-300 ease-in-out"
                                     >
-                                        <AuctionCard 
+                                        {/* <AuctionCard 
                                             auction={auction} 
                                             auctionCreator={auctionCreator} 
-                                        />
+                                        /> */}
+                                        <UpcomingAuctionCard auction={auction} auctionCreator={auctionCreator} />
                                     </motion.div>
                                 );
                             })}

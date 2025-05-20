@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -5,6 +6,7 @@ import AuctionCard from "../../../components/AuctionCard";
 import { Auction } from "../../../../lib/interfaces";
 import { FaSpinner, FaSearch, FaHistory, FaSortAmountDown } from "react-icons/fa";
 import { motion } from "framer-motion";
+import PastAuctionCard from "../../../components/PastAuctionCard";
 
 const PastAuctionsPage = () => {
     const [auctions, setAuctions] = useState<Auction[]>([]);
@@ -229,7 +231,7 @@ const PastAuctionsPage = () => {
                                 className="hover:scale-105 transform transition-all duration-300 ease-in-out"
                                 variants={itemVariants}
                             >
-                                <AuctionCard auction={auction} auctionCreator={auction.creator} isFavourited={false}/>
+                                <PastAuctionCard auction={auction} auctionCreator={auction.creator} />
                             </motion.div>
                         ))}
                     </motion.div>
