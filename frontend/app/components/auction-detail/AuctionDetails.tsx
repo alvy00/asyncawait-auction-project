@@ -13,14 +13,12 @@ interface AuctionDetailsProps {
   currentBid: number;
   startingBid: number;
   condition: string;
-  categories: string[];
+  categories: string;
   endTime: {
     days: number;
     hours: number;
     minutes: number;
     seconds: number;
-    fullDate: string;
-    timeZone: string;
   };
 }
 
@@ -67,7 +65,7 @@ const AuctionDetails = ({
         </div>
         <div>
           <div className="text-sm text-gray-400">Categories:</div>
-          <div className="font-medium">{categories.join(", ")}</div>
+          <div className="font-medium">{categories}</div>
         </div>
       </div>
 
@@ -93,17 +91,17 @@ const AuctionDetails = ({
         </div>
       </div>
 
-      <div className="mb-4">
+      {/* <div className="mb-4">
         <div className="text-sm">Auction ends: {endTime.fullDate}</div>
         <div className="text-sm">Time Zone: {endTime.timeZone}</div>
-      </div>
+      </div> */}
 
-      <div className="flex gap-4 mt-4">
-        <button className="flex items-center gap-1 text-sm">
+      <div className="flex gap-4 mt-4 mb-4">
+        <button className="flex items-center gap-1 text-sm cursor-pointer">
           <HelpCircle className="h-4 w-4" />
           Ask Question
         </button>
-        <button className="flex items-center gap-1 text-sm">
+        <button className="flex items-center gap-1 text-sm cursor-pointer">
           <Heart className="h-4 w-4" />
           Add to Watch list
         </button>
