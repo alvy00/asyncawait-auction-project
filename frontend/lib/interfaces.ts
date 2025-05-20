@@ -27,11 +27,7 @@ export interface Auction {
 }
 
 export interface PastAuctionCardProps{
-  item_name: string;
-  winner: string;
-  sold_price: number;
-  image: string;
-  ended_on: string;
+  auction: Auction;
 };
 
 export interface UpcomingAuctionCardProps{

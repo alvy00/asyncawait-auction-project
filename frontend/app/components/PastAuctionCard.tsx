@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { PastAuctionCardProps } from '../../lib/interfaces';
 
 const PastAuctionCard: React.FC<PastAuctionCardProps> = ({ auction }) => {
-  const firstImage = (auction.image && auction.image.length > 0) ? auction.image[0] : "/fallback.jpg";
+  const firstImage = (auction.images && auction.images.length > 0) ? auction.images[0] : "/fallback.jpg";
   const [winner, setWinner] = useState(null);
 
   // get highest bidder
@@ -57,10 +57,19 @@ const PastAuctionCard: React.FC<PastAuctionCardProps> = ({ auction }) => {
           Ended on: {auction.end_time ? new Date(auction.end_time).toLocaleDateString() : "Unknown date"}
         </p>
         <p className="text-sm text-gray-400">
-          Winner: <span className="font-semibold text-green-400">{winner || 'No one bidded :('}</span>
+          Winner: {winner? (
+            <span className="font-semibold text-green-400">{winner}</span>
+          ) : (
+            <span className="font-semibold text-red-400">No one bidded :(</span>
+          ) }
         </p>
         <p className="text-sm text-gray-300 mt-1">
-          Final Price: <span className="font-semibold text-orange-400">${auction.highest_bid != null ? Number(auction.highest_bid).toLocaleString() : "N/A"}</span>
+          Final Price:{" "}
+            <span className="font-semibold text-orange-400">
+              {auction.highest_bid != null && Number(auction.highest_bid) !== 0
+                ? `$${Number(auction.highest_bid).toLocaleString()}`
+                : "N/A"}
+            </span>
         </p>
       </div>
     </div>
