@@ -9,13 +9,19 @@ import { Input } from '../../components/ui/input';
 import { Search, Menu, X, Bell, Heart, ChevronDown, Home } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../lib/auth-context';
+import { useUser } from '../../lib/user-context';
 import toast from 'react-hot-toast';
 import { Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FaCrown, FaShieldAlt, FaSignInAlt, FaTachometerAlt } from 'react-icons/fa';
+import { HiOutlineLogin } from 'react-icons/hi'
+import { FiArrowRight, FiLogIn, FiSettings, FiUserCheck } from 'react-icons/fi';
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const { loggedIn, logout } = useAuth();  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const { loggedIn, logout } = useAuth();  
+  const { user } = useUser();
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -70,7 +76,7 @@ export const Navbar = () => {
   ];
 
   useEffect(() => {
-    
+    console.log(user);
   }, [])
 
   const handleLogOut = () => {
@@ -200,25 +206,74 @@ export const Navbar = () => {
             {/* Login/Signup/Dashboard/Logout Buttons */}
             <div className="hidden md:flex items-center space-x-2">
               {loggedIn ? (
-                <>
-                  <Button variant="ghost" className="text-white hover:text-orange-400 h-9 px-3 text-sm cursor-pointer" asChild>
-                    <Link href="/dashboard">Dashboard</Link>
-                  </Button>
-                  <Button
-                    className="bg-red-500 hover:bg-red-600 text-white h-9 px-4 text-sm cursor-pointer"
-                    onClick={handleLogOut}
-                  >
-                    Logout
-                  </Button>
+                <>{user.is_admin? (
+                    <Button
+                      variant="ghost"
+                      className="text-orange-400 hover:text-white hover:bg-orange-600/10 h-9 px-4 text-sm font-semibold tracking-wide transition-colors duration-200 rounded-lg backdrop-blur-md border border-orange-400/20 shadow-orange-500/10 shadow-sm"
+                      asChild
+                    >
+                      <Link href="/admin" className="flex items-center gap-2">
+                        <FaShieldAlt className="text-orange-300" />
+                        Admin Dashboard
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      className="flex items-center gap-2 px-4 h-9 text-sm font-semibold rounded-md
+                                bg-black/70 border border-cyan-500 text-cyan-400
+                                shadow-[0_0_8px_rgb(6_182_212_/_0.5)]
+                                hover:bg-cyan-600/20 hover:text-cyan-300 hover:shadow-[0_0_14px_rgb(6_182_212_/_0.8)]
+                                transition duration-300 cursor-pointer select-none"
+                      asChild
+                    >
+                      <Link href="/dashboard" className="flex items-center gap-2">
+                        <FiSettings className="w-4 h-4" />
+                        Dashboard
+                      </Link>
+                    </Button>
+                  )}
+
+                    <Button
+                      onClick={handleLogOut}
+                      className="
+                        bg-transparent
+                        border border-red-600
+                        text-red-600
+                        hover:bg-red-600 hover:text-white
+                        font-semibold
+                        px-5 h-9 text-sm rounded-md
+                        shadow-md
+                        transition-colors duration-300
+                        cursor-pointer
+                      "
+                    >
+                      Logout
+                    </Button>
                 </>
               ) : (
                 <>
-                  <Button variant="ghost" className="text-white hover:text-orange-400 h-9 px-3 text-sm" asChild>
-                    <Link href="/login">Login</Link>
+
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-2 text-orange-400 border border-orange-400 hover:bg-gray-800 hover:text-orange-300 h-9 px-5 text-sm font-semibold rounded-md transition-colors duration-300"
+                    asChild
+                  >
+                    <Link href="/login" className="flex items-center">
+                      <FiUserCheck className="w-5 h-5" />
+                      Sign In
+                    </Link>
                   </Button>
-                  <Button className="bg-orange-500 hover:bg-orange-600 text-white h-9 px-4 text-sm" asChild>
-                    <Link href="/signup">Sign up</Link>
+
+                  <Button
+                    className="bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white font-semibold h-9 px-5 text-sm rounded-md flex items-center gap-2 shadow-md shadow-orange-500/40 transition-colors duration-300"
+                    asChild
+                  >
+                    <Link href="/signup" className="flex items-center">
+                      Get Started <FiArrowRight className="w-4 h-4" />
+                    </Link>
                   </Button>
+
                 </>
               )}
             </div>
@@ -329,7 +384,11 @@ export const Navbar = () => {
               
               {/* Mobile Login/Signup */}
               <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" className="border-[#1e3a52] text-white hover:bg-[#1e3a52] w-full" asChild>
+                <Button
+                  variant="outline"
+                  className="border-red text-red hover:bg-white/20 hover:text-white w-full transition-colors duration-200"
+                  asChild
+                >
                   <Link href="/login" onClick={() => setMobileMenuOpen(false)}>Login</Link>
                 </Button>
                 
