@@ -29,6 +29,7 @@ const UsersPage = () => {
   const { user } = useUser();
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
@@ -71,23 +72,28 @@ const UsersPage = () => {
     }, 1000);
     return () => clearTimeout(timer);
   }, []);
-
+  
   // Filter users based on search term and filters
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = 
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.id.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === "all" || user.status === statusFilter;
-    const matchesRole = roleFilter === "all" || user.role === roleFilter;
-    const matchesVerification = 
-      verificationFilter === "all" || 
-      (verificationFilter === "verified" && user.verified) || 
-      (verificationFilter === "unverified" && !user.verified);
-    
-    return matchesSearch && matchesStatus && matchesRole && matchesVerification;
-  });
+  useEffect(() => {
+    const filteredUsers = users.filter(user => {
+      const matchesSearch = 
+        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.user_id.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesStatus = statusFilter === "all" || user.status === statusFilter;
+      const matchesRole = roleFilter === "all" || user.role === roleFilter;
+      const matchesVerification = 
+        verificationFilter === "all" || 
+        (verificationFilter === "verified" && user.verified) || 
+        (verificationFilter === "unverified" && !user.verified);
+      
+      return matchesSearch && matchesStatus && matchesRole && matchesVerification;
+    });
+
+    setFilteredUsers(filteredUsers);
+  }, [users, searchTerm, statusFilter, roleFilter, verificationFilter])
+
 
   const handleStatusChange = (id: string, newStatus: string) => {
     const updatedUsers = users.map(user => 
@@ -98,14 +104,17 @@ const UsersPage = () => {
   };
 
   // delete user
-  const handleDeleteUser = async () => {
+  const handleDeleteUser = async (user_id) => {
+    const confirmed = window.confirm("Are you sure you want to delete this user?");
+    if (!confirmed) return;
+    
     try {
       const res = await fetch('https://asyncawait-auction-project.onrender.com/api/admin/deleteuser', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ user_id: user.user_id }),
+        body: JSON.stringify({ user_id }),
       });
 
       if (!res.ok) {
@@ -113,6 +122,9 @@ const UsersPage = () => {
         toast.error(`Failed to delete user: ${errorData.message || 'Unknown error'}`);
         return;
       }
+
+      setUsers(prev => prev.filter(user => user.user_id !== user_id));
+      setFilteredUsers(prev => prev.filter(user => user.user_id !== user_id));
 
       toast.success('User deleted successfully');
     } catch (e) {
@@ -475,7 +487,7 @@ const UsersPage = () => {
                           whileTap={{ scale: 0.9 }}
                           className="bg-red-500/10 hover:bg-red-500/20 text-red-400 p-2 rounded-lg transition-colors duration-200"
                           title="Delete User"
-                          onClick={() => handleDeleteUser(user.id)}
+                          onClick={() => handleDeleteUser(user.user_id)}
                         >
                           <FaTrash size={14} />
                         </motion.button>
