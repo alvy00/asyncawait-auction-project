@@ -35,6 +35,7 @@ adminRouter.get('/stats', async (req, res) => {
     }
 })
 
+// -------------------------------------- USERS -------------------------------------------------
 
 // Get All Users
 adminRouter.get('/users', async (req, res) => {
@@ -51,8 +52,6 @@ adminRouter.get('/users', async (req, res) => {
     return res.status(500).json({ message: "Server error", error: e });
   }
 });
-
-
 // Get User by ID
 adminRouter.get('/users/:id', async (req, res) => {
     try{
@@ -66,10 +65,32 @@ adminRouter.get('/users/:id', async (req, res) => {
       return res.status(500).json({ message: "Internal server error" });
     }
 })
-
 // Update User
 
+// Delete User
+adminRouter.delete('/deleteuser', async (req, res) => {
+  try {
+    const { user_id } = req.body;
+    
+    const { data, error } = await supabase
+      .from('users')
+      .delete()
+      .eq('user_id', user_id);
+    
+    if (error) {
+      return res.status(400).json({ message: "Error deleting user", error });
+    }
 
+    return res.status(200).json({ message: "User deleted!" });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+
+// -------------------------------------- AUCTIONS -------------------------------------------------
 // Get All Auctions
 adminRouter.get('/auctions', async (req, res) => {
     try{
@@ -83,8 +104,6 @@ adminRouter.get('/auctions', async (req, res) => {
       return res.status(500).json({ message: "Internal server error" });
     }
 })
-
-
 // Get Auction by ID
 adminRouter.get('/auctions/:id', async (req, res) => {
   try{
@@ -99,11 +118,10 @@ adminRouter.get('/auctions/:id', async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 })
-
-
 // Delete Auction
 
 
+// -------------------------------------- BIDS -------------------------------------------------
 // Get All Bids
 adminRouter.get('/bids', async (req, res) => {
   try{
@@ -117,8 +135,6 @@ adminRouter.get('/bids', async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 })
-
-
 // Get Bid by ID
 adminRouter.get('/bids/:id', async (req, res) => {
   try{
