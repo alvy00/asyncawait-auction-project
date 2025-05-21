@@ -70,6 +70,9 @@ export default function LoginPage() {
 
       toast.success('Login successful!');
       router.push('/');
+      router.prefetch('/auctions/all');
+      router.prefetch('/auctions/upcoming');
+      router.prefetch('/auctions/past');
     } catch (error) {
       if (error instanceof Error) {
         toast.error('Something went wrong. Please try again.');

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -75,7 +76,6 @@ const MyAuctionsPage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    // Simulate loading
     const timer = setTimeout(() => {
       setLoading(false);
     }, 1000);
@@ -126,7 +126,7 @@ const MyAuctionsPage = () => {
         </div>
         <Button 
           onClick={() => router.push("/auctions/create")} 
-          className="mt-4 md:mt-0 bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white font-medium px-6 py-2.5 rounded-md flex items-center gap-2 shadow-lg transition-all duration-300"
+          className="mt-4 md:mt-0 bg-gradient-to-r from-orange-500 to-pink-600 cursor-pointer hover:from-orange-600 hover:to-pink-700 text-white font-medium px-6 py-2.5 rounded-md flex items-center gap-2 shadow-lg transition-all duration-300"
         >
           Create New Auction
         </Button>
@@ -186,7 +186,7 @@ const MyAuctionsPage = () => {
 
         {auctions.length === 0 ? (
           <div className="bg-white/5 backdrop-blur-md rounded-xl p-8 text-center border border-white/10">
-            <p className="text-gray-400 mb-4">You haven't created any auctions yet.</p>
+            <p className="text-gray-400 mb-4">You haven&apos;t created any auctions yet.</p>
             <Button 
               onClick={() => router.push("/auctions/create")} 
               className="bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white"
