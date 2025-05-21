@@ -80,7 +80,7 @@ adminRouter.delete('/deleteuser', async (req, res) => {
     if (error) {
       return res.status(400).json({ message: "Error deleting user", error });
     }
-
+    //console.log('Deleting user_id:', req.body.user_id);
     return res.status(200).json({ message: "User deleted!" });
   } catch (e) {
     console.error(e);
