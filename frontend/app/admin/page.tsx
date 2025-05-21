@@ -11,6 +11,7 @@ import UsersChart from "./_components/UsersChart";
 import AuctionsOverview from "./_components/AuctionsOverview";
 import BidsOverview from "./_components/BidsOverview";
 import RecentActivities from "./_components/RecentActivities";
+import { useUser } from "../../lib/user-context";
 
 // Sample data (replace with API calls in production)
 const SAMPLE_USER_STATS = {
@@ -76,6 +77,7 @@ const SAMPLE_ACTIVITIES = [
 ];
 
 const AdminDashboard = () => {
+  const { user } = useUser();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(SAMPLE_USER_STATS);
   const [chartData, setChartData] = useState(SAMPLE_CHART_DATA);
@@ -119,7 +121,7 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#021f49] to-[#010915] text-white p-4 md:p-6 rounded-xl">
       {/* Admin Header */}
-      <AdminHeader username="Shahriar" />
+      <AdminHeader username={user.name} />
       
       {/* Users Overview Section */}
       <StatsOverview stats={stats} />
