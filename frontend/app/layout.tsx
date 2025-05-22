@@ -6,6 +6,7 @@ import { AuthProvider } from "../lib/auth-context";
 import { AnimatedBackground } from "./components/AnimatedBackground";
 import { Analytics } from '@vercel/analytics/next';
 import { UserProvider } from "../lib/user-context";
+import head from "next/head";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -23,6 +24,10 @@ export const metadata: Metadata = {
   title: "AuctaSync - Premium Auction Platform",
   description: "Discover exclusive items and bid with confidence on our secure auction platform. Find art, collectibles, luxury goods and more.",
   keywords: "auction, bidding, collectibles, art auction, luxury auction, online bidding",
+  icons: {
+    icon: "/logo_favicon.svg",
+    apple: "/logo_favicon.svg",
+  },
 };
 
 export default function RootLayout({

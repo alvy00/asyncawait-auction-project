@@ -117,7 +117,7 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#021f49] to-[#010915] text-white p-4 md:p-6 rounded-xl">
+    <div className="min-h-screen text-white p-4 md:p-6 rounded-xl">
       {/* Admin Header */}
       <AdminHeader username="Shahriar" />
       
