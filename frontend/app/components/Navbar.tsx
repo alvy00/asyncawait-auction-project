@@ -162,7 +162,7 @@ export const Navbar = () => {
             </motion.div>
           </Link>
 
-          {/* Main Navigation - Desktop */}
+          {/* Main Navigation - For Desktop */}
           <nav className="hidden md:flex items-center space-x-8">
             {navItems.map((item, index) => (
               <motion.div 
