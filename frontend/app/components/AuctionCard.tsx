@@ -18,10 +18,9 @@ interface AuctionCardProps {
   auction: Auction;
   auctionCreator: string;
   isFavourited: boolean;
-  onToggleFavorite: () => void;
 }
 
-const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFavourited, onToggleFavorite })  => {
+const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFavourited })  => {
   const [winner, setWinner] = useState(null);
   const [isEnded, setIsEnded] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
@@ -36,6 +35,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
     if (now <= new Date(auction.end_time)) return "live";
     return "ended";
   });
+  const [favourited, setFavourited] = useState(isFavourited);
 
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : FALLBACK_IMAGE;
   const token = typeof window !== "undefined" ? localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken") : null;
@@ -158,18 +158,6 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
     setIsHovered(false);
   };
 
-  // handle fav click
-  const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    if (!user?.user_id) {
-      toast.error("Please log in to favorite auctions.");
-      return;
-    }
-
-    onToggleFavorite();
-  };
-
   // checks whether the auction has started or not
   useEffect(() => {
     const hasStarted = new Date(auction.start_time) <= new Date();
@@ -199,6 +187,36 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
   }, [auction.start_time, auction.end_time]);
 
   
+  // handle fav click
+  const handleFavoriteClick = async () => {
+    const url = favourited
+      ? 'https://asyncawait-auction-project.onrender.com/api/auctions/unfavourite'
+      : 'https://asyncawait-auction-project.onrender.com/api/auctions/favourite';
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user.user_id,
+          auction_id: auction.auction_id,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to update favorite status');
+      }
+
+      toast.success(favourited ? 'Removed from favorites' : 'Added to favorites');
+      setFavourited((prev) => !prev);
+    } catch (error) {
+      console.error('Favorite toggle error:', error);
+      toast.error(error.message || 'Something went wrong');
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -258,7 +276,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
             onClick={handleFavoriteClick}
             className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 backdrop-blur-md p-2 rounded-full z-10 transition-all duration-300 hover:scale-110 border border-white/20 shadow-lg"
           >
-            {isFavourited ? (
+            {favourited ? (
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
               </svg>

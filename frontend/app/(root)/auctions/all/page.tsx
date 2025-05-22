@@ -1,19 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AuctionCard from "../../../components/AuctionCard";
-import { Auction } from "../../../../lib/interfaces";
+import { Auction, User } from "../../../../lib/interfaces";
 import { FaSpinner, FaSearch } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useUser } from "../../../../lib/user-context";
 import toast from "react-hot-toast";
 
 const LiveAuctionsPage = () => {
-  const { user } = useUser();
+  const [user, setUser] = useState<User>();
   const [auctions, setAuctions] = useState<Auction[]>([]);
+  const [filteredAuctions, setFilteredAuctions] = useState<Auction[]>([]);
   const [favAuctionIDs, setFavAuctionIDs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFavsLoading, setIsFavsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
 
@@ -27,10 +29,39 @@ const LiveAuctionsPage = () => {
     "fashion",
   ];
 
-  // State to track favorite status by auction ID
-  // Using a map for quick lookup: { [auctionId]: true/false }
-  const [favoritesMap, setFavoritesMap] = useState<Record<string, boolean>>({});
+  // fetch user
+  useEffect(() => {
+    const getUser = async () => {
+      const token = localStorage.getItem('sessionToken') || sessionStorage.getItem('sessionToken');
+      if (!token) {
+        console.warn('No token found');
+        return;
+      }
 
+      try {
+        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getuser', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          console.error('Failed to fetch user:', err.message);
+          return;
+        }
+
+        const data = await res.json();
+        setUser(data);
+      } catch (e) {
+        console.error('Error fetching user:', e);
+      }
+    };
+    getUser();
+  }, []);
+  
   // Fetch all auctions on mount
   useEffect(() => {
     const fetchAllAuctions = async () => {
@@ -55,12 +86,6 @@ const LiveAuctionsPage = () => {
         const data = await res.json();
         setAuctions(data);
 
-        // Initialize favorites map with false for all auctions
-        const initialFavs: Record<string, boolean> = {};
-        data.forEach((auction: Auction) => {
-          initialFavs[auction.auction_id] = false;
-        });
-        setFavoritesMap(initialFavs);
       } catch (e) {
         console.error(e);
       } finally {
@@ -73,6 +98,7 @@ const LiveAuctionsPage = () => {
 
   // Fetch user's favorite auction IDs when user is available
   useEffect(() => {
+
     if (!user?.user_id) return;
 
     const fetchFavAuctionIDs = async () => {
@@ -95,93 +121,51 @@ const LiveAuctionsPage = () => {
         }
 
         const data = await res.json();
-        const favs: string[] = data.favourites || [];
-        setFavAuctionIDs(favs);
-
-        // Update favoritesMap: mark auctions in favs as true
-        setFavoritesMap((prev) => {
-            const updated: Record<string, boolean> = { ...prev };
-            Object.keys(updated).forEach((id) => {
-                updated[id] = favs.includes(id);
-            });
-            return updated;
-        });
+        console.log(user.user_id)
+        console.log(data)
+        setFavAuctionIDs(data);
+        
       } catch (e) {
         console.error(e);
+      } finally {
+        setIsFavsLoading(false);
       }
     };
 
     fetchFavAuctionIDs();
   }, [user?.user_id]);
 
-  // Handler to toggle favorite for an auction
-  const toggleFavorite = async (auctionId: string) => {
-    if (!user?.user_id) {
-      toast.error("Please log in to favorite auctions.");
-      return;
-    }
-
-    const currentlyFavorited = favoritesMap[auctionId];
-    const endpoint = currentlyFavorited ? "unfavourite" : "favourite";
-
-    try {
-      const res = await fetch(
-        `https://asyncawait-auction-project.onrender.com/api/auctions/${endpoint}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-type": "application/json",
-          },
-          body: JSON.stringify({ auction_id: auctionId, user_id: user.user_id }),
-        }
-      );
-
-      if (!res.ok) throw new Error(`Failed to ${endpoint}`);
-
-      // Optimistically update UI
-      setFavoritesMap((prev) => ({
-        ...prev,
-        [auctionId]: !currentlyFavorited,
-      }));
-
-      toast.success(
-        `Auction ${
-          currentlyFavorited ? "removed from" : "added to"
-        } favorites!`
-      );
-    } catch (e) {
-      console.error(e);
-      toast.error("Could not update favorites.");
-    }
-  };
 
   // Filter auctions based on search term and active filter
-  const filteredAuctions = auctions.filter((auction) => {
-    const matchesSearch = auction.item_name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesFilter =
-      activeFilter === "all" ||
-      auction.category?.toLowerCase() === activeFilter.toLowerCase();
-    return matchesSearch && matchesFilter;
-  });
+  useEffect(() => {
+    const filtered = auctions.filter((auction) => {
+      const matchesSearch = auction.item_name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const matchesFilter =
+        activeFilter === "all" ||
+        auction.category?.toLowerCase() === activeFilter.toLowerCase();
+      return matchesSearch && matchesFilter;
+    });
 
-  // Animation variants for staggered children
+    // console.log("Filtered auctions:", filtered);
+    setFilteredAuctions(filtered);
+  }, [auctions, searchTerm, activeFilter]);
+  
+
   const containerVariants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
       transition: {
         staggerChildren: 0.1,
+        delayChildren: 0.2,
+        when: "beforeChildren",
       },
     },
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 },
-  };
-
+  const isAnyLoading = isLoading || isFavsLoading;
   return (
     <section className="py-16 min-h-screen relative overflow-hidden">
       {/* Animated background elements */}
@@ -271,63 +255,67 @@ const LiveAuctionsPage = () => {
 
 
         {/* Auctions grid with staggered animation */}
-        {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-20">
-                <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
-                className="text-orange-500 mb-4"
-                >
-                <FaSpinner className="animate-spin h-12 w-12" />
-                </motion.div>
-                <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="text-gray-300 text-lg"
-                >
-                Discovering exceptional auctions...
-                </motion.p>
-            </div>
-            ) : filteredAuctions.length > 0 ? (
-            <motion.div
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
-                variants={containerVariants}
-                initial="hidden"
-                animate="show"
-            >
-                {filteredAuctions.map((auction) => (
-                <motion.div
+        {isAnyLoading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+              <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+              className="text-orange-500 mb-4"
+              >
+              <FaSpinner className="animate-spin h-12 w-12" />
+              </motion.div>
+              <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-gray-300 text-lg"
+              >
+              Discovering exceptional auctions...
+              </motion.p>
+          </div>
+          ) : filteredAuctions.length > 0 ? (
+          <motion.div
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+              variants={containerVariants}
+              initial="hidden"
+              animate="show"
+          >
+              {filteredAuctions.map((auction, index) => {
+                console.log(`Favourited: ${favAuctionIDs.includes(auction.auction_id)}`);
+                console.log(favAuctionIDs);
+                return (
+                  <motion.div
                     key={auction.auction_id}
                     className="hover:scale-105 transform transition-all duration-300 ease-in-out"
-                    variants={itemVariants}
-                >
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.25 }}
+                  >
                     <AuctionCard
-                        key={auction.auction_id}
-                        auction={auction}
-                        auctionCreator={auction.creator}
-                        isFavourited={favoritesMap[auction.auction_id] || false}
-                        onToggleFavorite={() => toggleFavorite(auction.auction_id)}
+                      auction={auction}
+                      auctionCreator={auction.creator}
+                      isFavourited={favAuctionIDs.includes(auction.auction_id)}
                     />
-                </motion.div>
-                ))}
-            </motion.div>
-            ) : (
-            <motion.div
-                className="text-center py-20"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-            >
-                <div className="inline-block p-6 rounded-full bg-white/5 backdrop-blur-md mb-6">
-                <FaSearch className="h-12 w-12 text-gray-400" />
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-2">No auctions found</h3>
-                <p className="text-gray-400">Try adjusting your search or filter criteria</p>
-            </motion.div>
-            )}
-            </div>
+                  </motion.div>
+                );
+              })}
+          </motion.div>
+          ) : (
+          <motion.div
+              className="text-center py-20"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+          >
+              <div className="inline-block p-6 rounded-full bg-white/5 backdrop-blur-md mb-6">
+              <FaSearch className="h-12 w-12 text-gray-400" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2">No auctions found</h3>
+              <p className="text-gray-400">Try adjusting your search or filter criteria</p>
+          </motion.div>
+          )}
+          </div>
     </section>
     );
 }
