@@ -18,39 +18,40 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [user, setUser] = useState<any | null>(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    } else {
-      const token = localStorage.getItem('sessionToken') || sessionStorage.getItem('sessionToken');
-      if (token) {
-        const fetchUser = async () => {
-          try {
-            const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getuser', {
-              method: 'GET',
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-              },
-            });
-
-            if (!res.ok) {
-              console.error('Failed to fetch user');
-              return;
-            }
-
-            const data = await res.json();
-            setUser(data);
-
-            localStorage.setItem('user', JSON.stringify(data));
-          } catch (error) {
-            console.error('Error fetching user:', error);
-          }
-        };
-
-        fetchUser();
-      }
+    const token = localStorage.getItem('sessionToken') || sessionStorage.getItem('sessionToken');
+    if (!token) {
+      setUser(null);
+      return;
     }
+
+    const fetchUser = async () => {
+      try {
+        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getuser', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!res.ok) {
+          console.error('Failed to fetch user, status:', res.status);
+          setUser(null);
+          localStorage.removeItem('user');
+          return;
+        }
+
+        const data = await res.json();
+        setUser(data);
+        localStorage.setItem('user', JSON.stringify(data));
+      } catch (error) {
+        console.error('Error fetching user:', error);
+        setUser(null);
+        localStorage.removeItem('user');
+      }
+    };
+
+    fetchUser();
   }, []);
 
   useEffect(() => {

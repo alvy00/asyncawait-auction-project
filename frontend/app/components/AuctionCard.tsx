@@ -372,13 +372,12 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                     </div>
 
                     {/* Bid Form (animated in when bidding) */}
-                    <form
+                    { <form
                       onSubmit={handleBidSubmit}
-                      className={`absolute inset-0 w-full h-full flex items-center justify-center gap-2 transition-all duration-500 ease-in-out
+                      className={`absolute inset-0 w-full h-full flex items-center justify-center gap-2 transition-all duration-500 ease-in-out z-0
                         ${isBidding
-                          ? "opacity-100 translate-x-0 scale-100 blur-none"
+                          ? "opacity-100 translate-x-0 scale-100 blur-none pointer-events-auto"
                           : "opacity-0 -translate-x-4 scale-95 blur-sm pointer-events-none"}
-                        z-0
                       `}
                     >
                       <input
@@ -398,7 +397,8 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                       >
                         Bid
                       </button>
-                    </form>
+                    </form>}
+
                   </div>
                 )}
               </div>

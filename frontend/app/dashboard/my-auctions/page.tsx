@@ -11,6 +11,7 @@ import { FaEdit, FaTrash, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { Button } from "../../../components/ui/button";
 import { Countdown } from "../../components/Countdown";
 import { FaBolt, FaClock, FaFlagCheckered } from "react-icons/fa";
+import { useUser } from "../../../lib/user-context";
 
 const FALLBACK_IMAGE = "/fallback.jpg";
 
@@ -62,7 +63,8 @@ const SAMPLE_AUCTIONS: Auction[] = [
 ];
 
 const MyAuctionsPage = () => {
-  const [auctions, setAuctions] = useState<Auction[]>(SAMPLE_AUCTIONS);
+  const { user } = useUser();
+  const [auctions, setAuctions] = useState<Auction[]>();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     created: SAMPLE_AUCTIONS.length,
@@ -74,6 +76,37 @@ const MyAuctionsPage = () => {
   });
   
   const router = useRouter();
+
+  // Fetch all auctions on mount
+  useEffect(() => {
+    const fetchAllAuctions = async () => {
+      try {
+        const res = await fetch(
+          "https://asyncawait-auction-project.onrender.com/api/auctions",
+          {
+            method: "GET",
+            headers: {
+              "Content-type": "application/json",
+            },
+          }
+        );
+
+        if (!res.ok) {
+          const r = await res.json();
+          console.error(r.message || r.statusText);
+          return;
+        }
+
+        const data = await res.json();
+        setAuctions(data);
+
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    fetchAllAuctions();
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -89,22 +122,44 @@ const MyAuctionsPage = () => {
 
   const handleDelete = async (auctionId: string) => {
     if (!confirm("Are you sure you want to delete this auction?")) return;
-    
-    // Remove the auction from state
-    toast.success("Auction deleted successfully");
-    setAuctions(auctions.filter(auction => auction.auction_id !== auctionId));
-    
-    // Update stats
-    const deletedAuction = auctions.find(a => a.auction_id === auctionId);
-    if (deletedAuction) {
-      setStats(prev => ({
-        ...prev,
-        created: prev.created - 1,
-        running: deletedAuction.status === "live" ? prev.running - 1 : prev.running,
-        upcoming: deletedAuction.status === "upcoming" ? prev.upcoming - 1 : prev.upcoming,
-        completed: (deletedAuction.status === "ended" && deletedAuction.highest_bidder_id) ? prev.completed - 1 : prev.completed,
-        expired: (deletedAuction.status === "ended" && !deletedAuction.highest_bidder_id) ? prev.expired - 1 : prev.expired,
-      }));
+
+    try {
+      const res = await fetch("https://asyncawait-auction-project.onrender.com/api/auctions/delete", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ auction_id: auctionId }),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        toast.error(result.message || "Failed to delete auction");
+        return;
+      }
+
+      toast.success("Auction deleted successfully");
+
+      // Remove deleted auction from state
+      setAuctions(prev => prev?.filter(a => a.auction_id !== auctionId));
+
+      // Update stats
+      const deletedAuction = auctions?.find(a => a.auction_id === auctionId);
+      if (deletedAuction) {
+        setStats(prev => ({
+          ...prev,
+          created: prev.created - 1,
+          running: deletedAuction.status === "live" ? prev.running - 1 : prev.running,
+          upcoming: deletedAuction.status === "upcoming" ? prev.upcoming - 1 : prev.upcoming,
+          completed: deletedAuction.status === "ended" && deletedAuction.highest_bidder_id ? prev.completed - 1 : prev.completed,
+          expired: deletedAuction.status === "ended" && !deletedAuction.highest_bidder_id ? prev.expired - 1 : prev.expired,
+        }));
+      }
+
+    } catch (e) {
+      console.error(e);
+      toast.error("An error occurred while deleting");
     }
   };
 
@@ -184,7 +239,7 @@ const MyAuctionsPage = () => {
           </div>
         </h2>
 
-        {auctions.length === 0 ? (
+        {auctions?.length === 0 ? (
           <div className="bg-white/5 backdrop-blur-md rounded-xl p-8 text-center border border-white/10">
             <p className="text-gray-400 mb-4">You haven&apos;t created any auctions yet.</p>
             <Button 
@@ -196,14 +251,16 @@ const MyAuctionsPage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {auctions.map((auction) => (
-              <AuctionCard 
-                key={auction.auction_id} 
-                auction={auction} 
-                onEdit={() => handleEdit(auction.auction_id)} 
-                onDelete={() => handleDelete(auction.auction_id)} 
-              />
-            ))}
+            {auctions
+              ?.filter(auction => auction?.user_id === user?.user_id)
+              .map(auction => (
+                <AuctionCard
+                  key={auction.auction_id}
+                  auction={auction}
+                  onEdit={() => handleEdit(auction.auction_id)}
+                  onDelete={() => handleDelete(auction.auction_id)}
+                />
+              ))}
           </div>
         )}
       </div>
@@ -357,7 +414,7 @@ const AuctionCard: React.FC<DashboardAuctionCardProps> = ({ auction, onEdit, onD
                   e.stopPropagation();
                   onEdit();
                 }}
-                className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-sm py-1.5 shadow-md transition-all duration-300"
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-sm py-1.5 shadow-md transition-all duration-300 cursor-pointer"
               >
                 Edit
               </Button>
@@ -366,7 +423,7 @@ const AuctionCard: React.FC<DashboardAuctionCardProps> = ({ auction, onEdit, onD
                   e.stopPropagation();
                   onDelete();
                 }}
-                className="bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white text-sm py-1.5 shadow-md transition-all duration-300"
+                className="bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white text-sm py-1.5 shadow-md transition-all duration-300 cursor-pointer"
               >
                 Delete
               </Button>

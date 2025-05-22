@@ -6,21 +6,23 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from "../../components/ui/button";
 import { Input } from '../../components/ui/input';
-import { Search, Menu, X, Bell, Heart, ChevronDown, Home, LogOut, User, Settings, MessageSquare } from 'lucide-react';
+import { Search, Menu, X, Bell, Heart, ChevronDown, Home, LogOut, Settings, MessageSquare } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../lib/auth-context';
-import { useUser } from '../../lib/user-context';
 import toast from 'react-hot-toast';
 import { Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaCrown, FaShieldAlt, FaSignInAlt, FaTachometerAlt } from 'react-icons/fa';
-import { HiOutlineLogin } from 'react-icons/hi'
-import { FiArrowRight, FiLogIn, FiSettings, FiUserCheck } from 'react-icons/fi';
+import { MdDashboard } from "react-icons/md";
+import { User } from '../../lib/interfaces';
+import { HiOutlineUserAdd } from "react-icons/hi";
+import { CiLogin } from "react-icons/ci";
+
+
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const { loggedIn, logout } = useAuth();  
-  const { user } = useUser();
+  const [user, setUser] = useState<User>();
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -37,6 +39,40 @@ export const Navbar = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
   const router = useRouter();
+
+  // fetch user
+  useEffect(() => {
+    const getUser = async () => {
+      const token = localStorage.getItem('sessionToken') || sessionStorage.getItem('sessionToken');
+      if (!token) {
+        console.warn('No token found');
+        return;
+      }
+
+      try {
+        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getuser', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          console.error('Failed to fetch user:', err.message);
+          return;
+        }
+
+        const data = await res.json();
+        setUser(data);
+      } catch (e) {
+        console.error('Error fetching user:', e);
+      }
+    };
+    getUser();
+  }, []);
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -266,7 +302,7 @@ export const Navbar = () => {
             </motion.div>
             
             {/* Action Icons */}
-            <div className="hidden md:flex items-center space-x-1">
+            {loggedIn && <div className="hidden md:flex items-center space-x-1">
               {/* Notification Icon */}
               <motion.div
                 whileHover={{ scale: 1.1 }}
@@ -309,7 +345,8 @@ export const Navbar = () => {
                   <span className="absolute inset-0 rounded-full bg-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                 </Link>
               </motion.div>
-            </div>
+            </div>}
+            
             
             {/* Login/Signup/Avatar with Dropdown */}
             <div className="hidden md:flex items-center space-x-3">
@@ -317,12 +354,14 @@ export const Navbar = () => {
                 <div className="relative" ref={avatarDropdownRef}>
                   <motion.button 
                     onClick={() => setAvatarDropdownOpen(!avatarDropdownOpen)}
-                    className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300 relative overflow-hidden"
+                    className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300 relative overflow-hidden cursor-pointer"
                     aria-label="User menu"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <span className="text-sm font-medium relative z-10">AS</span>
+                    <span className="text-sm font-medium relative z-10">
+                      { user?.name.split(' ').map(part => part[0]).join('').toUpperCase() || '' }
+                    </span>
                     <motion.div 
                       className="absolute inset-0 bg-gradient-to-r from-orange-500 to-purple-600 opacity-0 transition-opacity duration-500"
                       animate={{ opacity: avatarDropdownOpen ? 0.8 : 0 }}
@@ -344,8 +383,8 @@ export const Navbar = () => {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.1 }}
                         >
-                          <p className="text-white font-medium">User Name</p>
-                          <p className="text-gray-400 text-xs">user@example.com</p>
+                          <p className="text-white font-medium">{user.name}</p>
+                          <p className="text-gray-400 text-xs">{user.email}</p>
                         </motion.div>
                         
                         <motion.div variants={staggerMenuItems} initial="hidden" animate="visible">
@@ -355,12 +394,12 @@ export const Navbar = () => {
                               className="flex items-center gap-2 px-4 py-2 text-white hover:bg-[#162a3d]/70 hover:text-orange-400 text-sm transition-all duration-200"
                               onClick={() => setAvatarDropdownOpen(false)}
                             >
-                              <User size={16} />
+                              <MdDashboard className="text-lg" />
                               Dashboard
                             </Link>
                           </motion.div>
                           
-                          <motion.div variants={menuItemVariants}>
+                          {user.is_admin &&<motion.div variants={menuItemVariants}>
                             <Link 
                               href="/admin" 
                               className="flex items-center gap-2 px-4 py-2 text-white hover:bg-[#162a3d]/70 hover:text-orange-400 text-sm transition-all duration-200"
@@ -369,7 +408,7 @@ export const Navbar = () => {
                               <Settings size={16} />
                               Admin
                             </Link>
-                          </motion.div>
+                          </motion.div>}
                           
                           <motion.div variants={menuItemVariants}>
                             <button 
@@ -400,6 +439,7 @@ export const Navbar = () => {
                       asChild
                     >
                       <Link href="/login">
+                        <CiLogin className="text-sm" />
                         Login
                         <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-orange-400 to-orange-500 group-hover:w-full transition-all duration-300"></span>
                       </Link>
@@ -414,7 +454,10 @@ export const Navbar = () => {
                       className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white h-9 px-5 text-sm shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 transition-all duration-300" 
                       asChild
                     >
-                      <Link href="/signup">Sign up</Link>
+                      <Link href="/signup">
+                        <HiOutlineUserAdd className="text-sm" />
+                        Get Started
+                      </Link>
                     </Button>
                   </motion.div>
                 </>
@@ -567,7 +610,7 @@ export const Navbar = () => {
               </motion.nav>
               
               {/* Mobile Action Icons */}
-              <motion.div 
+              {loggedIn && <motion.div 
                 className="flex justify-between mb-6"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -596,7 +639,8 @@ export const Navbar = () => {
                     <span className="text-xs">Favorites</span>
                   </Link>
                 </motion.div>
-              </motion.div>
+              </motion.div>}
+              
               
               {/* Mobile Login/Signup */}
               <motion.div 
