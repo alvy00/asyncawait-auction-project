@@ -30,7 +30,6 @@ auctionRouter.get('/', async (req, res) => {
     }
 });
 
-
 // Create Auction
 auctionRouter.post('/create', async (req, res) => {
     try {
@@ -93,6 +92,30 @@ auctionRouter.post('/create', async (req, res) => {
     }
 });
 
+// Delete Auction
+auctionRouter.delete('/delete', async (req, res) => {
+  try {
+    const { auction_id } = req.body;
+
+    if (!auction_id) {
+      return res.status(400).json({ message: 'auction_id is required' });
+    }
+
+    const { data, error } = await supabase
+      .from('auctions')
+      .delete()
+      .eq('auction_id', auction_id);
+
+    if (error) {
+      return res.status(400).json({ message: 'Error deleting auction', error });
+    }
+
+    return res.status(200).json({ message: 'Auction deleted successfully', data });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 // Get Auction Details by ID
 auctionRouter.post('/aucdetails', async (req, res) => {
@@ -120,7 +143,6 @@ auctionRouter.post('/aucdetails', async (req, res) => {
   }
 });
 
-
 // GET /auctions/:id
 auctionRouter.get('/:id', async (req, res) => {
   const auction_id = req.params.id;
@@ -143,7 +165,6 @@ auctionRouter.get('/:id', async (req, res) => {
     return res.status(500).json({ message: "Unexpected server error." });
   }
 });
-
 
 // Place Bid
 auctionRouter.post('/bid', async (req, res) => {
@@ -215,7 +236,6 @@ auctionRouter.post('/bid', async (req, res) => {
     }
 });
 
-
 // Get User Bid History
 auctionRouter.post('/bidhistory', async (req, res) => {
   const { user_id } = req.body;
@@ -247,7 +267,6 @@ auctionRouter.post('/bidhistory', async (req, res) => {
   return res.status(200).json(formatted);
 });
 
-
 // Favourite Auctions
 auctionRouter.post('/favourite', async (req, res) => {
     try{
@@ -268,7 +287,6 @@ auctionRouter.post('/favourite', async (req, res) => {
         return res.status(500).json({ message: 'Something went wrong' });
     }
 });
-
 
 // Unfavorite Auctions
 auctionRouter.post('/unfavourite', async (req, res) => {
@@ -292,7 +310,6 @@ auctionRouter.post('/unfavourite', async (req, res) => {
     return res.status(500).json({ message: 'Something went wrong' });
   }
 });
-
 
 // Fetch All Favourite Auction IDs for a User
 auctionRouter.post('/favauctions', async (req, res) => {

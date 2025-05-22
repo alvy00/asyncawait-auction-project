@@ -6,7 +6,6 @@ import AuctionCard from "../../../components/AuctionCard";
 import { Auction, User } from "../../../../lib/interfaces";
 import { FaSpinner, FaSearch } from "react-icons/fa";
 import { motion } from "framer-motion";
-import { useUser } from "../../../../lib/user-context";
 import toast from "react-hot-toast";
 
 const LiveAuctionsPage = () => {
@@ -282,8 +281,8 @@ const LiveAuctionsPage = () => {
               animate="show"
           >
               {filteredAuctions.map((auction, index) => {
-                console.log(`Favourited: ${favAuctionIDs.includes(auction.auction_id)}`);
-                console.log(favAuctionIDs);
+                // console.log(`Favourited: ${favAuctionIDs.includes(auction.auction_id)}`);
+                // console.log(favAuctionIDs);
                 return (
                   <motion.div
                     key={auction.auction_id}
