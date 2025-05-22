@@ -4,16 +4,49 @@
 import { useEffect, useState } from "react";
 import { useUser } from "../../../../lib/user-context";
 import AuctionCard from "../../../components/AuctionCard";
-import { Auction } from "../../../../lib/interfaces";
+import { Auction, User } from "../../../../lib/interfaces";
 import toast from "react-hot-toast";
 import { motion } from "framer-motion";
 import { FaHeartBroken } from "react-icons/fa";
 
 const FavouritesPage = () => {
-  const { user } = useUser();
+  const [user, setUser] = useState<User>();
   const [favAuctionIds, setFavAuctionIds] = useState<string[]>([]);
   const [favAuctions, setFavAuctions] = useState<Auction[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // fetch user
+  useEffect(() => {
+    const getUser = async () => {
+      const token = localStorage.getItem('sessionToken') || sessionStorage.getItem('sessionToken');
+      if (!token) {
+        console.warn('No token found');
+        return;
+      }
+
+      try {
+        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getuser', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          console.error('Failed to fetch user:', err.message);
+          return;
+        }
+
+        const data = await res.json();
+        setUser(data);
+      } catch (e) {
+        console.error('Error fetching user:', e);
+      }
+    };
+    getUser();
+  }, []);
 
   // fetch favorite auction IDs
   useEffect(() => {
@@ -116,7 +149,6 @@ const FavouritesPage = () => {
                   auction={auction}
                   auctionCreator={auction.creator}
                   isFavourited={true}
-                  onToggleFavorite={() => {}}
                 />
               </motion.div>
             ))}
