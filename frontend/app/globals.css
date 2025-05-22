@@ -121,3 +121,44 @@
   }
 }
 
+@keyframes fadeSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auctions-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 2rem;
+}
+
+@media (min-width: 640px) {
+  .auctions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .auctions-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.auction-item {
+  opacity: 0;
+  animation-name: fadeSlideUp;
+  animation-fill-mode: forwards;
+  animation-duration: 0.4s;
+  animation-timing-function: ease-out;
+  transition: transform 0.3s ease-in-out;
+}
+
+.auction-item:hover {
+  transform: scale(1.05);
+}
