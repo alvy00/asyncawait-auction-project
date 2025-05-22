@@ -1,10 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 export interface User {
+    user_id: string;
     name: string;
     email: string;
+    join_date: string;
     money: number;
+    total_auctions: number;
     total_bids: number;
     bids_won: number;
+    win_rate: number;
+    is_admin: boolean;
+    is_suspended: boolean;
 }
 
 export interface Auction {
@@ -27,11 +33,7 @@ export interface Auction {
 }
 
 export interface PastAuctionCardProps{
-  item_name: string;
-  winner: string;
-  sold_price: number;
-  image: string;
-  ended_on: string;
+  auction: Auction;
 };
 
 export interface UpcomingAuctionCardProps{

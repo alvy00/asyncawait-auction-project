@@ -38,26 +38,25 @@ const Navbar = () => {
         <Separator orientation="vertical" className="mx-2 h-5 bg-white/20" />
         <Breadcrumb>
           <BreadcrumbList>
-            <li className="flex items-center gap-2">
-              <BreadcrumbLink href="/dashboard" className="text-blue-400 hover:text-blue-300 transition-all duration-200">
+            <span className="flex items-center gap-2">
+              <BreadcrumbLink href="/" className="text-blue-400 hover:text-blue-300 transition-all duration-200">
                 <Home className="h-4 w-4" />
               </BreadcrumbLink>
               {pathSegments.length > 0 && <BreadcrumbSeparator className="text-white/40" />}
-            </li>
+            </span>
             {pathSegments.map((segment, id) => (
-              <li key={id} className="flex items-center gap-2">
+              <span key={id} className="flex items-center gap-2">
                 {segment.length > 30 ? (
                   "update"
                 ) : (
                   <BreadcrumbLink 
-                    href={`/${pathSegments.slice(0, id + 1).join('/')}`}
-                    className={`transition-all duration-200 hover:text-blue-300 ${id === pathSegments.length - 1 ? "font-medium text-white" : "text-white/70"}`}
+                    className={`cursor-default transition-all duration-200 hover:text-blue-300 ${id === pathSegments.length - 1 ? "font-medium text-white" : "text-white/70"}`}
                   >
                     {segment.charAt(0).toUpperCase() + segment.slice(1)}
                   </BreadcrumbLink>
                 )}
                 {pathSegments.length !== id + 1 && <BreadcrumbSeparator className="text-white/40" />}
-              </li>
+              </span>
             ))}
           </BreadcrumbList>
         </Breadcrumb>

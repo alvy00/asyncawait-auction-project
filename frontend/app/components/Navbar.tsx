@@ -9,13 +9,18 @@ import { Input } from '../../components/ui/input';
 import { Search, Menu, X, Bell, Heart, ChevronDown, Home, LogOut, User, Settings, MessageSquare } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../lib/auth-context';
+import { useUser } from '../../lib/user-context';
 import toast from 'react-hot-toast';
 import { Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FaCrown, FaShieldAlt, FaSignInAlt, FaTachometerAlt } from 'react-icons/fa';
+import { HiOutlineLogin } from 'react-icons/hi'
+import { FiArrowRight, FiLogIn, FiSettings, FiUserCheck } from 'react-icons/fi';
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const { loggedIn, logout } = useAuth();
+  const { loggedIn, logout } = useAuth();  
+  const { user } = useUser();
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -609,6 +614,7 @@ export const Navbar = () => {
                     <Link href="/login" onClick={() => setMobileMenuOpen(false)}>Login</Link>
                   </Button>
                 </motion.div>
+
                 
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <Button 

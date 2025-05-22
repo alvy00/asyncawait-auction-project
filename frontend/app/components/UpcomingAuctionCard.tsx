@@ -8,6 +8,7 @@ import { cn } from "../../lib/utils";
 import { Countdown } from "./Countdown";
 import { Auction } from "../../lib/interfaces";
 import { UpcomingAuctionCardProps } from "../../lib/interfaces";
+import { FaClock } from "react-icons/fa";
 
 const FALLBACK_IMAGE = "/fallback.jpg";
 
@@ -40,9 +41,10 @@ const UpcomingAuctionCard = ({ auction, auctionCreator }: UpcomingAuctionCardPro
         />
 
         {/* Status Badge */}
-        <div className="absolute top-3 left-3 bg-blue-600 text-white text-xs font-light px-3 py-1 z-10 rounded-lg">
-          Upcoming
-        </div>
+          <div className="absolute top-3 left-3 bg-blue-600 text-white text-xs font-light px-3 py-1 z-10 rounded-lg flex items-center gap-2 shadow backdrop-blur-sm">
+            <FaClock className="text-white" />
+            <span>Upcoming</span>
+          </div>
       </div>
 
       {/* Content */}
