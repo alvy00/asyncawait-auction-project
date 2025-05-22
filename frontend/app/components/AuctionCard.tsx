@@ -18,17 +18,24 @@ interface AuctionCardProps {
   auction: Auction;
   auctionCreator: string;
   isFavourited: boolean;
-  onToggleFavorite: () => void;
 }
 
-const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFavourited, onToggleFavorite })  => {
+const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFavourited })  => {
   const [winner, setWinner] = useState(null);
   const [isEnded, setIsEnded] = useState(false);
+  const [isStarted, setIsStarted] = useState(false);
   const [isBidding, setIsBidding] = useState(false);
   const [bidAmount, setBidAmount] = useState(0);
   const [highestBid, setHighestBid] = useState(auction.highest_bid);
   const [isHovered, setIsHovered] = useState(false);
   const [user, setUser] = useState(null);
+  const [currentStatus, setCurrentStatus] = useState<"upcoming" | "live" | "ended">(() => {
+    const now = new Date();
+    if (now < new Date(auction.start_time)) return "upcoming";
+    if (now <= new Date(auction.end_time)) return "live";
+    return "ended";
+  });
+  const [favourited, setFavourited] = useState(isFavourited);
 
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : FALLBACK_IMAGE;
   const token = typeof window !== "undefined" ? localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken") : null;
@@ -151,19 +158,65 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
     setIsHovered(false);
   };
 
-  // handle fav click
-  const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  // checks whether the auction has started or not
+  useEffect(() => {
+    const hasStarted = new Date(auction.start_time) <= new Date();
+    setIsStarted(hasStarted);
+  }, [auction.start_time]);
 
-    if (!user?.user_id) {
-      toast.error("Please log in to favorite auctions.");
-      return;
-    }
+  // sets isEnded
+  useEffect(() => {
+    const hasEnded = new Date(auction.end_time) <= new Date();
+    setIsEnded(hasEnded);
+  }, [auction.end_time]);
 
-    onToggleFavorite();
-  };
+  // Status tag
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      if (now < new Date(auction.start_time)) {
+        setCurrentStatus("upcoming");
+      } else if (now <= new Date(auction.end_time)) {
+        setCurrentStatus("live");
+      } else {
+        setCurrentStatus("ended");
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [auction.start_time, auction.end_time]);
 
   
+  // handle fav click
+  const handleFavoriteClick = async () => {
+    const url = favourited
+      ? 'https://asyncawait-auction-project.onrender.com/api/auctions/unfavourite'
+      : 'https://asyncawait-auction-project.onrender.com/api/auctions/favourite';
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user.user_id,
+          auction_id: auction.auction_id,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to update favorite status');
+      }
+
+      toast.success(favourited ? 'Removed from favorites' : 'Added to favorites');
+      setFavourited((prev) => !prev);
+    } catch (error) {
+      console.error('Favorite toggle error:', error);
+      toast.error(error.message || 'Something went wrong');
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -194,15 +247,15 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60"></div>
           
           {/* Status tag */}
-          {auction.status === 'live' ? (
+          {currentStatus === "upcoming" ? (
+          <div className="absolute top-3 left-3 bg-blue-600 text-white text-xs font-light px-3 py-1 z-10 rounded-lg flex items-center gap-2 shadow backdrop-blur-sm">
+            <FaClock className="text-white" />
+            <span>Upcoming</span>
+          </div>
+          ) : currentStatus === "live" ? (
             <div className="absolute top-4 left-4 bg-gradient-to-r from-red-600 to-red-500 text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
               <FaBolt className="text-white animate-pulse" />
               <span>Live</span>
-            </div>
-          ) : auction.status === 'upcoming' ? (
-            <div className="absolute top-4 left-4 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
-              <FaClock className="text-white" />
-              <span>Upcoming</span>
             </div>
           ) : (
             <div className="absolute top-4 left-4 bg-gray-600 text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
@@ -223,7 +276,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
             onClick={handleFavoriteClick}
             className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 backdrop-blur-md p-2 rounded-full z-10 transition-all duration-300 hover:scale-110 border border-white/20 shadow-lg"
           >
-            {isFavourited ? (
+            {favourited ? (
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
               </svg>
@@ -307,21 +360,16 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                   </Button>
                 ) : (
                   <div className="relative w-full h-full">
-                    {/* Bid Now Button (animated out when bidding) */}
-                    <button
-                      onClick={() => setIsBidding(true)}
-                      disabled={isEnded}
-                      className={`absolute inset-0 w-full h-full flex items-center justify-center rounded-md border font-medium text-white backdrop-blur-sm transition-all duration-500 ease-in-out
-                        ${isBidding
-                          ? "opacity-0 translate-x-4 scale-95 blur-sm pointer-events-none"
-                          : isEnded
-                            ? "opacity-60 cursor-not-allowed border-gray-700 bg-gray-900 text-gray-500"
-                            : "opacity-100 translate-x-0 scale-100 border-gray-600 bg-gray-800 hover:bg-gray-700"}
-                        z-10
-                      `}
-                    >
-                      Bid Now
-                    </button>
+                    <div className="relative h-12 w-[160px]">
+                      {currentStatus === "live" && !isBidding && (
+                        <button
+                          onClick={() => setIsBidding(true)}
+                          className="absolute inset-0 w-full h-full flex items-center justify-center rounded-md border border-gray-600 bg-gray-800 hover:bg-gray-700 font-medium text-white backdrop-blur-sm transition-all duration-500 ease-in-out z-10"
+                        >
+                          Bid Now
+                        </button>
+                      )}
+                    </div>
 
                     {/* Bid Form (animated in when bidding) */}
                     <form
