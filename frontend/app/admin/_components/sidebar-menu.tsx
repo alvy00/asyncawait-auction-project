@@ -105,7 +105,7 @@ export default function SidebarMenu() {
           transition={{ duration: 0.3 }}
           className={cn(
             "flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-            pathname === "/dashboard/admin"
+            pathname === "/admin"
               ? "bg-gradient-to-r from-orange-500/20 to-pink-500/20 text-white"
               : "text-gray-300 hover:bg-white/5 hover:text-white"
           )}
@@ -187,7 +187,7 @@ export default function SidebarMenu() {
             transition={{ duration: 0.3 }}
             className="flex items-center cursor-pointer gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 text-gray-300 hover:bg-white/5 hover:text-white"
           >
-            <Link className="flex items-center gap-2 w-full" href="#">
+            <Link className="flex items-center gap-2 w-full" href="/admin/help">
               <HelpCircle size={18} /> 
               <span>Help Center</span>
             </Link>
@@ -199,7 +199,7 @@ export default function SidebarMenu() {
             transition={{ duration: 0.3 }}
             className="flex items-center cursor-pointer gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 text-gray-300 hover:bg-white/5 hover:text-white"
           >
-            <Link className="flex items-center gap-2 w-full" href="#">
+            <Link className="flex items-center gap-2 w-full" href="/admin/feedback">
               <MessageSquare size={18} /> 
               <span>Feedback</span>
             </Link>
