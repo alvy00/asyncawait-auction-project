@@ -83,7 +83,7 @@ const LiveAuctionsPage = () => {
         }
 
         const data = await res.json();
-        setAuctions(data);
+        setAuctions( data.filter((auction : Auction) => new Date(auction.end_time) > new Date()) ); // only live auctions
 
       } catch (e) {
         console.error(e);
