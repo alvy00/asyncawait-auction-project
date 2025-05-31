@@ -6,9 +6,7 @@ import { Button } from "../../components/ui/button";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { Auction } from "../../lib/interfaces";
-import { AnimatePresence, motion } from "framer-motion";
-import { title } from "process";
-import { cn, getUserIdFromToken } from "../../lib/utils";
+import { motion } from "framer-motion";
 import { Countdown } from "./Countdown";
 import { FaBolt, FaClock, FaFlagCheckered } from "react-icons/fa";
 
@@ -170,7 +168,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
     setIsEnded(hasEnded);
   }, [auction.end_time]);
 
-  // Status tag
+  // updates currentStatus every min
   useEffect(() => {
     const interval = setInterval(() => {
       const now = new Date();
@@ -181,7 +179,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
       } else {
         setCurrentStatus("ended");
       }
-    }, 1000);
+    }, 60000);
 
     return () => clearInterval(interval);
   }, [auction.start_time, auction.end_time]);
