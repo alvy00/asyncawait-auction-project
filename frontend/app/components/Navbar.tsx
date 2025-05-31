@@ -16,6 +16,8 @@ import { MdDashboard } from "react-icons/md";
 import { User } from '../../lib/interfaces';
 import { HiOutlineUserAdd } from "react-icons/hi";
 import { CiLogin } from "react-icons/ci";
+import { HiOutlineArrowSmallRight } from "react-icons/hi2";
+
 
 
 
@@ -110,7 +112,7 @@ export const Navbar = () => {
   const navItems = [
     { name: 'Home', href: '/' },
     { name: 'Auctions', href: '#', dropdown: true, items: [
-      { name: 'All Auctions', href: '/auctions/all' },
+      { name: 'Live Auctions', href: '/auctions/live' },
       { name: 'Upcoming Auctions', href: '/auctions/upcoming' },
       { name: 'Past Auctions', href: '/auctions/past' },
     ]},
@@ -439,7 +441,7 @@ export const Navbar = () => {
                       asChild
                     >
                       <Link href="/login">
-                        <CiLogin className="text-sm" />
+                        {/* <CiLogin className="text-sm" /> */}
                         Login
                         <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-orange-400 to-orange-500 group-hover:w-full transition-all duration-300"></span>
                       </Link>
@@ -455,8 +457,8 @@ export const Navbar = () => {
                       asChild
                     >
                       <Link href="/signup">
-                        <HiOutlineUserAdd className="text-sm" />
                         Get Started
+                        <HiOutlineArrowSmallRight className="text-sm" />
                       </Link>
                     </Button>
                   </motion.div>
