@@ -4,10 +4,10 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import toast from "react-hot-toast";
 import { FaChevronLeft, FaChevronRight, FaCheckCircle, FaTimesCircle, FaHourglassHalf } from "react-icons/fa";
 import { Button } from "../../../components/ui/button";
-import { Countdown } from "../../components/Countdown";
+import { useUser } from "../../../lib/user-context";
+import { Auction } from "../../../lib/interfaces";
 
 const FALLBACK_IMAGE = "/fallback.jpg";
 
@@ -15,175 +15,112 @@ const FALLBACK_IMAGE = "/fallback.jpg";
 interface Bid {
   bid_id: string;
   auction_id: string;
+  user_id: string;
   item_name: string;
-  item_image: string;
   bid_amount: number;
-  bid_time: string;
-  auction_end_time: string;
-  status: "active" | "won" | "lost" | "pending";
-  current_highest_bid: number;
-  is_highest_bidder: boolean;
-  category: string;
-  condition: string;
+  created_at: string;
 }
 
-const SAMPLE_BIDS: Bid[] = [
-  {
-    bid_id: "bid-1",
-    auction_id: "auction-1",
-    item_name: "Vintage Leica Camera",
-    item_image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1000&auto=format&fit=crop",
-    bid_amount: 275.00,
-    bid_time: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-    auction_end_time: new Date(Date.now() + 172800000).toISOString(), // 2 days from now
-    status: "active",
-    current_highest_bid: 275.00,
-    is_highest_bidder: true,
-    category: "electronics",
-    condition: "used"
-  },
-  {
-    bid_id: "bid-2",
-    auction_id: "auction-2",
-    item_name: "Modern Art Painting",
-    item_image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=1000&auto=format&fit=crop",
-    bid_amount: 420.50,
-    bid_time: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-    auction_end_time: new Date(Date.now() + 86400000).toISOString(), // 1 day from now
-    status: "active",
-    current_highest_bid: 450.75,
-    is_highest_bidder: false,
-    category: "art",
-    condition: "new"
-  },
-  {
-    bid_id: "bid-3",
-    auction_id: "auction-3",
-    item_name: "Antique Pocket Watch",
-    item_image: "https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?q=80&w=1000&auto=format&fit=crop",
-    bid_amount: 650.00,
-    bid_time: new Date(Date.now() - 604800000).toISOString(), // 7 days ago
-    auction_end_time: new Date(Date.now() - 86400000).toISOString(), // 1 day ago (ended)
-    status: "won",
-    current_highest_bid: 650.00,
-    is_highest_bidder: true,
-    category: "other",
-    condition: "refurbished"
-  },
-  {
-    bid_id: "bid-4",
-    auction_id: "auction-4",
-    item_name: "Designer Handbag",
-    item_image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=1000&auto=format&fit=crop",
-    bid_amount: 380.00,
-    bid_time: new Date(Date.now() - 432000000).toISOString(), // 5 days ago
-    auction_end_time: new Date(Date.now() - 172800000).toISOString(), // 2 days ago (ended)
-    status: "lost",
-    current_highest_bid: 425.00,
-    is_highest_bidder: false,
-    category: "fashion",
-    condition: "new"
-  },
-  {
-    bid_id: "bid-5",
-    auction_id: "auction-5",
-    item_name: "Vintage Vinyl Records Collection",
-    item_image: "https://images.unsplash.com/photo-1603048588665-791ca8aea617?q=80&w=1000&auto=format&fit=crop",
-    bid_amount: 180.00,
-    bid_time: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
-    auction_end_time: new Date(Date.now() + 345600000).toISOString(), // 4 days from now
-    status: "active",
-    current_highest_bid: 210.00,
-    is_highest_bidder: false,
-    category: "other",
-    condition: "used"
-  }
-];
-
 const MyBidsPage = () => {
+  const { user } = useUser();
+  const [auctions, setAuctions] = useState<Auction[]>([]);
   const [bids, setBids] = useState<Bid[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState({
     totalBids: 0,
     activeBids: 0,
-    wonBids: 0,
-    lostBids: 0,
-    pendingBids: 0,
+    wonAuctions: 0,
+    lostAuctions: 0,
     totalSpent: 0
   });
   const [filter, setFilter] = useState<"all" | "active" | "won" | "lost">("all");
   
   const router = useRouter();
 
+  // Fetch all auctions
   useEffect(() => {
-    const fetchMyBids = async () => {
-      const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
-      
-      if (!token) {
-        router.push("/login");
-        return;
-      }
-      
+    const fetchAllAuctions = async () => {
       try {
-        setLoading(true);
-        // In a real implementation, you would fetch from your API
-        // const res = await fetch("https://asyncawait-auction-project.onrender.com/api/bids/my-bids", {
-        //   headers: {
-        //     Authorization: `Bearer ${token}`,
-        //   },
-        // });
-        
-        // if (!res.ok) {
-        //   throw new Error("Failed to fetch your bids");
-        // }
-        
-        // const data = await res.json();
-        
-        // For now, use sample data
-        const data = SAMPLE_BIDS;
-        setBids(data);
-        
-        // Calculate stats
-        const statsData = {
-          totalBids: data.length,
-          activeBids: data.filter(b => b.status === "active").length,
-          wonBids: data.filter(b => b.status === "won").length,
-          lostBids: data.filter(b => b.status === "lost").length,
-          pendingBids: data.filter(b => b.status === "pending").length,
-          totalSpent: data.reduce((acc, curr) => curr.status === "won" ? acc + curr.bid_amount : acc, 0)
-        };
-        
-        setStats(statsData);
+        const res = await fetch(
+          "https://asyncawait-auction-project.onrender.com/api/auctions",
+          {
+            method: "GET",
+            headers: {
+              "Content-type": "application/json",
+            },
+          }
+        );
+
+        if (!res.ok) {
+          const r = await res.json();
+          console.error(r.message || r.statusText);
+          return;
+        }
+
+        const data = await res.json();
+        setAuctions(data);
+
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    fetchAllAuctions();
+  }, []);
+
+  // Fetch bid history
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchBids = async () => {
+      try {
+        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/bidhistory', {
+          method: 'POST',
+          headers: {
+            'Content-type': 'application/json'
+          },
+          body: JSON.stringify({ user_id: user.user_id })
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          console.error('Error fetching bids:', errorData.message || res.statusText);
+          return;
+        }
+
+        const r = await res.json();
+        setBids(r);
       } catch (err) {
-        console.error("Error fetching bids:", err);
-        setError(err.message || "Failed to load bids");
-        
-        // Use sample data on error
-        const data = SAMPLE_BIDS;
-        setBids(data);
-        
-        // Calculate stats from sample data
-        const statsData = {
-          totalBids: data.length,
-          activeBids: data.filter(b => b.status === "active").length,
-          wonBids: data.filter(b => b.status === "won").length,
-          lostBids: data.filter(b => b.status === "lost").length,
-          pendingBids: data.filter(b => b.status === "pending").length,
-          totalSpent: data.reduce((acc, curr) => curr.status === "won" ? acc + curr.bid_amount : acc, 0)
-        };
-        
-        setStats(statsData);
-        
-        // Show a toast notification instead of a full error screen
-        toast.error("Using sample data - " + (err.message || "Failed to load your bids"));
-      } finally {
+        console.error('Network or server error while fetching bids:', err);
+      }finally {
         setLoading(false);
       }
     };
 
-    fetchMyBids();
-  }, [router]);
+    fetchBids();
+  }, [user]);
+
+  // Update stats
+  // Needs fixing later (lost auctions, activeBids)
+  useEffect(() => {
+    if ( !auctions || !bids || !user ) return;
+
+    setStats({
+      totalBids: bids.length,
+      activeBids: bids.filter(bid => bid.status === 'active').length,
+      wonAuctions: auctions.filter(a => a.status === 'ended' && a.highest_bidder_id === user.user_id).length,
+      lostAuctions: auctions.filter(a => a.status === 'ended' && a.highest_bidder_id && a.highest_bidder_id !== user.user_id).length,
+      totalSpent: auctions
+                  .filter(
+                    (auction) =>
+                      auction.status === 'ended' &&
+                      auction.user_id === user?.user_id
+                  )
+                  .reduce((acc, auc) => acc + (auc.highest_bid || 0), 0)
+    });
+
+  }, [auctions, bids, user]);
+
 
   const handleViewAuction = (auctionId: string) => {
     router.push(`/auctions/${auctionId}`);
@@ -192,8 +129,6 @@ const MyBidsPage = () => {
   const handlePlaceBid = (auctionId: string) => {
     router.push(`/auctions/${auctionId}?bid=true`);
   };
-
-  const filteredBids = filter === "all" ? bids : bids.filter(bid => bid.status === filter);
 
   if (loading) {
     return (
@@ -221,30 +156,26 @@ const MyBidsPage = () => {
 
       {/* Stats Section */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-        <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-          <h3 className="text-gray-400 text-sm mb-1">Total Bids</h3>
-          <p className="text-2xl font-bold text-white">{stats.totalBids.toString().padStart(2, '0')}</p>
-        </div>
-        <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-          <h3 className="text-gray-400 text-sm mb-1">Active Bids</h3>
-          <p className="text-2xl font-bold text-white">{stats.activeBids.toString().padStart(2, '0')}</p>
-        </div>
-        <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-          <h3 className="text-gray-400 text-sm mb-1">Won Auctions</h3>
-          <p className="text-2xl font-bold text-white">{stats.wonBids.toString().padStart(2, '0')}</p>
-        </div>
-        <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-          <h3 className="text-gray-400 text-sm mb-1">Lost Auctions</h3>
-          <p className="text-2xl font-bold text-white">{stats.lostBids.toString().padStart(2, '0')}</p>
-        </div>
-        <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-          <h3 className="text-gray-400 text-sm mb-1">Pending Results</h3>
-          <p className="text-2xl font-bold text-white">{stats.pendingBids.toString().padStart(2, '0')}</p>
-        </div>
-        <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-          <h3 className="text-gray-400 text-sm mb-1">Total Spent</h3>
-          <p className="text-2xl font-bold text-white">${stats.totalSpent.toFixed(2)}</p>
-        </div>
+        {[
+          { label: "Total Bids", value: stats.totalBids },
+          { label: "Active Bids", value: stats.activeBids },
+          { label: "Won Auctions", value: stats.wonAuctions },
+          { label: "Lost Auctions", value: stats.lostAuctions },
+          { label: "Pending Results", value: stats.pendingBids },
+          { label: "Total Spent", value: stats.totalSpent, isCurrency: true },
+        ].map(({ label, value, isCurrency }) => (
+          <div
+            key={label}
+            className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10"
+          >
+            <h3 className="text-gray-400 text-sm mb-1">{label}</h3>
+            <p className="text-2xl font-bold text-white">
+              {isCurrency
+                ? `$${value.toFixed(2)}`
+                : value?.toString().padStart(2, "0")}
+            </p>
+          </div>
+        ))}
       </div>
 
       {/* Filter Tabs */}
@@ -292,9 +223,9 @@ const MyBidsPage = () => {
           </div>
         </h2>
 
-        {filteredBids.length === 0 ? (
+        {bids.length === 0 ? (
           <div className="bg-white/5 backdrop-blur-md rounded-xl p-8 text-center border border-white/10">
-            <p className="text-gray-400 mb-4">You haven't placed any bids yet.</p>
+            <p className="text-gray-400 mb-4">You haven&apos;t placed any bids yet.</p>
             <Button 
               onClick={() => router.push("/auctions")} 
               className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 border border-white/10 shadow-lg"
@@ -304,7 +235,7 @@ const MyBidsPage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredBids.map((bid) => (
+            {bids.map((bid) => (
               <BidCard 
                 key={bid.bid_id} 
                 bid={bid} 
@@ -326,9 +257,8 @@ interface BidCardProps {
   onPlaceBid: () => void;
 }
 
-const BidCard: React.FC<BidCardProps> = ({ bid, onViewAuction, onPlaceBid }) => {
-  const [isEnded, setIsEnded] = useState(new Date(bid.auction_end_time) < new Date());
-  
+const BidCard: React.FC<BidCardProps> = ({ bid, onViewAuction, onPlaceBid }) => { 
+
   const getStatusColor = () => {
     switch (bid.status) {
       case "active":
@@ -392,7 +322,7 @@ const BidCard: React.FC<BidCardProps> = ({ bid, onViewAuction, onPlaceBid }) => 
           {/* Image */}
           <div className="relative w-full h-48 overflow-hidden">
             <Image 
-              src={bid.item_image || FALLBACK_IMAGE} 
+              src={ FALLBACK_IMAGE } 
               alt={bid.item_name}
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-110"
@@ -416,38 +346,40 @@ const BidCard: React.FC<BidCardProps> = ({ bid, onViewAuction, onPlaceBid }) => 
               </div>
               
               {/* Category and condition */}
-              <div className="flex items-center gap-2 mb-4">
+              {/* <div className="flex items-center gap-2 mb-4">
                 <span className="text-xs bg-white/10 text-gray-300 px-2 py-0.5 rounded">
-                  {bid.category.charAt(0).toUpperCase() + bid.category.slice(1)}
+                  {bid.category?.charAt(0).toUpperCase() + bid.category?.slice(1)}
                 </span>
                 <span className="text-xs bg-white/10 text-gray-300 px-2 py-0.5 rounded">
-                  {bid.condition.charAt(0).toUpperCase() + bid.condition.slice(1)}
+                  {bid.condition?.charAt(0).toUpperCase() + bid.condition?.slice(1)}
                 </span>
-              </div>
+              </div> */}
               
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <p className="text-gray-400 text-xs mb-1">Bid Placed</p>
-                  <p className="text-white text-sm">{new Date(bid.bid_time).toLocaleString()}</p>
+                  <p className="text-white text-sm">
+                     {new Date(bid.created_at.replace('+00', 'Z')).toLocaleDateString('en-GB', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                  </p>
                 </div>
-                <div>
+                {/* <div>
                   <p className="text-gray-400 text-xs mb-1">Current Highest</p>
-                  <p className="text-white text-sm">${bid.current_highest_bid.toFixed(2)}</p>
-                </div>
-                <div>
+                  <p className="text-white text-sm">${bid.current_highest_bid?.toFixed(2)}</p>
+                </div> */}
+                {/* <div>
                   <p className="text-gray-400 text-xs mb-1">Your Status</p>
                   <p className={`text-sm ${bid.is_highest_bidder ? "text-green-400" : "text-orange-400"}`}>
                     {bid.is_highest_bidder ? "Highest Bidder" : "Outbid"}
                   </p>
-                </div>
+                </div> */}
                 <div>
                   <p className="text-gray-400 text-xs mb-1">Time Remaining</p>
                   <p className="text-white text-sm">
-                    {isEnded ? (
-                      <span className="text-gray-400">Auction Ended</span>
-                    ) : (
-                      <Countdown endTime={bid.auction_end_time} onComplete={() => setIsEnded(true)} />
-                    )}
+                    <span>---</span>
                   </p>
                 </div>
               </div>
@@ -461,7 +393,7 @@ const BidCard: React.FC<BidCardProps> = ({ bid, onViewAuction, onPlaceBid }) => 
               >
                 View Auction
               </Button>
-              {!isEnded && bid.status === "active" && !bid.is_highest_bidder && (
+              { (
                 <Button 
                   onClick={onPlaceBid}
                   className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white text-sm py-2 border border-white/10 shadow-lg"

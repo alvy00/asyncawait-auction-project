@@ -67,12 +67,12 @@ const MyAuctionsPage = () => {
   const [auctions, setAuctions] = useState<Auction[]>();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
-    created: SAMPLE_AUCTIONS.length,
-    running: SAMPLE_AUCTIONS.filter(a => a.status === "live").length,
-    upcoming: SAMPLE_AUCTIONS.filter(a => a.status === "upcoming").length,
-    completed: SAMPLE_AUCTIONS.filter(a => a.status === "ended" && a.highest_bidder_id).length,
-    expired: SAMPLE_AUCTIONS.filter(a => a.status === "ended" && !a.highest_bidder_id).length,
-    totalBids: 20 // Sample total bids
+    created: 0,
+    running: 0,
+    upcoming: 0,
+    completed: 0,
+    expired: 0,
+    totalBids: 0,
   });
   
   const router = useRouter();
@@ -107,6 +107,20 @@ const MyAuctionsPage = () => {
 
     fetchAllAuctions();
   }, []);
+
+  // Update stats
+  useEffect(() => {
+    if (!auctions || !user) return;
+
+    setStats({
+      created: auctions.length,
+      running: auctions.filter(a => a.status === "live").length,
+      upcoming: auctions.filter(a => a.status === "upcoming").length,
+      completed: auctions.filter(a => a.status === "ended" && a.highest_bidder_id).length,
+      expired: auctions.filter(a => a.status === "ended" && !a.highest_bidder_id).length,
+      totalBids: user.bids_received ?? 0,
+    });
+  }, [auctions, user]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -189,30 +203,21 @@ const MyAuctionsPage = () => {
 
       {/* Stats Section */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-        <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-          <h3 className="text-gray-400 text-sm mb-1">Auctions Created</h3>
-          <p className="text-2xl font-bold text-white">{stats.created.toString().padStart(2, '0')}</p>
-        </div>
-        <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-          <h3 className="text-gray-400 text-sm mb-1">Running Auction</h3>
-          <p className="text-2xl font-bold text-white">{stats.running.toString().padStart(2, '0')}</p>
-        </div>
-        <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-          <h3 className="text-gray-400 text-sm mb-1">Upcoming Auction</h3>
-          <p className="text-2xl font-bold text-white">{stats.upcoming.toString().padStart(2, '0')}</p>
-        </div>
-        <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-          <h3 className="text-gray-400 text-sm mb-1">Completed Auction</h3>
-          <p className="text-2xl font-bold text-white">{stats.completed.toString().padStart(2, '0')}</p>
-        </div>
-        <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-          <h3 className="text-gray-400 text-sm mb-1">Expired Auction</h3>
-          <p className="text-2xl font-bold text-white">{stats.expired.toString().padStart(2, '0')}</p>
-        </div>
-        <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-          <h3 className="text-gray-400 text-sm mb-1">Total Bid Received</h3>
-          <p className="text-2xl font-bold text-white">{stats.totalBids.toString().padStart(2, '0')}</p>
-        </div>
+        {[
+          { label: "Auctions Created", value: stats?.created },
+          { label: "Running Auction", value: stats?.running },
+          { label: "Upcoming Auction", value: stats?.upcoming },
+          { label: "Completed Auction", value: stats?.completed },
+          { label: "Expired Auction", value: stats?.expired },
+          { label: "Total Bid Received", value: stats?.totalBids },
+        ].map((stat, idx) => (
+          <div key={idx} className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
+            <h3 className="text-gray-400 text-sm mb-1">{stat.label}</h3>
+            <p className="text-2xl font-bold text-white">
+              {String(stat.value ?? 0).padStart(2, '0')}
+            </p>
+          </div>
+        ))}
       </div>
 
       {/* More Details Link */}
