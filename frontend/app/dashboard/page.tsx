@@ -82,7 +82,7 @@ const Dashboard = () => {
     );
   }
 
-  const winRatio = user.total_bids > 0 ? Math.round((user.bids_won / user.total_bids) * 100) : 0;
+  const winRatio = user.total_bids > 0 ? Math.round((user.auctions_won / user.total_bids) * 100) : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#021f49] to-[#010915] text-white p-6 rounded-xl">
@@ -132,8 +132,8 @@ const Dashboard = () => {
         >
           <WinRatioChart 
             winRatio={winRatio} 
-            bidsWon={user.bids_won} 
-            bidsLost={user.total_bids - user.bids_won} 
+            bidsWon={user.auctions_won} 
+            bidsLost={user.total_bids - user.auctions_won} 
             totalBids={user.total_bids} 
           />
         </motion.div>
@@ -166,7 +166,7 @@ const Dashboard = () => {
             
             <StatCard 
               title="Bids Won" 
-              value={user.bids_won.toString()} 
+              value={user.auctions_won.toString()} 
               icon={<FaChartPie className="text-yellow-400" />} 
             />
             

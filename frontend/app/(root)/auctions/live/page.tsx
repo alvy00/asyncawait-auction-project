@@ -61,7 +61,7 @@ const LiveAuctionsPage = () => {
     getUser();
   }, []);
   
-  // Fetch all auctions on mount
+  // Fetch all live auctions
   useEffect(() => {
     const fetchAllAuctions = async () => {
       setIsLoading(true);
