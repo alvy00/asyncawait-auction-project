@@ -7,7 +7,8 @@ export interface User {
     money: number;
     total_auctions: number;
     total_bids: number;
-    bids_won: number;
+    auctions_participated: number;
+    auctions_won: number;
     win_rate: number;
     is_admin: boolean;
     is_suspended: boolean;
