@@ -4,6 +4,7 @@ export const auctionSchema = z.object({
     item_name: z.string().min(5).max(50),
     description: z.string().min(10),
     category: z.enum(['electronics', 'art', 'fashion', 'vehicles', 'other']),
+    auction_type: z.string(),
     starting_price: z.number().nonnegative(),
     buy_now: z.number().nonnegative().optional(),
     start_time: z.coerce.date(),

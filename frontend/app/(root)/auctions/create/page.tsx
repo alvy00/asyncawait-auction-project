@@ -8,11 +8,20 @@ import { Label } from "../../../../components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../../../components/ui/dialog";
 import { Button } from "../../../../components/ui/button";
 import { FaTwitter, FaTelegramPlane, FaTag, FaDollarSign, FaRegCalendarAlt, FaImage, FaBoxOpen, FaGavel } from "react-icons/fa";
+import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/react'
+import { FaCrown } from 'react-icons/fa';
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
 import Link from "next/link";
+
+const auctionTypes = [
+  { value: 'regular', label: 'Regular', description: 'Standard auction, highest bid wins.' },
+  { value: 'blitz', label: 'Blitz', description: 'Short time, fast bidding.' },
+  { value: 'dutch', label: 'Dutch', description: 'Price starts high and decreases over time.' },
+  { value: 'reverse', label: 'Reverse', description: 'Lowest bid wins instead of highest.' },
+];
+
 
 const LoadingSpinner = () => (
   <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
@@ -29,6 +38,7 @@ export default function AuctionCreationForm() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [imageUrls, setImageUrls] = useState<string[]>([""]);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [selectedType, setSelectedType] = useState(auctionTypes[0]);
   const router = useRouter();
 
   useEffect(() => {
@@ -73,7 +83,7 @@ export default function AuctionCreationForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-
+    
     try {
       const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
 
@@ -106,6 +116,7 @@ export default function AuctionCreationForm() {
         item_name: formData.get('item_name') as string,
         description: formData.get('description') as string,
         category: formData.get('category') as 'electronics' | 'art' | 'fashion' | 'vehicles' | 'other',
+        auction_type: formData.get('auction_type') as string,
         starting_price: parseFloat(formData.get('starting_price') as string),
         buy_now: formData.get('buy_now') ? parseFloat(formData.get('buy_now') as string) : undefined,
         start_time: startTimeUTC.toISOString(),
@@ -114,7 +125,8 @@ export default function AuctionCreationForm() {
         images: imageUrls.filter(url => url.trim() !== ""),
         condition: formData.get('condition') as 'new' | 'used' | 'refurbished',
       };
-
+      console.log(formData.get('auction_type') as string)
+      
       const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/create', {
         method: 'POST',
         headers: {
@@ -294,6 +306,37 @@ export default function AuctionCreationForm() {
                       <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
                   </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Auction Type */}
+            <motion.div variants={itemVariants} className="space-y-2">
+              <Label htmlFor="auction_type" className="text-lg font-medium text-white/90">Auction Type</Label>
+              <div className="relative overflow-hidden rounded-xl bg-white/5 border border-white/10 transition-all focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/50">
+                <FaCrown className="absolute top-3 left-3 text-orange-400" />
+                <select
+                  id="auction_type"
+                  name="auction_type"
+                  value={selectedType.value}
+                  onChange={(e) => {
+                    const selected = auctionTypes.find(type => type.value === e.target.value);
+                    setSelectedType(selected);
+                  }}
+                  required
+                  className="pl-10 py-3 w-full bg-transparent border-none text-white focus:ring-0 appearance-none cursor-pointer"
+                >
+                  <option value="" className="bg-[#0A111B]">Select auction type</option>
+                  {auctionTypes.map(type => (
+                    <option key={type.value} value={type.value} className="bg-[#0A111B]">
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-3 top-3 pointer-events-none text-orange-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
                 </div>
               </div>
             </motion.div>
