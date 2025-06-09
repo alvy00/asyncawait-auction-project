@@ -34,10 +34,6 @@ auctionRouter.get('/', async (req, res) => {
 auctionRouter.post('/create', async (req, res) => {
     try {
         const user = await getUser(req);
-
-        //const { user_id } = req.body;
-        //console.log(user)
-
         if (!user) return res.status(401).json({ error: 'Unauthorized' });
         
         const result = auctionSchema.safeParse(req.body);
@@ -83,6 +79,7 @@ auctionRouter.post('/create', async (req, res) => {
             auction: data[0],
         });
 
+        console.log('Data to insert:', result.data);
     } catch (e) {
         console.error(e);
         return res.status(500).json({
