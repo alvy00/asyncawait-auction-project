@@ -4,6 +4,11 @@ import supabase from '../../config/supabaseClient.js';
 
 const authRouter = express.Router();
 
+// Server Ping
+authRouter.get('/ping', (req, res) => {
+    return res.status(200).json({ message: "Server is active" });
+});
+
 //Get Current Logged IN User's Database Data
 authRouter.get('/getuser', async (req, res) => {
     const authHeader = req.headers.authorization;
