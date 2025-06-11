@@ -6,7 +6,6 @@ import AuctionCard from "../../../components/AuctionCard";
 import { Auction, User } from "../../../../lib/interfaces";
 import { FaSpinner, FaSearch } from "react-icons/fa";
 import { motion } from "framer-motion";
-import toast from "react-hot-toast";
 
 const LiveAuctionsPage = () => {
   const [user, setUser] = useState<User>();
@@ -83,7 +82,7 @@ const LiveAuctionsPage = () => {
         }
 
         const data = await res.json();
-        setAuctions( data.filter((auction : Auction) => new Date(auction.end_time) > new Date()) ); // only live auctions
+        setAuctions( data.filter((auction: Auction) => new Date(auction.start_time) <= new Date() && new Date() < new Date(auction.end_time)) ); // only live auctions
 
       } catch (e) {
         console.error(e);
