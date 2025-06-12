@@ -3,6 +3,7 @@ import { motion, useAnimation } from "framer-motion";
 import { FaBolt, FaHourglassHalf, FaStopwatch } from "react-icons/fa";
 import { Auction } from "../../lib/interfaces";
 import Image from "next/image";
+import { Countdown } from "./Countdown";
 
 interface AuctionCardProps {
   auction: Auction;
@@ -14,26 +15,16 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
   const [isBidding, setIsBidding] = useState(false);
   const [shake, setShake] = useState(false);
   const [currentPrice, setCurrentPrice] = useState(auction.starting_price);
-  const [timeLeft, setTimeLeft] = useState(0);
   const FALLBACK_IMAGE = "/fallback.jpg";
 
-  useEffect(() => {
-    const endTimestamp = new Date(auction.end_time).getTime();
-    const interval = setInterval(() => {
-      const now = Date.now();
-      const diff = Math.max(0, Math.floor((endTimestamp - now) / 1000));
-      setTimeLeft(diff);
-      if (diff <= 0) clearInterval(interval);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [auction.end_time]);
-
+  // Update current price linearly from starting price down to 25% over auction duration
   useEffect(() => {
     const startTimestamp = new Date(auction.start_time).getTime();
     const endTimestamp = new Date(auction.end_time).getTime();
     const totalDuration = endTimestamp - startTimestamp;
     const endingPrice = auction.starting_price * 0.25;
     const priceDrop = auction.starting_price - endingPrice;
+
     const updatePrice = () => {
       const now = Date.now();
       if (now >= endTimestamp) {
@@ -45,21 +36,23 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
         return;
       }
       const elapsed = now - startTimestamp;
-      const newPrice = auction.starting_price - (priceDrop * (elapsed / totalDuration));
+      const newPrice = auction.starting_price - priceDrop * (elapsed / totalDuration);
       setCurrentPrice(newPrice);
     };
+
     updatePrice();
     const priceInterval = setInterval(updatePrice, 1000);
     return () => clearInterval(priceInterval);
   }, [auction.start_time, auction.end_time, auction.starting_price]);
 
+  // Animate live badge pulse glow
   useEffect(() => {
     if (auction.status === "live") {
       controls.start({
-        scale: [1, 1.07, 1], // softer pulse scale
+        scale: [1, 1.07, 1],
         opacity: [1, 0.85, 1],
         boxShadow: [
-          "0 0 4px 1px rgba(30,144,255,0.4)", // very soft glow
+          "0 0 4px 1px rgba(30,144,255,0.4)",
           "0 0 6px 2px rgba(0,191,255,0.5)",
           "0 0 4px 1px rgba(30,144,255,0.4)",
         ],
@@ -75,6 +68,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
     }
   }, [auction.status, controls]);
 
+  // Shake animation on bidding
   useEffect(() => {
     if (isBidding) {
       setShake(true);
@@ -89,12 +83,6 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
   const handleBidNow = () => {
     setIsBidding(true);
     onBid();
-  };
-
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
   const StatusBadge = ({ status }: { status: string }) => {
@@ -144,46 +132,40 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
         boxShadow: "0 0 25px 7px rgba(0,191,255,0.8)",
         transition: { duration: 0.3 },
       }}
-      className={`relative w-full h-[500px] group rounded-lg overflow-hidden cursor-pointer bg-gradient-to-br from-blue-900 to-blue-800 text-white select-none ${
+      className={`relative w-full h-[500px] flex flex-col rounded-lg overflow-hidden bg-gradient-to-br from-blue-900 to-blue-800 text-white border border-white/20 select-none ${
         shake ? "animate-shake" : ""
       }`}
     >
-      <Image
-        src={FALLBACK_IMAGE}
-        alt={auction.item_name || "Dutch Auction"}
-        width={700}
-        height={288}
-        className="brightness-90 group-hover:brightness-110 transition duration-300 object-cover rounded-t-lg"
-      />
+      <div className="relative h-72 overflow-hidden rounded-t-lg">
+        <Image
+          src={FALLBACK_IMAGE}
+          alt={auction.item_name || "Dutch Auction"}
+          fill
+          className="brightness-90 group-hover:brightness-110 transition duration-300 object-cover"
+          sizes="(max-width: 768px) 100vw, 700px"
+        />
+      </div>
 
       <StatusBadge status={auction.status} />
 
-      <div className="p-5 flex flex-col justify-between h-[calc(100%-288px)] bg-gradient-to-t from-black/80 to-transparent">
+      <div className="p-5 flex flex-col justify-between flex-grow bg-gradient-to-t from-black/80 to-transparent min-h-[150px]">
         <h3 className="text-2xl font-bold">{auction.item_name}</h3>
         <p className="mt-2 text-lg">
           Current Price:{" "}
           <span className="font-extrabold text-cyan-400">${currentPrice.toFixed(2)}</span>
         </p>
-        <p className="mt-1 text-sm text-gray-300">Time Left: {formatTime(timeLeft)}</p>
+        <div className="mt-3 flex items-center gap-2 text-sm font-semibold text-orange-400">
+          <span className="text-white bg-white/5 backdrop-blur-sm px-3 py-1 rounded-md border border-white/10 font-mono tracking-wide">
+            <Countdown endTime={auction.end_time} />
+          </span>
+        </div>
       </div>
 
       {auction.status === "live" && !isBidding && (
-        <div className="absolute bottom-5 left-1/2 transform -translate-x-1/2 z-10">
+        <div className="absolute bottom-5 right-5 z-10">
           <motion.button
             onClick={handleBidNow}
-            whileHover={{
-              scale: 1.1,
-              boxShadow: "0 0 10px 3px rgba(0,191,255,0.9)",
-            }}
-            animate={{
-              boxShadow: [
-                "0 0 12px 4px rgba(0,191,255,1)",
-                "0 0 20px 8px rgba(30,144,255,0.8)",
-                "0 0 12px 4px rgba(0,191,255,1)",
-              ],
-            }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-            className="px-6 py-3 rounded-md border border-cyan-400 bg-cyan-600 font-bold text-white backdrop-blur-sm transition-all duration-300 ease-in-out"
+            className="px-6 py-3 rounded-md border border-cyan-400 bg-cyan-600 font-bold text-white backdrop-blur-sm transition-all duration-300 ease-in-out cursor-pointer"
           >
             Accept Price
           </motion.button>

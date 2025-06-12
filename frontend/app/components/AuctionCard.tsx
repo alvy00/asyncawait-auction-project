@@ -362,7 +362,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                       {currentStatus === "live" && !isBidding && (
                         <button
                           onClick={() => setIsBidding(true)}
-                          className="absolute inset-0 w-full h-full flex items-center justify-center rounded-md border border-gray-600 bg-gray-800 hover:bg-gray-700 font-medium text-white backdrop-blur-sm transition-all duration-500 ease-in-out z-10"
+                          className="absolute inset-0 w-full h-full flex items-center justify-center rounded-md border border-gray-600 bg-gray-800 hover:bg-gray-700 font-medium text-white backdrop-blur-sm transition-all duration-500 ease-in-out z-10 cursor-pointer"
                         >
                           Bid Now
                         </button>
@@ -391,7 +391,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                       />
                       <button
                         type="submit"
-                        className="px-3 py-2 bg-gray-800 text-white font-semibold rounded-lg border border-gray-700 shadow hover:bg-gray-700 hover:border-gray-500 transition-all duration-300 ease-in-out"
+                        className="px-3 py-2 bg-gray-800 text-white font-semibold rounded-lg border border-gray-700 shadow hover:bg-gray-700 hover:border-gray-500 transition-all duration-300 ease-in-out cursor-pointer"
                       >
                         Bid
                       </button>
