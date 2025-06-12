@@ -16,6 +16,7 @@ export interface User {
 
 export interface Auction {
   auction_id: string;
+  auction_type: string;
   user_id?: string;
   creator: string;
   item_name: string;
