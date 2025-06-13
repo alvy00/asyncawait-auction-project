@@ -191,11 +191,6 @@ auctionRouter.post('/bid', async (req, res) => {
             return res.status(400).json({ message: 'Auction has ended :(' });
         }
 
-        if (amount <= auction.highest_bid) {
-            console.error(`Bid is too low. Current highest bid is ${auction.highest_bid}`);
-            return res.status(401).json({ message: `Bid must be higher than the current highest bid ($${auction.highest_bid})` });
-        }
-
         if (isNaN(amount) || amount <= 0) {
             console.error('Invalid bid amount:', amount);
             return res.status(400).json({ message: 'Please enter a valid bid amount' });

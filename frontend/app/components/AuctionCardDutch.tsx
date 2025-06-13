@@ -49,13 +49,8 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
   useEffect(() => {
     if (auction.status === "live") {
       controls.start({
-        scale: [1, 1.07, 1],
-        opacity: [1, 0.85, 1],
-        boxShadow: [
-          "0 0 4px 1px rgba(30,144,255,0.4)",
-          "0 0 6px 2px rgba(0,191,255,0.5)",
-          "0 0 4px 1px rgba(30,144,255,0.4)",
-        ],
+        scale: [1, 1.05, 1],
+        opacity: [1, 0.75, 1],
         transition: {
           repeat: Infinity,
           duration: 1.5,
@@ -112,12 +107,10 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
 
     return (
       <motion.div
-        initial={{ scale: 1, boxShadow: "none", opacity: 1 }}
-        animate={status.toLowerCase() === "live" ? controls : { scale: 1, boxShadow: "none", opacity: 1 }}
+        animate={status.toLowerCase() === "live" ? controls : { scale: 1 }}
         className={`${bgClasses} text-white text-xs font-bold px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm absolute top-4 left-4`}
-        style={{ boxShadow: "inherit" }}
       >
-        {Icon && <Icon className="text-white" />}
+        {Icon && <Icon className="text-white animate-pulse" />}
         <span>{text}</span>
       </motion.div>
     );
