@@ -82,7 +82,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
       };
 
       const res = await fetch(
-        "https://asyncawait-auction-project.onrender.com/api/auctions/bid",
+        "https://asyncawait-auction-project.onrender.com/api/auctions/bidlow",
         {
           method: "POST",
           headers: {
@@ -309,7 +309,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
                   onChange={(e) => setBidAmount(Number(e.target.value))}
                   max={
                     auction.highest_bid
-                      ? auction.highest_bid - 1
+                      ? auction.highest_bid - 2
                       : auction.starting_price ?? 0
                   }
                   min={0}
