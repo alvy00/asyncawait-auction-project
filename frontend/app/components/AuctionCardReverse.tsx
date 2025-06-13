@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { FaArrowDown, FaClock, FaBan } from "react-icons/fa";
@@ -8,18 +9,17 @@ import toast from "react-hot-toast";
 
 interface AuctionCardProps {
   auction: Auction;
-  onBid: () => void;
 }
 
 const FIREY_PURPLE = "rgba(191, 85, 236, "; // vibrant purple (rgba base)
 
-const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
+const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
   const controls = useAnimation();
   const [isBidding, setIsBidding] = useState(false);
   const [winner, setWinner] = useState(null);
   const [submittingBid, setSubmittingBid] = useState(false);
   const [bidAmount, setBidAmount] = useState(
-    auction.highest_bid ? auction.highest_bid - 1 : auction.starting_price
+    auction.highest_bid ? auction.highest_bid - 2 : auction.starting_price
   );
   const [highestBid, setHighestBid] = useState(auction.highest_bid);
   const [user, setUser] = useState(null);
@@ -76,9 +76,16 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
     try {
       const formData = new FormData(e.currentTarget);
 
+      const amount = parseFloat(formData.get("amount") as string);
+
+      if (isNaN(amount) || amount <= 0) {
+        toast.error("Please enter a valid bid amount.");
+        return;
+      }
+
       const body = {
         auction_id: auction.auction_id,
-        amount: formData.get("amount"),
+        amount,
       };
 
       const res = await fetch(
@@ -93,15 +100,17 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
         }
       );
 
+      const result = await res.json();
+
       if (!res.ok) {
-        const error = await res.json();
-        console.error("Error placing bid:", error);
-        toast.error(error?.message || "Failed to place bid.");
+        console.error("Error placing bid:", result);
+        toast.error(result?.message || "Failed to place bid.");
         return;
       }
 
-      toast.success(`Bid of $${bidAmount} placed successfully!`);
-      setHighestBid(Number(bidAmount));
+      toast.success(`Bid of $${amount.toFixed(2)} placed successfully!`);
+      setHighestBid(amount);
+      setBidAmount(amount);
       setIsBidding(false);
     } catch (err) {
       console.error("Bid submission error:", err);
@@ -192,7 +201,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
     );
   };
 
-    // Live Badge Animation
+  // Live Badge Animation
   useEffect(() => {
     if (auction.status === "live") {
       controls.start({
@@ -257,7 +266,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
           <p className="mt-2 text-lg">
             Lowest Bid:{" "}
             <span className="font-extrabold text-purple-300">
-              ${bidAmount?.toFixed(2) ?? "—"}
+              ${highestBid?.toFixed(2) ?? "—"}
             </span>
           </p>
           <div className="mt-3 flex items-center gap-2 text-sm font-semibold text-orange-400">
@@ -283,7 +292,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
                 <button
                   onClick={() => {
                     setIsBidding(true);
-                    setShake(true); // trigger shake effect on open
+                    setShake(true);
                     setTimeout(() => setShake(false), 600);
                   }}
                   className="w-full h-full flex items-center justify-center rounded-md border border-orange-700 bg-orange-800 hover:bg-orange-700 font-medium text-white backdrop-blur-sm transition-all duration-300 ease-in-out cursor-pointer"
@@ -309,8 +318,8 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
                   onChange={(e) => setBidAmount(Number(e.target.value))}
                   max={
                     auction.highest_bid
-                      ? auction.highest_bid - 2
-                      : auction.starting_price ?? 0
+                      ? auction.highest_bid - 1
+                      : auction.starting_price - 1
                   }
                   min={0}
                   placeholder="Your lower bid"

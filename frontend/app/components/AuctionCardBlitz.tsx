@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { FaBolt, FaHourglassHalf, FaStar, FaStopwatch } from "react-icons/fa";
@@ -8,7 +9,6 @@ import toast from "react-hot-toast";
 
 interface AuctionCardProps {
   auction: Auction;
-  onBid: () => void;
 }
 
 const FIREY_ORANGE = "#FF4500"; // Firey Orange (OrangeRed)
@@ -300,7 +300,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction }) => {
                   <button
                     onClick={() => {
                       setIsBidding(true);
-                      setShake(true); // trigger shake
+                      setShake(true);
                     }}
                     className="w-full h-full flex items-center justify-center rounded-md border border-orange-700 bg-orange-800 hover:bg-orange-700 font-medium text-white backdrop-blur-sm transition-all duration-300 ease-in-out cursor-pointer"
                   >

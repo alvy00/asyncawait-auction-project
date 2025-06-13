@@ -7,10 +7,9 @@ import { Countdown } from "./Countdown";
 
 interface AuctionCardProps {
   auction: Auction;
-  onBid: () => void;
 }
 
-const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
+const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction }) => {
   const controls = useAnimation();
   const [isBidding, setIsBidding] = useState(false);
   const [shake, setShake] = useState(false);
@@ -77,7 +76,6 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
 
   const handleBidNow = () => {
     setIsBidding(true);
-    onBid();
   };
 
   const StatusBadge = ({ status }: { status: string }) => {
@@ -160,8 +158,9 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
             onClick={handleBidNow}
             className="px-6 py-3 rounded-md border border-cyan-400 bg-cyan-600 font-bold text-white backdrop-blur-sm transition-all duration-300 ease-in-out cursor-pointer"
           >
-            Accept Price
+            Work in progress
           </motion.button>
+          {/* accept price */}
         </div>
       )}
 
