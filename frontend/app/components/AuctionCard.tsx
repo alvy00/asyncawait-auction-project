@@ -23,6 +23,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
   const [isEnded, setIsEnded] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
   const [isBidding, setIsBidding] = useState(false);
+  const [submittingBid, setSubmittingBid] = useState(false);
   const [bidAmount, setBidAmount] = useState(0);
   const [highestBid, setHighestBid] = useState(auction.highest_bid);
   const [isHovered, setIsHovered] = useState(false);
@@ -113,7 +114,8 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
   // submit bid
   const handleBidSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-  
+    setSubmittingBid(true);
+
     try {
         const formData = new FormData(e.currentTarget);
         
@@ -143,7 +145,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
         toast.success(`Bid of $${bidAmount} placed successfully!`);
         setHighestBid(bidAmount);
         setIsBidding(false);
-
+        setSubmittingBid(false);
       } catch (err) {
         console.error("Bid submission error:", err);
         toast.error("Something went wrong. Please try again.");
@@ -225,7 +227,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
       onMouseLeave={handleMouseLeave}
     >
       {/* Card content */}
-      <div className="relative h-full overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-xl shadow-2xl border border-white/20">
+      <div className="relative h-full overflow-hidden rounded-lg bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-xl shadow-2xl border border-white/20">
         {/* Glassmorphism card highlights */}
         <div className="absolute inset-0 overflow-hidden rounded-xl sm:rounded-2xl">
           <div className="absolute -inset-1 bg-gradient-to-tr from-orange-500/10 via-purple-500/5 to-blue-500/10 opacity-30 group-hover:opacity-40 transition-opacity duration-700"></div>
@@ -303,28 +305,35 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
           
           {/* Price and time */}
           <div className="flex-grow">
-            <div className="flex items-center justify-between mb-4">
-              {!isEnded && (
-                <div className="text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-orange-500 font-bold text-3xl">
-                  {!auction.highest_bid ? (
-                    `$${auction.starting_price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                  ) : (
-                    `$${highestBid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                  )}
-                </div>
-              )}
-              <div className="text-white text-sm bg-white/5 backdrop-blur-sm px-2 py-1 rounded-lg border border-white/10">
-                {isEnded ? (
-                  winner ? (
-                    <span className="text-green-400 font-bold animate-pulse">🎉 {winner} won!</span>
-                  ) : (
-                    <span className="text-red-400 font-semibold">❌ Expired</span>
-                  )
-                ) : (
-                  <Countdown endTime={auction.end_time} onComplete={() => setIsEnded(true)} />
-                )}
-              </div>
-            </div>
+            {/* Price and time */}
+<div className="flex-grow">
+  <div className="flex items-center justify-between mb-4">
+    {!isEnded && (
+      <div className="text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-orange-500 font-bold text-3xl flex flex-col">
+        {!auction.highest_bid ? (
+          `$${auction.starting_price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        ) : (
+          <>
+            <span>${highestBid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            <span className="text-sm font-normal text-white/80 mt-1">by {auction.highest_bidder_name || "Unknown"}</span>
+          </>
+        )}
+      </div>
+    )}
+
+    <div className="text-white text-sm bg-white/5 backdrop-blur-sm px-2 py-1 rounded-lg border border-white/10">
+      {isEnded ? (
+        winner ? (
+          <span className="text-green-400 font-bold animate-pulse">🎉 {winner} won!</span>
+        ) : (
+          <span className="text-red-400 font-semibold">❌ Expired</span>
+        )
+      ) : (
+        <Countdown endTime={auction.end_time} onComplete={() => setIsEnded(true)} />
+      )}
+    </div>
+  </div>
+</div>
 
             {/* Seller and bid button */}
             <div className="flex items-center justify-between">
@@ -336,6 +345,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                   {auctionCreator}
                 </div>
               )}
+
               {/* Bid Area with smooth transition */}
               <div className="relative h-12 w-[160px] transition-all duration-500">
                 {!token ? (
@@ -396,14 +406,25 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                         Bid
                       </button>
                     </form>}
-
                   </div>
-                )}
+                )}            
               </div>
-
             </div>
           </div>
         </div>
+
+        {/* Overlay during bidding */}
+        {submittingBid && (
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-xl font-bold text-white z-50 pointer-events-auto space-x-4">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+              className="w-10 h-10 border-4 border-white border-t-transparent rounded-full"
+            />
+            <span>Submitting Bid...</span>
+          </div>
+        )}
+        
       </div>
 
       {/* Decorative elements */}

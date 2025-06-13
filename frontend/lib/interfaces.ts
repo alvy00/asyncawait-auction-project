@@ -26,12 +26,12 @@ export interface Auction {
   buy_now?: number;
   highest_bid?: number;
   highest_bidder_id?: string;
+  highest_bidder_name?: string;
   start_time: string;
   end_time: string;
   status?: string;
   images?: string[];
   condition: "new" | "used" | "refurbished";
-  onFavorite?: (id: string | number, isFavorite: boolean) => void;
   isFavorite?: boolean;
 }
 

@@ -22,6 +22,7 @@ const LiveAuctionsPage = () => {
 
   const categories = ["all", "watches", "jewelry", "art", "collectibles", "fashion"];
 
+  // Get User
   useEffect(() => {
     const getUser = async () => {
       const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
@@ -56,6 +57,7 @@ const LiveAuctionsPage = () => {
     getUser();
   }, []);
 
+  // Fetch All Live Auctions
   useEffect(() => {
     const fetchAllAuctions = async () => {
       setIsLoading(true);
@@ -91,6 +93,7 @@ const LiveAuctionsPage = () => {
     fetchAllAuctions();
   }, []);
 
+  // Fetch Favourited Auctions
   useEffect(() => {
     if (!user?.user_id) {
       setIsFavsLoading(false);
@@ -128,19 +131,29 @@ const LiveAuctionsPage = () => {
     fetchFavAuctionIDs();
   }, [user?.user_id]);
 
+  // Set Filtered Auctions
   useEffect(() => {
-    const filtered = auctions.filter((auction) => {
-      const matchesSearch = auction.item_name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-      const matchesFilter =
-        activeFilter === "all" ||
-        auction.category?.toLowerCase() === activeFilter.toLowerCase();
-      return matchesSearch && matchesFilter;
-    });
+    const filtered = auctions
+      .filter((auction) => {
+        const matchesSearch = auction.item_name
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
+
+        const matchesFilter =
+          activeFilter === "all" ||
+          auction.category?.toLowerCase() === activeFilter.toLowerCase();
+
+        return matchesSearch && matchesFilter;
+      })
+      .map((auction) => ({
+        ...auction,
+        isFavorite: favAuctionIDs.includes(auction.auction_id),
+      }));
 
     setFilteredAuctions(filtered);
-  }, [auctions, searchTerm, activeFilter]);
+  }, [auctions, searchTerm, activeFilter, favAuctionIDs]);
+
+
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -153,7 +166,6 @@ const LiveAuctionsPage = () => {
       },
     },
   };
-
   const isAnyLoading = isLoading || isFavsLoading;
 
   return (
@@ -265,11 +277,12 @@ const LiveAuctionsPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.25 }}
               >
+
                 {auction.auction_type === "regular" && (
                   <AuctionCard
                     auction={auction}
                     auctionCreator={auction.creator}
-                    isFavourited={user ? favAuctionIDs.includes(auction.auction_id) : false}
+                    isFavourited={auction.isFavorite}
                   />
                 )}
                 {auction.auction_type === "blitz" && (
@@ -281,6 +294,7 @@ const LiveAuctionsPage = () => {
                 {auction.auction_type === "reverse" && (
                   <AuctionCardReverse auction={auction} onBid={() => alert("Bid placed!")} />
                 )}
+
               </motion.div>
             ))}
           </motion.div>

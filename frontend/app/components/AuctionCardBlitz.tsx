@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
-import { FaBolt, FaHourglassHalf, FaStopwatch } from "react-icons/fa";
+import { FaBolt, FaHourglassHalf, FaStar, FaStopwatch } from "react-icons/fa";
 import { Auction } from "../../lib/interfaces";
 import Image from "next/image";
 import { Countdown } from "./Countdown";
+import toast from "react-hot-toast";
 
 interface AuctionCardProps {
   auction: Auction;
@@ -12,49 +13,146 @@ interface AuctionCardProps {
 
 const FIREY_ORANGE = "#FF4500"; // Firey Orange (OrangeRed)
 
-const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
+const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction }) => {
   const controls = useAnimation();
+  const [winner, setWinner] = useState(null);
   const [isBidding, setIsBidding] = useState(false);
+  const [submittingBid, setSubmittingBid] = useState(false);
+  const [bidAmount, setBidAmount] = useState(
+    auction.highest_bid ? auction.highest_bid + 1 : auction.starting_price
+  );
+  const [highestBid, setHighestBid] = useState(auction.highest_bid);
+  const [user, setUser] = useState(null);
+  const [isHovered, setIsHovered] = useState(false);
   const [shake, setShake] = useState(false);
+
   const FALLBACK_IMAGE = "/fallback.jpg";
+  const token =typeof window !== "undefined"? localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken") : null;
 
+  // fetch user
   useEffect(() => {
-    if (auction.status === "live") {
-      controls.start({
-        scale: [1, 1.05, 1],
-        opacity: [1, 0.75, 1],
-        boxShadow: [
-          `0 0 5px 1px ${FIREY_ORANGE}80`,
-          `0 0 8px 3px ${FIREY_ORANGE}B3`,
-          `0 0 5px 1px ${FIREY_ORANGE}80`,
-        ],
-        transition: {
-          repeat: Infinity,
-          duration: 1.5,
-          ease: "easeInOut",
-        },
-      });
-    } else {
-      controls.stop();
-      controls.set({ scale: 1, boxShadow: "none" });
-    }
-  }, [auction.status, controls]);
+    const getUser = async () => {
+      const token =
+        localStorage.getItem("sessionToken") ||
+        sessionStorage.getItem("sessionToken");
+      if (!token) {
+        console.warn("No token found");
+        return;
+      }
 
-  useEffect(() => {
-    if (isBidding) {
-      setShake(true);
-      const timer = setTimeout(() => {
-        setShake(false);
-        setIsBidding(false);
-      }, 600);
-      return () => clearTimeout(timer);
-    }
-  }, [isBidding]);
+      try {
+        const res = await fetch(
+          "https://asyncawait-auction-project.onrender.com/api/getuser",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-  const handleBidNow = () => {
-    setIsBidding(true);
-    onBid();
+        if (!res.ok) {
+          const err = await res.json();
+          console.error("Failed to fetch user:", err.message);
+          return;
+        }
+
+        const data = await res.json();
+        setUser(data);
+      } catch (e) {
+        console.error("Error fetching user:", e);
+      }
+    };
+    getUser();
+  }, []);
+
+  // submit bid
+  const handleBidSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSubmittingBid(true);
+
+    try {
+      const formData = new FormData(e.currentTarget);
+
+      const body = {
+        auction_id: auction.auction_id,
+        amount: formData.get("amount"),
+      };
+
+      const res = await fetch(
+        "https://asyncawait-auction-project.onrender.com/api/auctions/bid",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(body),
+        }
+      );
+
+      if (!res.ok) {
+        const error = await res.json();
+        console.error("Error placing bid:", error);
+        toast.error(error?.message || "Failed to place bid.");
+        return;
+      }
+
+      toast.success(`Bid of $${bidAmount} placed successfully!`);
+      setHighestBid(Number(bidAmount));
+      setIsBidding(false);
+    } catch (err) {
+      console.error("Bid submission error:", err);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setSubmittingBid(false);
+    }
   };
+
+  // get highest bidder
+  useEffect(() => {
+    const getHighestBidder = async () => {
+      const userId = auction?.highest_bidder_id;
+
+      if (!userId) {
+        console.log("Missing highest_bidder_id");
+        return;
+      }
+
+      try {
+        const res = await fetch(
+          "https://asyncawait-auction-project.onrender.com/api/fetchuser",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ user_id: userId }),
+          }
+        );
+
+        if (!res.ok) {
+          const errorBody = await res.text();
+          console.error(
+            "Failed to fetch user. Status:",
+            res.status,
+            "Response:",
+            errorBody
+          );
+          return;
+        }
+
+        const data = await res.json();
+        setWinner(data.name);
+        return data;
+      } catch (err) {
+        console.error("Fetch exception:", err);
+      }
+    };
+
+    getHighestBidder();
+  }, [auction?.highest_bidder_id]);
 
   // Status Badge component
   const StatusBadge = ({ status }: { status: string }) => {
@@ -84,7 +182,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
 
     return (
       <motion.div
-        animate={status.toLowerCase() === "live" ? controls : { scale: 1, boxShadow: "none" }}
+        animate={status.toLowerCase() === "live" ? controls : { scale: 1 }}
         className={`${bgClasses} text-white text-xs font-bold px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm absolute top-4 left-4`}
       >
         {Icon && <Icon className="text-white" />}
@@ -93,8 +191,41 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
     );
   };
 
+    // Live Badge Animation
+  useEffect(() => {
+    if (auction.status === "live") {
+      controls.start({
+        scale: [1, 1.05, 1],
+        opacity: [1, 0.75, 1],
+        transition: {
+          repeat: Infinity,
+          duration: 1.5,
+          ease: "easeInOut",
+        },
+      });
+    } else {
+      controls.stop();
+      controls.set({ scale: 1, boxShadow: "none" });
+    }
+  }, [auction.status, controls]);
+
+  // shake effect
+  useEffect(() => {
+    if (shake) {
+      const timer = setTimeout(() => {
+        setShake(false);
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [shake]);
+
   return (
     <motion.div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setIsBidding(false);
+      }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{
@@ -102,9 +233,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
         boxShadow: `0 0 20px 5px ${FIREY_ORANGE}B3`,
         transition: { duration: 0.3 },
       }}
-      className={`relative w-full h-[550px] group rounded-lg overflow-hidden bg-gray-900 border border-white/20 text-white select-none ${
-        shake ? "animate-shake" : ""
-      }`}
+      className={`relative w-full h-[500px] group rounded-lg overflow-hidden bg-gray-900 border border-white/20 text-white select-none`}
     >
       {/* Image container */}
       <div className="relative h-[300px] w-full">
@@ -128,9 +257,25 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
           <div className="mt-2 text-lg">
             Current Bid:{" "}
             <span className="font-extrabold" style={{ color: FIREY_ORANGE }}>
-              ${auction.highest_bid.toFixed(2)}
+              ${highestBid.toFixed(2)}
             </span>
           </div>
+
+          {/* Higest bid and name */}
+          <div
+            className="mt-1 text-sm flex items-center gap-2 select-none cursor-default
+            text-yellow-300 font-semibold tracking-wide
+            drop-shadow-[0_0_6px_rgba(252,211,77,0.7)]
+            transition-all duration-300 ease-in-out
+            hover:text-yellow-350 hover:drop-shadow-[0_0_8px_rgba(252,211,77,0.9)]"
+          >
+            <div className="text-gray-200">by</div>
+            <div className="hover:underline transition-all duration-200">
+              {auction.highest_bidder_name || "—"}
+            </div>
+          </div>
+
+          {/* Countdown */}
           <div className="mt-3 flex items-center gap-2 text-sm font-semibold text-orange-400">
             <span className="text-white bg-white/5 backdrop-blur-sm px-3 py-1 rounded-md border border-white/10 font-mono tracking-wide">
               <Countdown endTime={auction.end_time} />
@@ -138,23 +283,77 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
           </div>
         </div>
 
-        {/* Bid Now Button */}
-        {auction.status === "live" && !isBidding && (
-          <div className="absolute bottom-5 right-5 z-10">
-            <motion.button
-              onClick={handleBidNow}
-              className="mt-6 self-start px-6 py-2 rounded-md border border-orange-700 bg-orange-800 font-bold text-white backdrop-blur-sm transition-all duration-300 ease-in-out z-10 cursor-pointer"
-            >
-              Bid Now
-            </motion.button>
+        {/* Bid Now Area with Transition */}
+        <div className="absolute bottom-5 right-5 z-10">
+          <div className="relative h-12 w-[160px] transition-all duration-500">
+            {/* If auction is live and user is allowed to bid */}
+            {auction.status === "live" && (
+              <div className={`relative w-full h-full ${shake ? "animate-shake" : ""}`}>
+                {/* Bid Now Button */}
+                <div
+                  className={`absolute inset-0 w-full h-full flex items-center justify-center transition-all duration-500 ease-in-out z-10 ${
+                    isBidding
+                      ? "opacity-0 scale-95 pointer-events-none"
+                      : "opacity-100 scale-100 pointer-events-auto"
+                  }`}
+                >
+                  <button
+                    onClick={() => {
+                      setIsBidding(true);
+                      setShake(true); // trigger shake
+                    }}
+                    className="w-full h-full flex items-center justify-center rounded-md border border-orange-700 bg-orange-800 hover:bg-orange-700 font-medium text-white backdrop-blur-sm transition-all duration-300 ease-in-out cursor-pointer"
+                  >
+                    Place Higher Bid
+                  </button>
+                </div>
+
+                {/* Bid Form (slide/scale/blur animated transition) */}
+                <form
+                  onSubmit={handleBidSubmit}
+                  className={`absolute inset-0 w-full h-full flex items-center justify-center gap-2 transition-all duration-500 ease-in-out z-0
+                    ${isBidding
+                      ? "opacity-100 translate-x-0 scale-100 blur-none pointer-events-auto"
+                      : "opacity-0 -translate-x-4 scale-95 blur-sm pointer-events-none"}`}
+                >
+                  <input
+                    type="number"
+                    name="amount"
+                    value={bidAmount}
+                    onChange={(e) => setBidAmount(Number(e.target.value))}
+                    min={
+                      auction.starting_price === auction.highest_bid
+                        ? auction.starting_price
+                        : Math.max(auction.starting_price, auction.highest_bid) + 1
+                    }
+                    placeholder="Your bid"
+                    className="w-2/3 max-w-[100px] p-2 rounded-lg border bg-gray-800 text-white border-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-400 transition"
+                  />
+                  <button
+                    type="submit"
+                    disabled={submittingBid}
+                    className={`px-3 py-2 bg-orange-800 text-white font-semibold rounded-lg border border-orange-700 shadow hover:bg-orange-700 hover:border-orange-500 transition-all duration-300 ease-in-out cursor-pointer ${
+                      submittingBid ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                  >
+                    Bid
+                  </button>
+                </form>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Overlay while bidding */}
-      {isBidding && (
-        <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center text-xl font-bold text-white z-20 pointer-events-none">
-          Placing Your Bid...
+      {/* Overlay during bidding */}
+      {submittingBid && (
+        <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-xl font-bold text-white z-50 pointer-events-auto space-x-4">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+            className="w-10 h-10 border-4 border-white border-t-transparent rounded-full"
+          />
+          <span>Submitting Bid...</span>
         </div>
       )}
 
