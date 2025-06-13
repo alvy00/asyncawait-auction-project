@@ -263,12 +263,28 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
       <div className="p-5 flex flex-col justify-between flex-grow bg-gradient-to-t from-black/80 to-transparent relative">
         <div>
           <h3 className="text-2xl font-bold">{auction.item_name}</h3>
-          <p className="mt-2 text-lg">
+          <div className="mt-2 text-lg">
             Lowest Bid:{" "}
-            <span className="font-extrabold text-purple-300">
+            <span className="font-extrabold text-purple-500">
               ${highestBid?.toFixed(2) ?? "—"}
             </span>
-          </p>
+          </div>
+
+          {/* Higest bid and name */}
+          <div
+            className="mt-1 text-sm flex items-center gap-2 select-none cursor-default
+            text-red-300 font-semibold tracking-wide
+            drop-shadow-[0_0_6px_rgba(252,211,77,0.7)]
+            transition-all duration-300 ease-in-out
+            hover:text-red-350 hover:drop-shadow-[0_0_8px_rgba(252,211,77,0.9)]"
+          >
+            <div className="text-gray-200">by</div>
+            <div className="hover:underline transition-all duration-200">
+              {auction.highest_bidder_name || "—"}
+            </div>
+          </div>
+
+          {/* Countdown */}
           <div className="mt-3 flex items-center gap-2 text-sm font-semibold text-orange-400">
             <span className="text-white bg-white/5 backdrop-blur-sm px-3 py-1 rounded-md border border-white/10 font-mono tracking-wide">
               <Countdown endTime={auction.end_time} />
@@ -295,7 +311,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
                     setShake(true);
                     setTimeout(() => setShake(false), 600);
                   }}
-                  className="w-full h-full flex items-center justify-center rounded-md border border-orange-700 bg-orange-800 hover:bg-orange-700 font-medium text-white backdrop-blur-sm transition-all duration-300 ease-in-out cursor-pointer"
+                  className="w-full h-full flex items-center justify-center rounded-md border border-purple-700 bg-purple-800 hover:bg-purple-700 font-medium text-white backdrop-blur-sm transition-all duration-300 ease-in-out cursor-pointer shadow-md hover:shadow-lg"
                   type="button"
                 >
                   Place Lower Bid
@@ -323,12 +339,12 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
                   }
                   min={0}
                   placeholder="Your lower bid"
-                  className="w-2/3 max-w-[100px] p-2 rounded-lg border bg-gray-800 text-white border-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-400 transition"
+                  className="w-2/3 max-w-[100px] p-2 rounded-lg border bg-gray-800 text-white border-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-gray-400 transition"
                 />
                 <button
                   type="submit"
                   disabled={submittingBid}
-                  className={`px-3 py-2 bg-orange-800 text-white font-semibold rounded-lg border border-orange-700 shadow hover:bg-orange-700 hover:border-orange-500 transition-all duration-300 ease-in-out cursor-pointer ${
+                  className={`px-3 py-2 bg-purple-800 text-white font-semibold rounded-lg border border-purple-700 shadow hover:bg-purple-700 hover:border-purple-500 transition-all duration-300 ease-in-out cursor-pointer ${
                     submittingBid ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                 >
@@ -355,15 +371,18 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
         </div>
       )}
 
+      {/* Shake animation styles */}
       <style>
         {`
           @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-5px); }
-            40%, 80% { transform: translateX(5px); }
+            25% { transform: translateX(-0.5px); }
+            50% { transform: translateX(0.5px); }
+            75% { transform: translateX(-0.5px); }
           }
+
           .animate-shake {
-            animation: shake 0.6s ease-in-out;
+            animation: shake 0.2s ease-in-out;
           }
         `}
       </style>

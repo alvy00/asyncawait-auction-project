@@ -362,11 +362,13 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction }) => {
         {`
           @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-5px); }
-            40%, 80% { transform: translateX(5px); }
+            25% { transform: translateX(-0.5px); }
+            50% { transform: translateX(0.5px); }
+            75% { transform: translateX(-0.5px); }
           }
+
           .animate-shake {
-            animation: shake 0.6s ease-in-out;
+            animation: shake 0.2s ease-in-out;
           }
         `}
       </style>
