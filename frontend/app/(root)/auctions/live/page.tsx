@@ -286,13 +286,13 @@ const LiveAuctionsPage = () => {
                   />
                 )}
                 {auction.auction_type === "blitz" && (
-                  <AuctionCardBlitz auction={auction} onBid={() => alert("Bid placed!")} />
+                  <AuctionCardBlitz auction={auction} />
                 )}
                 {auction.auction_type === "dutch" && (
-                  <AuctionCardDutch auction={auction} onBid={() => alert("Bid placed!")} />
+                  <AuctionCardDutch auction={auction} />
                 )}
                 {auction.auction_type === "reverse" && (
-                  <AuctionCardReverse auction={auction} onBid={() => alert("Bid placed!")} />
+                  <AuctionCardReverse auction={auction} />
                 )}
 
               </motion.div>
