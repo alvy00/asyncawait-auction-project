@@ -163,7 +163,68 @@ auctionRouter.get('/:id', async (req, res) => {
   }
 });
 
-// Place Higher Bid (Regular, Blitz, Dutch)
+// Place Bid (Dutch)
+auctionRouter.post('/bidcurrent', async (req, res) => {
+  try {
+    const { auction_id, amount } = req.body;
+    const user = await getUser(req);
+
+    if (!user) {
+      console.error('Unauthorized user');
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { data: auction, error: auctionErr } = await supabase
+      .from('auctions')
+      .select('*')
+      .eq('auction_id', auction_id)
+      .single();
+
+    if (auctionErr || !auction) {
+      console.error('Auction not found:', auctionErr);
+      return res.status(400).json({ message: 'Auction not found!' });
+    }
+
+    const now = new Date();
+
+    if (now > new Date(auction.end_time)) {
+      console.error('Auction has ended');
+      return res.status(400).json({ message: 'Auction has ended :(' });
+    }
+
+    if (now < new Date(auction.start_time)) {
+      console.error('Auction has not started yet');
+      return res.status(400).json({ message: 'Auction has not started yet' });
+    }
+
+    if (isNaN(amount) || amount <= 0) {
+      console.error('Invalid bid amount:', amount);
+      return res.status(400).json({ message: 'Please enter a valid bid amount' });
+    }
+
+    // Place bid transaction RPC
+    const { data: bid, error: bidErr } = await supabase.rpc('place_bid_transaction', {
+      p_auction_id: auction_id,
+      p_bid_amount: amount,
+      p_highest_bid: auction.highest_bid,
+      p_user_id: user.id,
+    });
+
+    if (bidErr) {
+      console.error('Error placing bid:', bidErr);
+      return res.status(400).json({ message: 'Bid could not be placed!', error: bidErr });
+    }
+
+    console.log('Bid placed successfully:', bid);
+    return res.status(200).json({ message: 'Bid placed!' });
+
+  } catch (e) {
+    console.error('Error in place bid route:', e);
+    return res.status(500).json({ message: 'Something went wrong!' });
+  }
+});
+
+// Place Higher Bid (Regular, Blitz)
 auctionRouter.post('/bid', async (req, res) => {
     try {
         //const { auction_id, amount, highest_bid, user_id } = req.body;

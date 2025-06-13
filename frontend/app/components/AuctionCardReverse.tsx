@@ -173,17 +173,17 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
     switch (status.toLowerCase()) {
       case "live":
         bgClasses = "bg-gradient-to-r from-purple-700 to-purple-600";
-        text = "REVERSE LIVE";
+        text = "REVERSE | LIVE";
         Icon = FaArrowDown;
         break;
       case "upcoming":
         bgClasses = "bg-gradient-to-r from-yellow-600 to-yellow-500";
-        text = "REVERSE UPCOMING";
+        text = "REVERSE | UPCOMING";
         Icon = FaClock;
         break;
       case "ended":
         bgClasses = "bg-gradient-to-r from-gray-700 to-gray-600";
-        text = "REVERSE ENDED";
+        text = "REVERSE | ENDED";
         Icon = FaBan;
         break;
       default:
@@ -239,20 +239,20 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{
-        scale: 1.03,
-        boxShadow: `0 0 30px 10px ${FIREY_PURPLE}0.7)`,
-        transition: { duration: 0.3 },
+        scale: 1.02,
+        boxShadow: `0 0 15px 4px rgba(128, 90, 213, 0.4)`,
+        transition: { duration: 0.35, ease: "easeOut" },
       }}
-      className={`relative w-full h-[500px] group rounded-lg overflow-hidden bg-gradient-to-br from-purple-900 to-purple-800 text-white border border-white/20 select-none flex flex-col`}
+      className={`relative w-full h-[500px] group rounded-lg overflow-hidden bg-gradient-to-br from-red-900 to-purple-800 text-white border border-white/20 select-none flex flex-col`}
     >
       {/* Image container with fixed height */}
-      <div className="relative h-72 w-full rounded-t-lg overflow-hidden">
+      <div className="relative h-[55%] w-full overflow-hidden">
         <Image
           src={FALLBACK_IMAGE}
-          alt={auction.item_name || "Reverse Auction"}
+          alt={auction.item_name}
           fill
-          sizes="(max-width: 768px) 100vw, 700px"
-          className="brightness-90 group-hover:brightness-110 transition duration-300 object-cover"
+          style={{ objectFit: "cover" }}
+          className="brightness-90 group-hover:brightness-110 object-cover transition-transform duration-700 group-hover:scale-110"
           priority
         />
       </div>
@@ -260,7 +260,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
       <StatusBadge status={auction.status} />
 
       {/* Info section fills remaining space */}
-      <div className="p-5 flex flex-col justify-between flex-grow bg-gradient-to-t from-black/80 to-transparent relative">
+      <div className="p-5 flex flex-col justify-between h-[45%] bg-gradient-to-t from-black/80 to-transparent">
         <div>
           <h3 className="text-2xl font-bold">{auction.item_name}</h3>
           <div className="mt-2 text-lg">
@@ -374,15 +374,15 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
       {/* Shake animation styles */}
       <style>
         {`
-          @keyframes shake {
+          @keyframes gentle-shake {
             0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-0.5px); }
-            50% { transform: translateX(0.5px); }
-            75% { transform: translateX(-0.5px); }
+            30% { transform: translateX(-0.3px); }
+            50% { transform: translateX(0.3px); }
+            70% { transform: translateX(-0.2px); }
           }
 
           .animate-shake {
-            animation: shake 0.2s ease-in-out;
+            animation: gentle-shake 0.4s ease-in-out;
           }
         `}
       </style>

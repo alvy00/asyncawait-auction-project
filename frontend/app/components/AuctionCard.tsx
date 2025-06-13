@@ -222,12 +222,19 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="relative w-full h-[500px] group"
+      whileHover={{
+        scale: 1.015,
+        boxShadow: "0 0 14px 4px rgba(144, 238, 144, 0.3)",
+        transition: { duration: 0.35, ease: "easeOut" },
+      }}
+      className="relative w-full h-[500px] group overflow-hidden rounded-lg 
+        bg-gradient-to-br from-[#0f2d21] via-[#1b4332] to-[#2d6a4f]
+        backdrop-blur-xl shadow-2xl border border-white/20 text-white"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
     >
       {/* Card content */}
-      <div className="relative h-full overflow-hidden rounded-lg bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-xl shadow-2xl border border-white/20">
+      <div className="relative h-full overflow-hidden rounded-lg bg-gradient-to-br from-green-900 to-black-800 to-transparent backdrop-blur-xl shadow-2xl border border-white/20">
         {/* Glassmorphism card highlights */}
         <div className="absolute inset-0 overflow-hidden rounded-xl sm:rounded-2xl">
           <div className="absolute -inset-1 bg-gradient-to-tr from-orange-500/10 via-purple-500/5 to-blue-500/10 opacity-30 group-hover:opacity-40 transition-opacity duration-700"></div>
@@ -240,7 +247,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
             src={imageSrc} 
             alt={auction.item_name}
             fill
-            className="object-cover transition-transform duration-700 group-hover:scale-110"
+            className="brightness-90 group-hover:brightness-110 object-cover transition-transform duration-700 group-hover:scale-110"
           />
           
           {/* Glass overlay on image */}
@@ -248,19 +255,19 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
           
           {/* Status tag */}
           {currentStatus === "upcoming" ? (
-          <div className="absolute top-3 left-3 bg-blue-600 text-white text-xs font-light px-3 py-1 z-10 rounded-lg flex items-center gap-2 shadow backdrop-blur-sm">
+          <div className="absolute top-4 left-4 bg-gradient-to-r from-green-700 to-green-500 text-white text-xs font-semibold px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
             <FaClock className="text-white" />
-            <span>REGULAR UPCOMING</span>
+            <span>REGULAR | UPCOMING</span>
           </div>
           ) : currentStatus === "live" ? (
-            <div className="absolute top-4 left-4 bg-gradient-to-r from-red-600 to-red-500 text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
+            <div className="absolute top-4 left-4 bg-gradient-to-r from-green-700 to-green-500 text-white text-xs font-semibold px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
               <FaBolt className="text-white animate-pulse" />
-              <span>Regular LIVE</span>
+              <span>REGULAR | LIVE</span>
             </div>
           ) : (
             <div className="absolute top-4 left-4 bg-gray-600 text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
               <FaFlagCheckered className="text-white" />
-              <span>REGULAR ENDED</span>
+              <span>REGULAR | ENDED</span>
             </div>
           )}
           
@@ -305,35 +312,34 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
           
           {/* Price and time */}
           <div className="flex-grow">
-            {/* Price and time */}
-<div className="flex-grow">
-  <div className="flex items-center justify-between mb-4">
-    {!isEnded && (
-      <div className="text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-orange-500 font-bold text-3xl flex flex-col">
-        {!auction.highest_bid ? (
-          `$${auction.starting_price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-        ) : (
-          <>
-            <span>${highestBid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-            <span className="text-sm font-normal text-white/80 mt-1">by {auction.highest_bidder_name || "Unknown"}</span>
-          </>
-        )}
-      </div>
-    )}
+            <div className="flex-grow">
+              <div className="flex items-center justify-between mb-4">
+                {!isEnded && (
+                  <div className="text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-orange-500 font-bold text-3xl flex flex-col">
+                    {!auction.highest_bid ? (
+                      `$${auction.starting_price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    ) : (
+                      <>
+                        <span>${highestBid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <span className="text-sm font-normal text-white/80 mt-1">by {auction.highest_bidder_name || "Unknown"}</span>
+                      </>
+                    )}
+                  </div>
+                )}
 
-    <div className="text-white text-sm bg-white/5 backdrop-blur-sm px-2 py-1 rounded-lg border border-white/10">
-      {isEnded ? (
-        winner ? (
-          <span className="text-green-400 font-bold animate-pulse">🎉 {winner} won!</span>
-        ) : (
-          <span className="text-red-400 font-semibold">❌ Expired</span>
-        )
-      ) : (
-        <Countdown endTime={auction.end_time} onComplete={() => setIsEnded(true)} />
-      )}
-    </div>
-  </div>
-</div>
+                <div className="text-white text-sm bg-white/5 backdrop-blur-sm px-2 py-1 rounded-lg border border-white/10">
+                  {isEnded ? (
+                    winner ? (
+                      <span className="text-green-400 font-bold animate-pulse">🎉 {winner} won!</span>
+                    ) : (
+                      <span className="text-red-400 font-semibold">❌ Expired</span>
+                    )
+                  ) : (
+                    <Countdown endTime={auction.end_time} onComplete={() => setIsEnded(true)} />
+                  )}
+                </div>
+              </div>
+            </div>
 
             {/* Seller and bid button */}
             <div className="flex items-center justify-between">
