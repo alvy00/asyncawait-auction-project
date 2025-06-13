@@ -163,7 +163,7 @@ auctionRouter.get('/:id', async (req, res) => {
   }
 });
 
-// Place Bid
+// Place Higher Bid (Regular, Blitz, Dutch)
 auctionRouter.post('/bid', async (req, res) => {
     try {
         //const { auction_id, amount, highest_bid, user_id } = req.body;
@@ -189,6 +189,11 @@ auctionRouter.post('/bid', async (req, res) => {
         if (new Date() > new Date(auction.end_time)) {
             console.error('Auction has ended');
             return res.status(400).json({ message: 'Auction has ended :(' });
+        }
+
+        if (amount <= auction.highest_bid) {
+            console.error(`Bid is too low. Current highest bid is ${auction.highest_bid}`);
+            return res.status(401).json({ message: `Bid must be higher than the current highest bid ($${auction.highest_bid})` });
         }
 
         if (isNaN(amount) || amount <= 0) {
@@ -226,6 +231,68 @@ auctionRouter.post('/bid', async (req, res) => {
         console.error('Error in place bid route:', e);
         return res.status(500).json({ message: 'Something went wrong!' });
     }
+});
+
+// Place Lower Bid (Reverse)
+auctionRouter.post('/bidlow', async (req, res) => {
+  try {
+    const { auction_id, amount } = req.body;
+    const user = await getUser(req);
+
+    if (!user) {
+      console.error('Unauthorized user');
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { data: auction, error: auctionErr } = await supabase
+      .from('auctions')
+      .select('*')
+      .eq('auction_id', auction_id)
+      .single();
+
+    if (auctionErr || !auction) {
+      console.error('Auction not found:', auctionErr);
+      return res.status(400).json({ message: 'Auction not found!' });
+    }
+
+    if (new Date() > new Date(auction.end_time)) {
+      console.error('Auction has ended');
+      return res.status(400).json({ message: 'Auction has ended :(' });
+    }
+
+    if (isNaN(amount) || amount <= 0) {
+      console.error('Invalid bid amount:', amount);
+      return res.status(400).json({ message: 'Please enter a valid bid amount' });
+    }
+
+    const currentLowestBid = auction.highest_bid ?? auction.starting_price;
+
+    if (Number(amount) >= currentLowestBid) {
+      console.error(`Bid too high. Current lowest bid is $${currentLowestBid}`);
+      return res.status(401).json({
+        message: `Your bid must be lower than the current lowest bid ($${currentLowestBid})`,
+      });
+    }
+
+    const { data: bid, error: bidErr } = await supabase.rpc('place_bid_transaction', {
+      p_auction_id: auction_id,
+      p_bid_amount: amount,
+      p_highest_bid: currentLowestBid,
+      p_user_id: user.id,
+    });
+
+    if (bidErr) {
+      console.error('Error placing bid:', bidErr);
+      return res.status(400).json({ message: 'Bid could not be placed!', error: bidErr });
+    }
+
+    console.log('Lower bid placed successfully:', bid);
+    return res.status(200).json({ message: 'Lower bid placed!' });
+
+  } catch (e) {
+    console.error('Error in reverse auction bid route:', e);
+    return res.status(500).json({ message: 'Something went wrong!' });
+  }
 });
 
 // Get User Bid History
