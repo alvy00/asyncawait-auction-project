@@ -34,6 +34,7 @@ const LoadingSpinner = () => (
 );
 
 export default function AuctionCreationForm() {
+  const [startTime, setStartTime] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [imageUrls, setImageUrls] = useState<string[]>([""]);
@@ -95,20 +96,33 @@ export default function AuctionCreationForm() {
 
       const formData = new FormData(e.currentTarget);
 
-      const startTime = new Date(formData.get('start_time') as string);
-      const endTime = new Date(formData.get('end_time') as string);
+      const startTimeStr = formData.get("start_time") as string;
+      const endTimeStr = formData.get("end_time") as string;
+      const durationStr = formData.get("duration") as string;
 
-      const startTimeUTC = new Date(startTime.toISOString());
-      const endTimeUTC = new Date(endTime.toISOString());
+      const startTime = new Date(startTimeStr);
+
+      let endTime: Date;
+
+      if (endTimeStr) {
+        endTime = new Date(endTimeStr);
+      } else if (durationStr) {
+        const durationInMinutes = parseInt(durationStr, 10);
+        endTime = new Date(startTime.getTime() + durationInMinutes * 60000); // add duration in ms
+      } else {
+        throw new Error("Either end_time or duration must be provided");
+      }
+
+      const startTimeUTC = startTime.toISOString();
+      const endTimeUTC = endTime.toISOString();
 
       const now = new Date();
 
-      let auctionStatus = 'upcoming';
-
+      let auctionStatus = "upcoming";
       if (endTime < now) {
-        auctionStatus = 'ended';
+        auctionStatus = "ended";
       } else if (startTime <= now) {
-        auctionStatus = 'live';
+        auctionStatus = "live";
       }
 
       const auctionBody = {
@@ -119,13 +133,13 @@ export default function AuctionCreationForm() {
         auction_type: formData.get('auction_type') as string,
         starting_price: parseFloat(formData.get('starting_price') as string),
         buy_now: formData.get('buy_now') ? parseFloat(formData.get('buy_now') as string) : undefined,
-        start_time: startTimeUTC.toISOString(),
-        end_time: endTimeUTC.toISOString(),
+        start_time: startTime.toISOString(),
+        end_time: endTime.toISOString(),
         status: auctionStatus,
         images: imageUrls.filter(url => url.trim() !== ""),
         condition: formData.get('condition') as 'new' | 'used' | 'refurbished',
       };
-      console.log(formData.get('auction_type') as string)
+      //console.log(formData.get('auction_type') as string)
       
       const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/create', {
         method: 'POST',
@@ -341,6 +355,68 @@ export default function AuctionCreationForm() {
               </div>
             </motion.div>
 
+            {/* Start & End Time or Duration Based on Auction Type */}
+            <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Always show Start Time */}
+              <div className="space-y-2">
+                <Label htmlFor="start_time" className="text-lg font-medium text-white/90">Start Time</Label>
+                <div className="relative overflow-hidden rounded-xl bg-white/5 border border-white/10 transition-all focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/50">
+                  <FaRegCalendarAlt className="absolute top-3 left-3 text-orange-400" />
+                  <Input
+                    type="datetime-local"
+                    id="start_time"
+                    name="start_time"
+                    required
+                    min={new Date().toISOString().slice(0, 16)}
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    className="pl-10 py-3 w-full bg-transparent border-none text-white focus:ring-0 calendar-white"
+                  />
+                </div>
+              </div>
+
+              {/* Conditionally show either End Time or Duration */}
+              {selectedType?.value === "blitz" ? (
+                <div className="space-y-2">
+                  <Label htmlFor="duration" className="text-lg font-medium text-white/90">Duration (minutes)</Label>
+                  <div className="relative overflow-hidden rounded-xl bg-white/5 border border-white/10 transition-all focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/50">
+                    <select
+                      id="duration"
+                      name="duration"
+                      required
+                      className="pl-4 pr-10 py-3 w-full bg-transparent border-none text-white focus:ring-0 appearance-none cursor-pointer"
+                    >
+                      <option value="10" className="bg-[#0A111B]">5</option>
+                      <option value="15" className="bg-[#0A111B]">10</option>
+                      <option value="30" className="bg-[#0A111B]">15</option>
+                      <option value="45" className="bg-[#0A111B]">30</option>
+                    </select>
+                    <div className="absolute right-3 top-3 pointer-events-none text-orange-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="end_time" className="text-lg font-medium text-white/90">End Time</Label>
+                  <div className="relative overflow-hidden rounded-xl bg-white/5 border border-white/10 transition-all focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/50">
+                    <FaRegCalendarAlt className="absolute top-3 left-3 text-orange-400" />
+                    <Input
+                      type="datetime-local"
+                      id="end_time"
+                      name="end_time"
+                      required
+                      min={startTime || new Date().toISOString().slice(0, 16)}
+                      className="pl-10 py-3 w-full bg-transparent border-none text-white focus:ring-0 calendar-white"
+                    />
+                  </div>
+                </div>
+              )}
+
+            </motion.div>
+            
             {/* Prices */}
             <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
@@ -372,37 +448,6 @@ export default function AuctionCreationForm() {
                     min={0}
                     step="0.01"
                     className="pl-10 py-3 w-full bg-transparent border-none text-white focus:ring-0 placeholder:text-white/50"
-                  />
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Start & End Time */}
-            <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="start_time" className="text-lg font-medium text-white/90">Start Time</Label>
-                <div className="relative overflow-hidden rounded-xl bg-white/5 border border-white/10 transition-all focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/50">
-                  <FaRegCalendarAlt className="absolute top-3 left-3 text-orange-400" />
-                  <Input
-                    type="datetime-local"
-                    id="start_time"
-                    name="start_time"
-                    required
-                    className="pl-10 py-3 w-full bg-transparent border-none text-white focus:ring-0 calendar-white"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="end_time" className="text-lg font-medium text-white/90">End Time</Label>
-                <div className="relative overflow-hidden rounded-xl bg-white/5 border border-white/10 transition-all focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/50">
-                  <FaRegCalendarAlt className="absolute top-3 left-3 text-orange-400" />
-                  <Input
-                    type="datetime-local"
-                    id="end_time"
-                    name="end_time"
-                    required
-                    className="pl-10 py-3 w-full bg-transparent border-none text-white focus:ring-0 calendar-white"
                   />
                 </div>
               </div>
