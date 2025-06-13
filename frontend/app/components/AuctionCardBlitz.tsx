@@ -163,17 +163,17 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction }) => {
     switch (status.toLowerCase()) {
       case "live":
         bgClasses = "bg-gradient-to-r from-orange-800 to-orange-600";
-        text = "BLITZ LIVE";
+        text = "BLITZ | LIVE";
         Icon = FaBolt;
         break;
       case "upcoming":
         bgClasses = "bg-gradient-to-r from-yellow-500 to-yellow-400";
-        text = "BLITZ UPCOMING";
+        text = "BLITZ | UPCOMING";
         Icon = FaHourglassHalf;
         break;
       case "ended":
         bgClasses = "bg-gradient-to-r from-gray-700 to-gray-600";
-        text = "BLITZ ENDED";
+        text = "BLITZ | ENDED";
         Icon = FaStopwatch;
         break;
       default:
@@ -229,20 +229,23 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{
-        scale: 1.03,
-        boxShadow: `0 0 20px 5px ${FIREY_ORANGE}B3`,
-        transition: { duration: 0.3 },
+        scale: 1.015,
+        boxShadow: `0 0 12px 3px rgba(255, 69, 0, 0.35)`,
+        transition: { duration: 0.35, ease: "easeOut" },
       }}
-      className={`relative w-full h-[500px] group rounded-lg overflow-hidden bg-gray-900 border border-white/20 text-white select-none`}
+      className={`relative w-full h-[500px] group rounded-lg overflow-hidden 
+        bg-gradient-to-br from-[#4a0d0d] via-[#801111] to-[#a42c2c]
+        border border-white/20 text-white select-none`}
     >
+
       {/* Image container */}
-      <div className="relative h-[300px] w-full">
+      <div className="relative h-[55%] w-full overflow-hidden">
         <Image
           src={FALLBACK_IMAGE}
           alt={auction.item_name}
           fill
           style={{ objectFit: "cover" }}
-          className="brightness-90 group-hover:brightness-110 transition duration-300 rounded-t-lg"
+          className="brightness-90 group-hover:brightness-110 object-cover transition-transform duration-700 group-hover:scale-110"
           priority
         />
       </div>
@@ -251,7 +254,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction }) => {
       <StatusBadge status={auction.status} />
 
       {/* Content area */}
-      <div className="p-5 flex flex-col justify-between h-[calc(100%-300px)] bg-gradient-to-t from-black/80 to-transparent">
+      <div className="p-5 flex flex-col justify-between h-[45%] bg-gradient-to-t from-black/80 to-transparent">
         <div>
           <h3 className="text-2xl font-bold">{auction.item_name}</h3>
           <div className="mt-2 text-lg">
@@ -360,15 +363,15 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction }) => {
       {/* Shake animation styles */}
       <style>
         {`
-          @keyframes shake {
+          @keyframes gentle-shake {
             0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-0.5px); }
-            50% { transform: translateX(0.5px); }
-            75% { transform: translateX(-0.5px); }
+            30% { transform: translateX(-0.3px); }
+            50% { transform: translateX(0.3px); }
+            70% { transform: translateX(-0.2px); }
           }
 
           .animate-shake {
-            animation: shake 0.2s ease-in-out;
+            animation: gentle-shake 0.4s ease-in-out;
           }
         `}
       </style>
