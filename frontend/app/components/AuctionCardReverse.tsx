@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { FaArrowDown, FaClock, FaBan } from "react-icons/fa";
@@ -8,18 +9,17 @@ import toast from "react-hot-toast";
 
 interface AuctionCardProps {
   auction: Auction;
-  onBid: () => void;
 }
 
 const FIREY_PURPLE = "rgba(191, 85, 236, "; // vibrant purple (rgba base)
 
-const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
+const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
   const controls = useAnimation();
   const [isBidding, setIsBidding] = useState(false);
   const [winner, setWinner] = useState(null);
   const [submittingBid, setSubmittingBid] = useState(false);
   const [bidAmount, setBidAmount] = useState(
-    auction.highest_bid ? auction.highest_bid - 1 : auction.starting_price
+    auction.highest_bid ? auction.highest_bid - 2 : auction.starting_price
   );
   const [highestBid, setHighestBid] = useState(auction.highest_bid);
   const [user, setUser] = useState(null);
@@ -76,9 +76,16 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
     try {
       const formData = new FormData(e.currentTarget);
 
+      const amount = parseFloat(formData.get("amount") as string);
+
+      if (isNaN(amount) || amount <= 0) {
+        toast.error("Please enter a valid bid amount.");
+        return;
+      }
+
       const body = {
         auction_id: auction.auction_id,
-        amount: formData.get("amount"),
+        amount,
       };
 
       const res = await fetch(
@@ -93,15 +100,17 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
         }
       );
 
+      const result = await res.json();
+
       if (!res.ok) {
-        const error = await res.json();
-        console.error("Error placing bid:", error);
-        toast.error(error?.message || "Failed to place bid.");
+        console.error("Error placing bid:", result);
+        toast.error(result?.message || "Failed to place bid.");
         return;
       }
 
-      toast.success(`Bid of $${bidAmount} placed successfully!`);
-      setHighestBid(Number(bidAmount));
+      toast.success(`Bid of $${amount.toFixed(2)} placed successfully!`);
+      setHighestBid(amount);
+      setBidAmount(amount);
       setIsBidding(false);
     } catch (err) {
       console.error("Bid submission error:", err);
@@ -192,7 +201,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
     );
   };
 
-    // Live Badge Animation
+  // Live Badge Animation
   useEffect(() => {
     if (auction.status === "live") {
       controls.start({
@@ -254,12 +263,28 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
       <div className="p-5 flex flex-col justify-between flex-grow bg-gradient-to-t from-black/80 to-transparent relative">
         <div>
           <h3 className="text-2xl font-bold">{auction.item_name}</h3>
-          <p className="mt-2 text-lg">
+          <div className="mt-2 text-lg">
             Lowest Bid:{" "}
-            <span className="font-extrabold text-purple-300">
-              ${bidAmount?.toFixed(2) ?? "—"}
+            <span className="font-extrabold text-purple-500">
+              ${highestBid?.toFixed(2) ?? "—"}
             </span>
-          </p>
+          </div>
+
+          {/* Higest bid and name */}
+          <div
+            className="mt-1 text-sm flex items-center gap-2 select-none cursor-default
+            text-red-300 font-semibold tracking-wide
+            drop-shadow-[0_0_6px_rgba(252,211,77,0.7)]
+            transition-all duration-300 ease-in-out
+            hover:text-red-350 hover:drop-shadow-[0_0_8px_rgba(252,211,77,0.9)]"
+          >
+            <div className="text-gray-200">by</div>
+            <div className="hover:underline transition-all duration-200">
+              {auction.highest_bidder_name || "—"}
+            </div>
+          </div>
+
+          {/* Countdown */}
           <div className="mt-3 flex items-center gap-2 text-sm font-semibold text-orange-400">
             <span className="text-white bg-white/5 backdrop-blur-sm px-3 py-1 rounded-md border border-white/10 font-mono tracking-wide">
               <Countdown endTime={auction.end_time} />
@@ -283,10 +308,10 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
                 <button
                   onClick={() => {
                     setIsBidding(true);
-                    setShake(true); // trigger shake effect on open
+                    setShake(true);
                     setTimeout(() => setShake(false), 600);
                   }}
-                  className="w-full h-full flex items-center justify-center rounded-md border border-orange-700 bg-orange-800 hover:bg-orange-700 font-medium text-white backdrop-blur-sm transition-all duration-300 ease-in-out cursor-pointer"
+                  className="w-full h-full flex items-center justify-center rounded-md border border-purple-700 bg-purple-800 hover:bg-purple-700 font-medium text-white backdrop-blur-sm transition-all duration-300 ease-in-out cursor-pointer shadow-md hover:shadow-lg"
                   type="button"
                 >
                   Place Lower Bid
@@ -309,17 +334,17 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
                   onChange={(e) => setBidAmount(Number(e.target.value))}
                   max={
                     auction.highest_bid
-                      ? auction.highest_bid - 2
-                      : auction.starting_price ?? 0
+                      ? auction.highest_bid - 1
+                      : auction.starting_price - 1
                   }
                   min={0}
                   placeholder="Your lower bid"
-                  className="w-2/3 max-w-[100px] p-2 rounded-lg border bg-gray-800 text-white border-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-400 transition"
+                  className="w-2/3 max-w-[100px] p-2 rounded-lg border bg-gray-800 text-white border-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-gray-400 transition"
                 />
                 <button
                   type="submit"
                   disabled={submittingBid}
-                  className={`px-3 py-2 bg-orange-800 text-white font-semibold rounded-lg border border-orange-700 shadow hover:bg-orange-700 hover:border-orange-500 transition-all duration-300 ease-in-out cursor-pointer ${
+                  className={`px-3 py-2 bg-purple-800 text-white font-semibold rounded-lg border border-purple-700 shadow hover:bg-purple-700 hover:border-purple-500 transition-all duration-300 ease-in-out cursor-pointer ${
                     submittingBid ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                 >
@@ -346,15 +371,18 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, onBid }) => {
         </div>
       )}
 
+      {/* Shake animation styles */}
       <style>
         {`
           @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-5px); }
-            40%, 80% { transform: translateX(5px); }
+            25% { transform: translateX(-0.5px); }
+            50% { transform: translateX(0.5px); }
+            75% { transform: translateX(-0.5px); }
           }
+
           .animate-shake {
-            animation: shake 0.6s ease-in-out;
+            animation: shake 0.2s ease-in-out;
           }
         `}
       </style>
