@@ -7,6 +7,7 @@ import { Input } from "../../../../components/ui/input";
 import { Label } from "../../../../components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../../../components/ui/dialog";
 import { Button } from "../../../../components/ui/button";
+import { DropzoneUploader } from "../../../components/DropzoneUploader";
 import { FaTwitter, FaTelegramPlane, FaTag, FaDollarSign, FaRegCalendarAlt, FaImage, FaBoxOpen, FaGavel } from "react-icons/fa";
 import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/react'
 import { FaCrown } from 'react-icons/fa';
@@ -22,7 +23,6 @@ const auctionTypes = [
   { value: 'reverse', label: 'Reverse', description: 'Lowest bid wins instead of highest.' },
 ];
 
-
 const LoadingSpinner = () => (
   <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div className="relative w-20 h-20">
@@ -33,15 +33,17 @@ const LoadingSpinner = () => (
   </div>
 );
 
+
 export default function AuctionCreationForm() {
   const [startTime, setStartTime] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [imageUrls, setImageUrls] = useState<string[]>([""]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [selectedType, setSelectedType] = useState(auctionTypes[0]);
   const router = useRouter();
 
+  // fetch user
   useEffect(() => {
     const fetchUser = async () => {
       const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
@@ -79,7 +81,7 @@ export default function AuctionCreationForm() {
     setImageUrls(updated);
   };
 
-  const addImageField = () => setImageUrls((prev) => [...prev, ""]);
+  //const addImageField = () => setImageUrls((prev) => [...prev, ""]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -454,40 +456,7 @@ export default function AuctionCreationForm() {
             </motion.div>
 
             {/* Images */}
-            <motion.div variants={itemVariants} className="space-y-3">
-              <Label className="text-lg font-medium text-white/90">Image URLs</Label>
-              <AnimatePresence>
-                {imageUrls.map((url, index) => (
-                  <motion.div 
-                    key={index} 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="relative overflow-hidden rounded-xl bg-white/5 border border-white/10 transition-all focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/50 mb-3"
-                  >
-                    <FaImage className="absolute top-3 left-3 text-orange-400" />
-                    <Input
-                      type="url"
-                      value={url}
-                      placeholder="https://example.com/image.jpg"
-                      onChange={(e) => handleImageChange(index, e.target.value)}
-                      className="pl-10 py-3 w-full bg-transparent border-none text-white focus:ring-0 placeholder:text-white/50"
-                    />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-              <motion.button
-                type="button"
-                onClick={addImageField}
-                className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center gap-2 transition-all duration-300"
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-              >
-                <FaImage className="text-orange-400" />
-                <span>Add Another Image</span>
-              </motion.button>
-            </motion.div>
+            <DropzoneUploader imageUrls={imageUrls} setImageUrls={setImageUrls} />;
 
             <motion.div 
               variants={itemVariants}
