@@ -242,6 +242,38 @@ export default function AuctionCreationForm() {
           className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
         >
           <div className="p-6 md:p-8 space-y-6">
+
+            {/* Auction Type */}
+            <motion.div variants={itemVariants} className="space-y-2">
+              <Label htmlFor="auction_type" className="text-lg font-medium text-white/90">Auction Type</Label>
+              <div className="relative overflow-hidden rounded-xl bg-white/5 border border-white/10 transition-all focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/50">
+                <FaCrown className="absolute top-3 left-3 text-orange-400" />
+                <select
+                  id="auction_type"
+                  name="auction_type"
+                  value={selectedType.value}
+                  onChange={(e) => {
+                    const selected = auctionTypes.find(type => type.value === e.target.value);
+                    setSelectedType(selected);
+                  }}
+                  required
+                  className="pl-10 py-3 w-full bg-transparent border-none text-white focus:ring-0 appearance-none cursor-pointer"
+                >
+                  <option value="" className="bg-[#0A111B]">Select auction type</option>
+                  {auctionTypes.map(type => (
+                    <option key={type.value} value={type.value} className="bg-[#0A111B]">
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-3 top-3 pointer-events-none text-orange-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+            </motion.div>
+
             {/* Item Name */}
             <motion.div variants={itemVariants} className="space-y-2">
               <Label htmlFor="item_name" className="text-lg font-medium text-white/90">Item Name</Label>
@@ -322,37 +354,6 @@ export default function AuctionCreationForm() {
                       <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
                   </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Auction Type */}
-            <motion.div variants={itemVariants} className="space-y-2">
-              <Label htmlFor="auction_type" className="text-lg font-medium text-white/90">Auction Type</Label>
-              <div className="relative overflow-hidden rounded-xl bg-white/5 border border-white/10 transition-all focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/50">
-                <FaCrown className="absolute top-3 left-3 text-orange-400" />
-                <select
-                  id="auction_type"
-                  name="auction_type"
-                  value={selectedType.value}
-                  onChange={(e) => {
-                    const selected = auctionTypes.find(type => type.value === e.target.value);
-                    setSelectedType(selected);
-                  }}
-                  required
-                  className="pl-10 py-3 w-full bg-transparent border-none text-white focus:ring-0 appearance-none cursor-pointer"
-                >
-                  <option value="" className="bg-[#0A111B]">Select auction type</option>
-                  {auctionTypes.map(type => (
-                    <option key={type.value} value={type.value} className="bg-[#0A111B]">
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute right-3 top-3 pointer-events-none text-orange-400">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
                 </div>
               </div>
             </motion.div>
@@ -456,7 +457,7 @@ export default function AuctionCreationForm() {
             </motion.div>
 
             {/* Images */}
-            <DropzoneUploader imageUrls={imageUrls} setImageUrls={setImageUrls} />;
+            <DropzoneUploader imageUrls={imageUrls} setImageUrls={setImageUrls} />
 
             <motion.div 
               variants={itemVariants}
@@ -464,7 +465,7 @@ export default function AuctionCreationForm() {
             >
               <motion.button
                 type="submit"
-                className="w-full py-4 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold text-lg flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 transition-all duration-300"
+                className="w-full py-4 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold text-lg flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 transition-all duration-300 cursor-pointer"
                 whileHover={{ scale: 1.02, boxShadow: "0 10px 25px -5px rgba(249, 115, 22, 0.4)" }}
                 whileTap={{ scale: 0.98 }}
                 disabled={isLoading}
