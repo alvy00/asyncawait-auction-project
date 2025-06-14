@@ -264,7 +264,7 @@ const LiveAuctionsPage = () => {
           </div>
         ) : filteredAuctions.length > 0 ? (
           <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 ml-7 mr-7"
             variants={containerVariants}
             initial="hidden"
             animate="show"
