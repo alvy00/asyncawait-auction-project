@@ -35,6 +35,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
     return "ended";
   });
   const [favourited, setFavourited] = useState(isFavourited);
+  const [shake, setShake] = useState(false);
 
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : FALLBACK_IMAGE;
   const token = typeof window !== "undefined" ? localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken") : null;
@@ -217,6 +218,16 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
     }
   };
 
+    // shake effect
+    useEffect(() => {
+      if (shake) {
+        const timer = setTimeout(() => {
+          setShake(false);
+        }, 600);
+        return () => clearTimeout(timer);
+      }
+    }, [shake]);
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -374,10 +385,14 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                   </Button>
                 ) : (
                   <div className="relative w-full h-full">
-                    <div className="relative h-12 w-[160px]">
+                    <div className={`relative h-12 w-[160px] ${shake ? "animate-shake" : ""}`}>
                       {currentStatus === "live" && !isBidding && (
                         <button
-                          onClick={() => setIsBidding(true)}
+                          onClick={() => {
+                            setIsBidding(true);
+                            setShake(true);
+                            setTimeout(() => setShake(false), 300); // remove shake after 300ms
+                          }}
                           className="absolute inset-0 w-full h-full flex items-center justify-center rounded-md border border-gray-600 bg-gray-800 hover:bg-gray-700 font-medium text-white backdrop-blur-sm transition-all duration-500 ease-in-out z-10 cursor-pointer"
                         >
                           Bid Now
@@ -386,7 +401,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                     </div>
 
                     {/* Bid Form (animated in when bidding) */}
-                    { <form
+                    <form
                       onSubmit={handleBidSubmit}
                       className={`absolute inset-0 w-full h-full flex items-center justify-center gap-2 transition-all duration-500 ease-in-out z-0
                         ${isBidding
@@ -399,9 +414,11 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                         name="amount"
                         value={bidAmount}
                         onChange={(e) => setBidAmount(Number(e.target.value))}
-                        min={(auction.starting_price === auction.highest_bid)
-                          ? auction.starting_price
-                          : Math.max(auction.starting_price, auction.highest_bid) + 1}
+                        min={
+                          auction.starting_price === auction.highest_bid
+                            ? auction.starting_price
+                            : Math.max(auction.starting_price, auction.highest_bid) + 1
+                        }
                         placeholder="Your bid"
                         className="w-2/3 max-w-[100px] p-2 rounded-lg border bg-gray-800 text-white border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400 transition"
                       />
@@ -411,9 +428,9 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                       >
                         Bid
                       </button>
-                    </form>}
+                    </form>
                   </div>
-                )}            
+                )}
               </div>
             </div>
           </div>
@@ -433,9 +450,21 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
         
       </div>
 
-      {/* Decorative elements */}
-      {/* <div className="absolute -bottom-5 -right-5 w-40 h-40 bg-orange-500/20 rounded-full filter blur-[50px] animate-pulse-slow"></div>
-      <div className="absolute -top-5 -left-5 w-20 h-20 bg-blue-500/20 rounded-full filter blur-[30px] animate-float"></div> */}
+      {/* Shake animation styles */}
+      <style>
+        {`
+          @keyframes gentle-shake {
+            0%, 100% { transform: translateX(0); }
+            30% { transform: translateX(-0.3px); }
+            50% { transform: translateX(0.3px); }
+            70% { transform: translateX(-0.2px); }
+          }
+
+          .animate-shake {
+            animation: gentle-shake 0.4s ease-in-out;
+          }
+        `}
+      </style>
     </motion.div>
   );
 };

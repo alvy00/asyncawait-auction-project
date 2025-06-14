@@ -6,6 +6,7 @@ import { Auction } from "../../lib/interfaces";
 import Image from "next/image";
 import { Countdown } from "./Countdown";
 import toast from "react-hot-toast";
+import { Button } from "../../components/ui/button";
 
 interface AuctionCardProps {
   auction: Auction;
@@ -212,8 +213,12 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction }) => {
       <div className="p-5 h-[45%] flex flex-col justify-between bg-gradient-to-t from-black/80 to-transparent min-h-[150px]">
         <div>
           <h3 className="text-2xl font-bold">{auction.item_name}</h3>
-          <p className="mt-2 text-lg">
-            Current Price:{" "}
+          <p className="mt-2 text-md">
+            Original Price:{" "}
+            <span className="font-extrabold text-cyan-400">${auction.starting_price.toFixed(2)}</span>
+          </p>
+          <p className="mt-2 text-md">
+            Price dropped to:{" "}
             <span className="font-extrabold text-cyan-400">${currentPrice.toFixed(2)}</span>
           </p>
         </div>
@@ -227,7 +232,26 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction }) => {
       {/* Bid Button + Modal */}
       {auction.status === "live" && !submittingBid && (
         <div className="absolute bottom-5 right-5 z-20 flex flex-col items-end">
-          <motion.button
+          {!token? (
+              <Button
+                disabled
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md 
+                          bg-gray-800 border border-gray-700 text-gray-400 opacity-60 
+                          cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30"
+              >
+                <svg
+                  className="w-4 h-4 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636L5.636 18.364M5.636 5.636l12.728 12.728" />
+                </svg>
+                <span className="text-sm">Login to bid</span>
+            </Button>
+          ) : (
+            <motion.button
             onClick={handleAcceptClick}
             whileTap={{ scale: 0.95 }}
             disabled={showConfirmModal}
@@ -239,6 +263,8 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction }) => {
           >
             Accept Price
           </motion.button>
+          )}
+          
 
           {/* Tooltip-style Confirmation */}
           {showConfirmModal && (
