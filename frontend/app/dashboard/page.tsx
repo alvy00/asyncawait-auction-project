@@ -188,7 +188,7 @@ const Dashboard = () => {
         className="mt-12 flex justify-center"
       >
         <Link href="/auctions/create">
-          <button className="bg-green-500 hover:bg-green-600 text-white font-medium px-6 py-3 rounded-full flex items-center gap-2 transform transition-all duration-200 hover:scale-105 shadow-lg">
+          <button className="bg-green-500 hover:bg-green-600 text-white font-medium px-6 py-3 rounded-full flex items-center gap-2 transform transition-all duration-200 hover:scale-105 shadow-lg cursor-pointer">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
             </svg>

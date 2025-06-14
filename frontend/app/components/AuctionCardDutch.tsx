@@ -2,21 +2,22 @@
 import React, { useState, useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { FaBolt, FaHourglassHalf, FaStopwatch } from "react-icons/fa";
-import { Auction } from "../../lib/interfaces";
 import Image from "next/image";
-import { Countdown } from "./Countdown";
 import toast from "react-hot-toast";
 import { Button } from "../../components/ui/button";
+import { Auction } from "../../lib/interfaces";
+import { Countdown } from "./Countdown";
 
 interface AuctionCardProps {
   auction: Auction;
 }
 
-const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction }) => {
+const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction }) => {
   const controls = useAnimation();
+  const [auction, setAuction] = useState(initialAuction);
   const [isBidding, setIsBidding] = useState(false);
   const [submittingBid, setSubmittingBid] = useState(false);
-  const [currentPrice, setCurrentPrice] = useState(auction.starting_price);
+  const [currentPrice, setCurrentPrice] = useState(initialAuction.starting_price);
   const [user, setUser] = useState(null);
   const [shake, setShake] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -42,13 +43,10 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction }) => {
           },
         });
 
-        if (!res.ok) {
-          console.error("Failed to fetch user");
-          return;
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data);
         }
-
-        const data = await res.json();
-        setUser(data);
       } catch (e) {
         console.error("Error fetching user:", e);
       }
@@ -86,6 +84,12 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction }) => {
 
       toast.success(`You won the auction!`);
       setIsBidding(false);
+      setAuction((prev) => ({
+        ...prev,
+        status: "ended",
+        end_time: new Date().toISOString(),
+        highest_bid: currentPrice,
+      }));
     } catch (err) {
       toast.error("Something went wrong. Please try again.");
     } finally {
@@ -229,44 +233,35 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction }) => {
         </div>
       </div>
 
-      {/* Bid Button + Modal */}
       {auction.status === "live" && !submittingBid && (
         <div className="absolute bottom-5 right-5 z-20 flex flex-col items-end">
-          {!token? (
-              <Button
-                disabled
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md 
-                          bg-gray-800 border border-gray-700 text-gray-400 opacity-60 
-                          cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30"
-              >
-                <svg
-                  className="w-4 h-4 text-gray-500"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636L5.636 18.364M5.636 5.636l12.728 12.728" />
-                </svg>
-                <span className="text-sm">Login to bid</span>
+          {!token ? (
+            <Button
+              disabled
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md 
+                        bg-gray-800 border border-gray-700 text-gray-400 opacity-60 
+                        cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30"
+            >
+              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636L5.636 18.364M5.636 5.636l12.728 12.728" />
+              </svg>
+              <span className="text-sm">Login to bid</span>
             </Button>
           ) : (
             <motion.button
-            onClick={handleAcceptClick}
-            whileTap={{ scale: 0.95 }}
-            disabled={showConfirmModal}
-            className={`px-6 py-3 rounded-md border font-bold text-white backdrop-blur-sm transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-cyan-400
-              ${showConfirmModal
-                ? "bg-cyan-400 cursor-not-allowed opacity-60"
-                : "bg-cyan-600 hover:bg-cyan-500 border-cyan-400 cursor-pointer"}
-            `}
-          >
-            Accept Price
-          </motion.button>
+              onClick={handleAcceptClick}
+              whileTap={{ scale: 0.95 }}
+              disabled={showConfirmModal}
+              className={`px-6 py-3 rounded-md border font-bold text-white backdrop-blur-sm transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-cyan-400
+                ${showConfirmModal
+                  ? "bg-cyan-400 cursor-not-allowed opacity-60"
+                  : "bg-cyan-600 hover:bg-cyan-500 border-cyan-400 cursor-pointer"}
+              `}
+            >
+              Accept Price
+            </motion.button>
           )}
-          
 
-          {/* Tooltip-style Confirmation */}
           {showConfirmModal && (
             <motion.div
               initial={{ opacity: 0, y: 8 }}
@@ -274,7 +269,6 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction }) => {
               exit={{ opacity: 0, y: 8 }}
               className="absolute bottom-[60px] right-0 w-64 bg-white text-gray-800 rounded-lg shadow-xl z-30 border border-gray-200"
             >
-              {/* Triangle pointer */}
               <div className="absolute -bottom-1.5 right-4 w-3 h-3 bg-white rotate-45 border-l border-b border-gray-200"></div>
               <div className="p-4">
                 <h3 className="text-sm font-semibold mb-2 text-center">Confirm Your Bid</h3>
