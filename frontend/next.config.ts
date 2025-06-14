@@ -19,6 +19,7 @@ const nextConfig: NextConfig = {
       'www.michellesburt.com',
       'imgs.search.brave.com',
       't3.ftcdn.net',
+      'i.ibb.co',
     ],
   },
   webpack(config) {
