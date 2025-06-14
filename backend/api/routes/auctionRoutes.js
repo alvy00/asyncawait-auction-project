@@ -210,6 +210,16 @@ auctionRouter.post('/bidcurrent', async (req, res) => {
       p_user_id: user.id,
     });
 
+    const { data, error } = await supabase
+      .from('auctions')
+      .update({ end_time: now, status: 'ended' })
+      .eq('auction_id', auction_id);
+    if (error) {
+      console.error("Failed to end auction:", error.message);
+    } else {
+      console.log("Auction successfully ended:", data);
+    }
+
     if (bidErr) {
       console.error('Error placing bid:', bidErr);
       return res.status(400).json({ message: 'Bid could not be placed!', error: bidErr });
