@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -21,6 +22,7 @@ const Dashboard = () => {
   
   const router = useRouter();
 
+  // fetch user
   useEffect(() => {
     const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
     if (!token) {
@@ -82,7 +84,9 @@ const Dashboard = () => {
     );
   }
 
-  const winRatio = user.total_bids > 0 ? Math.round((user.auctions_won / user.total_bids) * 100) : 0;
+  const winRatio = user.auctions_participated > 0
+    ? Math.round((user.auctions_won / user.auctions_participated) * 100)
+    : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#021f49] to-[#010915] text-white p-6 rounded-xl">
@@ -133,8 +137,7 @@ const Dashboard = () => {
           <WinRatioChart 
             winRatio={winRatio} 
             bidsWon={user.auctions_won} 
-            bidsLost={user.total_bids - user.auctions_won} 
-            totalBids={user.total_bids} 
+            bidsLost={user.auctions_participated - user.auctions_won}
           />
         </motion.div>
 
@@ -143,7 +146,7 @@ const Dashboard = () => {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="lg:col-span-7"
+          className="lg:col-span-7 "
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <StatCard 
@@ -157,45 +160,53 @@ const Dashboard = () => {
               value="03" 
               icon={<FaExternalLinkAlt className="text-blue-400" />} 
             />
-            
+
             <StatCard 
-              title="Total Bids" 
+              title="Auctions Participated" 
+              value={user.auctions_participated.toString()} 
+              icon={<FaChartPie className="text-white-400" />} 
+            />
+
+            <StatCard 
+              title="Total Bids Placed" 
               value={user.total_bids.toString()} 
               icon={<FaChartPie className="text-purple-400" />} 
             />
             
             <StatCard 
-              title="Bids Won" 
+              title="Auctions Won" 
               value={user.auctions_won.toString()} 
-              icon={<FaChartPie className="text-yellow-400" />} 
+              icon={<FaChartPie className="text-green-400" />} 
+            />
+
+            <StatCard 
+              title="Auctions Lost" 
+              value={(user.auctions_participated - user.auctions_won).toString()} 
+              icon={<FaChartPie className="text-red-400" />} 
             />
             
-            <StatCard 
-              title="Win Ratio" 
-              value={`${winRatio.toFixed(2)}%`} 
-              icon={<FaChartPie className="text-orange-400" />} 
-              className="md:col-span-2"
-            />
+            {/* Centered Create New Auction Button */}
+            <div className="col-span-full flex justify-center mt-4">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+              >
+                <Link href="/auctions/create">
+                  <button className="bg-green-500 hover:bg-green-600 text-white font-medium px-6 py-3 rounded-full flex items-center gap-2 transform transition-all duration-200 hover:scale-105 shadow-lg cursor-pointer">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Create New Auction
+                  </button>
+                </Link>
+              </motion.div>
+            </div>
           </div>
         </motion.div>
+
       </div>
 
-      {/* Create New Auction Button */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-        className="mt-12 flex justify-center"
-      >
-        <Link href="/auctions/create">
-          <button className="bg-green-500 hover:bg-green-600 text-white font-medium px-6 py-3 rounded-full flex items-center gap-2 transform transition-all duration-200 hover:scale-105 shadow-lg cursor-pointer">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            Create New Auction
-          </button>
-        </Link>
-      </motion.div>
     </div>
   );
 };
