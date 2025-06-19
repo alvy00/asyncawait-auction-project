@@ -336,7 +336,7 @@ auctionRouter.post('/bidlow', async (req, res) => {
       return res.status(400).json({ message: 'Please enter a valid bid amount' });
     }
 
-    const currentLowestBid = auction.highest_bid ?? auction.starting_price;
+      const currentLowestBid = auction.highest_bid > 0 ? auction.highest_bid : auction.starting_price;
 
     if (Number(amount) >= currentLowestBid) {
       console.error(`Bid too high. Current lowest bid is $${currentLowestBid}`);

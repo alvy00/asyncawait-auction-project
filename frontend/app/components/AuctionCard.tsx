@@ -363,14 +363,14 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                 </div>
               )}
 
-              {/* Bid Area with smooth transition */}
-              <div className="relative h-12 w-[160px] transition-all duration-500">
+              {/* Bid Area with Transition */}
+              <div className="absolute bottom-5 right-5 z-10">
                 {!token ? (
                   <Button
                     disabled
                     className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md 
-                              bg-gray-800 border border-gray-700 text-gray-400 opacity-60 
-                              cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30"
+                      bg-gray-800 border border-gray-700 text-gray-400 opacity-60 
+                      cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30"
                   >
                     <svg
                       className="w-4 h-4 text-gray-500"
@@ -379,61 +379,82 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                       strokeWidth="2"
                       viewBox="0 0 24 24"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636L5.636 18.364M5.636 5.636l12.728 12.728" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M18.364 5.636L5.636 18.364M5.636 5.636l12.728 12.728"
+                      />
                     </svg>
                     <span className="text-sm">Login to bid</span>
                   </Button>
                 ) : (
-                  <div className="relative w-full h-full">
-                    <div className={`relative h-12 w-[160px] ${shake ? "animate-shake" : ""}`}>
-                      {currentStatus === "live" && !isBidding && (
-                        <button
-                          onClick={() => {
-                            setIsBidding(true);
-                            setShake(true);
-                            setTimeout(() => setShake(false), 300); // remove shake after 300ms
-                          }}
-                          className="absolute inset-0 w-full h-full flex items-center justify-center rounded-md border border-gray-600 bg-gray-800 hover:bg-gray-700 font-medium text-white backdrop-blur-sm transition-all duration-500 ease-in-out z-10 cursor-pointer"
+                  <div className="relative h-12 w-[160px] transition-all duration-500">
+                    {currentStatus === "live" && (
+                      <div className={`relative w-full h-full ${shake ? "animate-shake" : ""}`}>
+                        {/* Bid Now Button */}
+                        <div
+                          className={`absolute inset-0 w-full h-full flex items-center justify-center transition-all duration-500 ease-in-out z-10 ${
+                            isBidding
+                              ? "opacity-0 scale-95 pointer-events-none"
+                              : "opacity-100 scale-100 pointer-events-auto"
+                          }`}
                         >
-                          Bid Now
-                        </button>
-                      )}
-                    </div>
+                          <button
+                            onClick={() => {
+                              setIsBidding(true);
+                              setShake(true);
+                              setTimeout(() => setShake(false), 600);
+                            }}
+                            type="button"
+                            className="w-full h-full flex items-center justify-center rounded-md border border-emerald-700 bg-emerald-800 hover:bg-emerald-700 font-medium text-white backdrop-blur-sm transition-all duration-300 ease-in-out cursor-pointer"
+                          >
+                            Place Bid
+                          </button>
+                        </div>
 
-                    {/* Bid Form (animated in when bidding) */}
-                    <form
-                      onSubmit={handleBidSubmit}
-                      className={`absolute inset-0 w-full h-full flex items-center justify-center gap-2 transition-all duration-500 ease-in-out z-0
-                        ${isBidding
-                          ? "opacity-100 translate-x-0 scale-100 blur-none pointer-events-auto"
-                          : "opacity-0 -translate-x-4 scale-95 blur-sm pointer-events-none"}
-                      `}
-                    >
-                      <input
-                        type="number"
-                        name="amount"
-                        value={bidAmount}
-                        onChange={(e) => setBidAmount(Number(e.target.value))}
-                        min={
-                          auction.starting_price === auction.highest_bid
-                            ? auction.starting_price
-                            : Math.max(auction.starting_price, auction.highest_bid) + 1
-                        }
-                        placeholder="Your bid"
-                        className="w-2/3 max-w-[100px] p-2 rounded-lg border bg-gray-800 text-white border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400 transition"
-                      />
-                      <button
-                        type="submit"
-                        className="px-3 py-2 bg-gray-800 text-white font-semibold rounded-lg border border-gray-700 shadow hover:bg-gray-700 hover:border-gray-500 transition-all duration-300 ease-in-out cursor-pointer"
-                      >
-                        Bid
-                      </button>
-                    </form>
+                        {/* Bid Form (Animated) */}
+                        <form
+                          onSubmit={handleBidSubmit}
+                          className={`absolute inset-0 w-full h-full flex items-center justify-center gap-2 transition-all duration-500 ease-in-out z-0 ${
+                            isBidding
+                              ? "opacity-100 translate-x-0 scale-100 blur-none pointer-events-auto"
+                              : "opacity-0 -translate-x-4 scale-95 blur-sm pointer-events-none"
+                          }`}
+                        >
+                          <input
+                            type="number"
+                            name="amount"
+                            value={bidAmount}
+                            onChange={(e) => setBidAmount(Number(e.target.value))}
+                            min={
+                              auction.starting_price === auction.highest_bid
+                                ? auction.starting_price
+                                : Math.max(auction.starting_price, auction.highest_bid) + 1
+                            }
+                            placeholder="Your bid"
+                            className="w-2/3 max-w-[100px] p-2 rounded-lg border bg-gray-800 text-white border-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder-gray-400 transition"
+                          />
+                          <button
+                            type="submit"
+                            disabled={submittingBid}
+                            className={`px-3 py-2 bg-emerald-800 text-white font-semibold rounded-lg border border-emerald-700 shadow hover:bg-emerald-700 hover:border-emerald-500 transition-all duration-300 ease-in-out cursor-pointer ${
+                              submittingBid ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
+                          >
+                            Bid
+                          </button>
+                        </form>
+
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
+
             </div>
+
           </div>
+
         </div>
 
         {/* Overlay during bidding */}

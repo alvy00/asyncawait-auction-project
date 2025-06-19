@@ -22,7 +22,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction 
   const [shake, setShake] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  const FALLBACK_IMAGE = "/fallback.jpg";
+  const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : "/fallback.jpg";
   const token =
     typeof window !== "undefined"
       ? localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken")
@@ -203,7 +203,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction 
     >
       <div className="relative h-[55%] w-full overflow-hidden">
         <Image
-          src={FALLBACK_IMAGE}
+          src={imageSrc}
           alt={auction.item_name}
           fill
           style={{ objectFit: "cover" }}
@@ -248,49 +248,50 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction 
               <span className="text-sm">Login to bid</span>
             </Button>
           ) : (
-            <motion.button
-              onClick={handleAcceptClick}
-              whileTap={{ scale: 0.95 }}
-              disabled={showConfirmModal}
-              className={`px-6 py-3 rounded-md border font-bold text-white backdrop-blur-sm transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-cyan-400
-                ${showConfirmModal
-                  ? "bg-cyan-400 cursor-not-allowed opacity-60"
-                  : "bg-cyan-600 hover:bg-cyan-500 border-cyan-400 cursor-pointer"}
-              `}
-            >
-              Accept Price
-            </motion.button>
-          )}
+            <>
+              <motion.button
+                onClick={handleAcceptClick}
+                whileTap={{ scale: 0.95 }}
+                disabled={showConfirmModal}
+                className={`px-6 py-3 rounded-md border font-bold text-white backdrop-blur-sm transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-cyan-400
+                  ${showConfirmModal
+                    ? "bg-cyan-400 cursor-not-allowed opacity-60"
+                    : "bg-cyan-600 hover:bg-cyan-500 border-cyan-400 cursor-pointer"}`}
+              >
+                Accept Price
+              </motion.button>
 
-          {showConfirmModal && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              className="absolute bottom-[60px] right-0 w-64 bg-white text-gray-800 rounded-lg shadow-xl z-30 border border-gray-200"
-            >
-              <div className="absolute -bottom-1.5 right-4 w-3 h-3 bg-white rotate-45 border-l border-b border-gray-200"></div>
-              <div className="p-4">
-                <h3 className="text-sm font-semibold mb-2 text-center">Confirm Your Bid</h3>
-                <p className="text-center text-sm mb-4">
-                  Accept <strong>${currentPrice.toFixed(2)}</strong>?
-                </p>
-                <div className="flex justify-between gap-2">
-                  <button
-                    onClick={() => setShowConfirmModal(false)}
-                    className="w-full px-3 py-1.5 rounded-md bg-gray-200 text-sm hover:bg-gray-300 cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={submitBid}
-                    className="w-full px-3 py-1.5 rounded-md bg-cyan-600 text-white text-sm hover:bg-cyan-700 font-semibold cursor-pointer"
-                  >
-                    Confirm
-                  </button>
-                </div>
-              </div>
-            </motion.div>
+              {showConfirmModal && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  className="absolute bottom-[60px] right-0 w-64 bg-white text-gray-800 rounded-lg shadow-xl z-30 border border-gray-200"
+                >
+                  <div className="absolute -bottom-1.5 right-4 w-3 h-3 bg-white rotate-45 border-l border-b border-gray-200"></div>
+                  <div className="p-4">
+                    <h3 className="text-sm font-semibold mb-2 text-center">Confirm Your Bid</h3>
+                    <p className="text-center text-sm mb-4">
+                      Accept <strong>${currentPrice.toFixed(2)}</strong>?
+                    </p>
+                    <div className="flex justify-between gap-2">
+                      <button
+                        onClick={() => setShowConfirmModal(false)}
+                        className="w-full px-3 py-1.5 rounded-md bg-gray-200 text-sm hover:bg-gray-300 cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={submitBid}
+                        className="w-full px-3 py-1.5 rounded-md bg-cyan-600 text-white text-sm hover:bg-cyan-700 font-semibold cursor-pointer"
+                      >
+                        Confirm
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </>
           )}
         </div>
       )}
