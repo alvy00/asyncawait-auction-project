@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
-import { FaBolt, FaHourglassHalf, FaStopwatch } from "react-icons/fa";
+import { FaArrowDown, FaBolt, FaHourglassHalf, FaStopwatch, FaTag } from "react-icons/fa";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { Button } from "../../components/ui/button";
@@ -10,9 +10,10 @@ import { Countdown } from "./Countdown";
 
 interface AuctionCardProps {
   auction: Auction;
+  auctionCreator: string;
 }
 
-const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction }) => {
+const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction, auctionCreator }) => {
   const controls = useAnimation();
   const [auction, setAuction] = useState(initialAuction);
   const [isBidding, setIsBidding] = useState(false);
@@ -201,6 +202,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction 
         shake ? "animate-shake" : ""
       }`}
     >
+      {/* Image container with fixed height */}
       <div className="relative h-[55%] w-full overflow-hidden">
         <Image
           src={imageSrc}
@@ -213,17 +215,25 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction 
       </div>
 
       <StatusBadge status={auction.status} />
-
+      
+      
       <div className="p-5 h-[45%] flex flex-col justify-between bg-gradient-to-t from-black/80 to-transparent min-h-[150px]">
         <div>
           <h3 className="text-2xl font-bold">{auction.item_name}</h3>
-          <p className="mt-2 text-md">
+          <p className="mt-2 text-sm flex items-center gap-2">
+            <FaTag className="text-cyan-400" />
             Original Price:{" "}
-            <span className="font-extrabold text-cyan-400">${auction.starting_price.toFixed(2)}</span>
+            <span className="font-extrabold text-cyan-200">${auction.starting_price.toFixed(2)}</span>
           </p>
-          <p className="mt-2 text-md">
-            Price dropped to:{" "}
-            <span className="font-extrabold text-cyan-400">${currentPrice.toFixed(2)}</span>
+
+          <p className="mt-2 text-base flex flex-col gap-1">
+            <span className="flex items-center gap-2 text-cyan-300 font-semibold">
+              <FaArrowDown className="text-cyan-500" />
+              Price dropped to:
+            </span>
+            <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-cyan-500 text-3xl">
+              ${currentPrice.toFixed(2)}
+            </span>
           </p>
         </div>
         <div className="flex items-center gap-2 text-sm font-semibold text-orange-400 mt-3">

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
-import { FaArrowDown, FaClock, FaBan } from "react-icons/fa";
+import { FaArrowDown, FaClock, FaBan, FaBullhorn, FaGavel } from "react-icons/fa";
 import { Auction } from "../../lib/interfaces";
 import { Button } from "../../components/ui/button";
 import Image from "next/image";
@@ -10,11 +10,12 @@ import toast from "react-hot-toast";
 
 interface AuctionCardProps {
   auction: Auction;
+  auctionCreator: string;
 }
 
 const FIREY_PURPLE = "rgba(191, 85, 236, "; // vibrant purple (rgba base)
 
-const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
+const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreator }) => {
   const controls = useAnimation();
   const [isBidding, setIsBidding] = useState(false);
   const [winner, setWinner] = useState(null);
@@ -25,6 +26,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
   const [highestBid, setHighestBid] = useState(auction.highest_bid);
   const [user, setUser] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [refresh, setRefresh] = useState(false);
   const [shake, setShake] = useState(false);
 
 
@@ -113,6 +115,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
       setHighestBid(amount);
       setBidAmount(amount);
       setIsBidding(false);
+      setRefresh(prev => !prev);
     } catch (err) {
       console.error("Bid submission error:", err);
       toast.error("Something went wrong. Please try again.");
@@ -163,7 +166,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
     };
 
     getHighestBidder();
-  }, [auction?.highest_bidder_id]);
+  }, [auction?.highest_bidder_id, refresh]);
 
   // Status Badge component
   const StatusBadge = ({ status }: { status: string }) => {
@@ -218,7 +221,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
       controls.stop();
       controls.set({ scale: 1, boxShadow: "none" });
     }
-  }, [auction.status, controls]);
+  }, [auction.status, controls, refresh]);
 
   // shake effect
   useEffect(() => {
@@ -266,19 +269,32 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
         <div>
           <h3 className="text-2xl font-bold">{auction.item_name}</h3>
           <div className="mt-2 text-lg">
-            Lowest Bid:{" "}
-            <span className="font-extrabold text-purple-500">
-              ${highestBid?.toFixed(2) ?? "—"}
+            {/* Bidding starts / Current Bid Label */}
+            <div className={`text-gray-400 text-xs mb-1 font-medium`}>
+            {!highestBid ? (
+              <span className="text-gray-300 flex items-center gap-1">
+                <FaBullhorn className="text-yellow-400" />
+                Bidding starts at:
+              </span>
+            ) : (
+              <span className="text-gray-300 flex items-center gap-1">
+                <FaGavel className="text-orange-400" />
+                Current Lowest bid:
+              </span>
+            )}
+            </div>
+
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-purple-500 font-extrabold text-3xl">
+              {highestBid > 0? `$${highestBid?.toFixed(2)}` : auction.starting_price}
             </span>
           </div>
 
           {/* Higest bid and name */}
           <div
-            className="mt-1 text-sm flex items-center gap-2 select-none cursor-default
+            className="mt-1 text-sm flex items-center gap-2 select-none cursor-pointer
             text-red-300 font-semibold tracking-wide
-            drop-shadow-[0_0_6px_rgba(252,211,77,0.7)]
             transition-all duration-300 ease-in-out
-            hover:text-red-350 hover:drop-shadow-[0_0_8px_rgba(252,211,77,0.9)]"
+            "
           >
             <div className="text-gray-200">by</div>
             <div className="hover:underline transition-all duration-200">
@@ -294,8 +310,19 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
           </div>
         </div>
 
-        {/* Bid Now Area with Transition */}
-        <div className="absolute bottom-5 right-5 z-10">
+        <div className="flex items-center justify-between">
+          {/* AuctionCreator Badge */}
+          {auctionCreator && (
+            <div className="flex items-center text-white text-sm bg-white/5 backdrop-blur-sm px-2 py-1 rounded-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              {auctionCreator}
+            </div>
+          )}
+
+          {/* Bidding Area */}
+          <div className="absolute bottom-5 right-5 z-10">
           {!token? (
               <Button
               disabled
@@ -376,7 +403,10 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
               )}
             </div>
           )}
+          </div>
+        
         </div>
+
 
       </div>
 

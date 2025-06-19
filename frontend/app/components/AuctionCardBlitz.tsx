@@ -10,11 +10,12 @@ import { Button } from "../../components/ui/button";
 
 interface AuctionCardProps {
   auction: Auction;
+  auctionCreator: string;
 }
 
 const FIREY_ORANGE = "#FF4500"; // Firey Orange (OrangeRed)
 
-const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction }) => {
+const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator }) => {
   const controls = useAnimation();
   const [winner, setWinner] = useState(null);
   const [isBidding, setIsBidding] = useState(false);
@@ -25,6 +26,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction }) => {
   const [highestBid, setHighestBid] = useState(auction.highest_bid);
   const [user, setUser] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [refresh, setRefresh] = useState(false);
   const [shake, setShake] = useState(false);
 
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : "/fallback.jpg";
@@ -103,6 +105,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction }) => {
       toast.success(`Bid of $${bidAmount} placed successfully!`);
       setHighestBid(Number(bidAmount));
       setIsBidding(false);
+      setRefresh(prev => !prev);
     } catch (err) {
       console.error("Bid submission error:", err);
       toast.error("Something went wrong. Please try again.");
@@ -153,7 +156,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction }) => {
     };
 
     getHighestBidder();
-  }, [auction?.highest_bidder_id]);
+  }, [auction?.highest_bidder_id, refresh]);
 
   // Status Badge component
   const StatusBadge = ({ status }: { status: string }) => {
@@ -208,7 +211,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction }) => {
       controls.stop();
       controls.set({ scale: 1, boxShadow: "none" });
     }
-  }, [auction.status, controls]);
+  }, [auction.status, controls, refresh]);
 
   // shake effect
   useEffect(() => {
@@ -259,19 +262,28 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction }) => {
         <div>
           <h3 className="text-2xl font-bold">{auction.item_name}</h3>
           <div className="mt-2 text-lg">
-            Current Bid:{" "}
-            <span className="font-extrabold" style={{ color: FIREY_ORANGE }}>
-              ${highestBid.toFixed(2)}
-            </span>
+            {/* Bidding starts / Current Bid Label */}
+            <div className={`text-gray-400 text-xs mb-1 font-medium`}>
+            {!highestBid ? (
+              <span className="text-yellow-300 text-xl font-medium tracking-wide">Be The First to Bid</span>
+            ) : (
+              <span className="text-gray-300">Current Highest bid:</span>
+              
+            )}
+            </div>
+            {highestBid > 0 && 
+              <span className="font-extrabold text-transparent bg-clip-text font-bold text-3xl" style={{ color: FIREY_ORANGE }}>
+                ${highestBid.toFixed(2)}
+              </span>
+            }
+            
           </div>
 
           {/* Higest bid and name */}
           <div
-            className="mt-1 text-sm flex items-center gap-2 select-none cursor-default
+            className="mt-1 text-sm flex items-center gap-2 select-none cursor-pointer
             text-yellow-300 font-semibold tracking-wide
-            drop-shadow-[0_0_6px_rgba(252,211,77,0.7)]
-            transition-all duration-300 ease-in-out
-            hover:text-yellow-350 hover:drop-shadow-[0_0_8px_rgba(252,211,77,0.9)]"
+            transition-all duration-300 ease-in-out"
           >
             <div className="text-gray-200">by</div>
             <div className="hover:underline transition-all duration-200">
