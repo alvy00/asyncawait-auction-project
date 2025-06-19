@@ -331,8 +331,14 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                       `$${auction.starting_price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                     ) : (
                       <>
+                        {/* Higest bid and name */}
                         <span>${highestBid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                        <span className="text-sm font-normal text-white/80 mt-1">by {auction.highest_bidder_name || "Unknown"}</span>
+                        <div className="text-sm font-normal text-white/80 mt-1 flex items-center">
+                          <span className="mr-1">by</span>
+                          <div className="hover:underline transition-all duration-200">
+                            {auction.highest_bidder_name || "—"}
+                          </div>
+                        </div>
                       </>
                     )}
                   </div>

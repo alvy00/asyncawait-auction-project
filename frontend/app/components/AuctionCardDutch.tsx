@@ -10,9 +10,10 @@ import { Countdown } from "./Countdown";
 
 interface AuctionCardProps {
   auction: Auction;
+  auctionCreator: string;
 }
 
-const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction }) => {
+const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction, auctionCreator }) => {
   const controls = useAnimation();
   const [auction, setAuction] = useState(initialAuction);
   const [isBidding, setIsBidding] = useState(false);
@@ -201,6 +202,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction 
         shake ? "animate-shake" : ""
       }`}
     >
+      {/* Image container with fixed height */}
       <div className="relative h-[55%] w-full overflow-hidden">
         <Image
           src={imageSrc}
@@ -213,7 +215,8 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction 
       </div>
 
       <StatusBadge status={auction.status} />
-
+      
+      
       <div className="p-5 h-[45%] flex flex-col justify-between bg-gradient-to-t from-black/80 to-transparent min-h-[150px]">
         <div>
           <h3 className="text-2xl font-bold">{auction.item_name}</h3>
