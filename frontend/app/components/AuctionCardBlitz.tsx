@@ -27,7 +27,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [shake, setShake] = useState(false);
 
-  const FALLBACK_IMAGE = "/fallback.jpg";
+  const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : "/fallback.jpg";
   const token =typeof window !== "undefined"? localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken") : null;
 
   // fetch user
@@ -242,7 +242,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction }) => {
       {/* Image container */}
       <div className="relative h-[55%] w-full overflow-hidden">
         <Image
-          src={FALLBACK_IMAGE}
+          src={imageSrc}
           alt={auction.item_name}
           fill
           style={{ objectFit: "cover" }}

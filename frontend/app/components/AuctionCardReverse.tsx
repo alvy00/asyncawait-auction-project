@@ -28,7 +28,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
   const [shake, setShake] = useState(false);
 
 
-  const FALLBACK_IMAGE = "/fallback.jpg";
+  const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : "/fallback.jpg";
   const token = typeof window !== "undefined"? localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken") : null;
   
   // fetch user
@@ -249,7 +249,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
       {/* Image container with fixed height */}
       <div className="relative h-[55%] w-full overflow-hidden">
         <Image
-          src={FALLBACK_IMAGE}
+          src={imageSrc}
           alt={auction.item_name}
           fill
           style={{ objectFit: "cover" }}
@@ -262,6 +262,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
 
       {/* Info section fills remaining space */}
       <div className="p-5 flex flex-col justify-between h-[45%] bg-gradient-to-t from-black/80 to-transparent">
+      
         <div>
           <h3 className="text-2xl font-bold">{auction.item_name}</h3>
           <div className="mt-2 text-lg">
@@ -293,90 +294,89 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction }) => {
           </div>
         </div>
 
-      {/* Bid Now Area with Transition */}
-      <div className="absolute bottom-5 right-5 z-10">
-        {!token? (
-            <Button
-            disabled
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md 
-                      bg-gray-800 border border-gray-700 text-gray-400 opacity-60 
-                      cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30"
-          >
-            <svg
-              className="w-4 h-4 text-gray-500"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
+        {/* Bid Now Area with Transition */}
+        <div className="absolute bottom-5 right-5 z-10">
+          {!token? (
+              <Button
+              disabled
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md 
+                        bg-gray-800 border border-gray-700 text-gray-400 opacity-60 
+                        cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636L5.636 18.364M5.636 5.636l12.728 12.728" />
-            </svg>
-            <span className="text-sm">Login to bid</span>
-          </Button>
-        ) : (
-          <div className="relative h-12 w-[160px] transition-all duration-500">
-            {auction.status === "live" && (
-              <div className={`relative w-full h-full ${shake ? "animate-shake" : ""}`}>
-                {/* Bid Now Button */}
-                <div
-                  className={`absolute inset-0 w-full h-full flex items-center justify-center transition-all duration-500 ease-in-out z-10 ${
-                    isBidding
-                      ? "opacity-0 scale-95 pointer-events-none"
-                      : "opacity-100 scale-100 pointer-events-auto"
-                  }`}
-                >
-                  <button
-                    onClick={() => {
-                      setIsBidding(true);
-                      setShake(true);
-                      setTimeout(() => setShake(false), 600);
-                    }}
-                    className="w-full h-full flex items-center justify-center rounded-md border border-purple-700 bg-purple-800 hover:bg-purple-700 font-medium text-white backdrop-blur-sm transition-all duration-300 ease-in-out cursor-pointer shadow-md hover:shadow-lg"
-                    type="button"
-                  >
-                    Place Lower Bid
-                  </button>
-                </div>
-
-                {/* Bid Form (slide/scale/blur animated transition) */}
-                <form
-                  onSubmit={handleBidSubmit}
-                  className={`absolute inset-0 w-full h-full flex items-center justify-center gap-2 transition-all duration-500 ease-in-out z-0 ${
-                    isBidding
-                      ? "opacity-100 translate-x-0 scale-100 blur-none pointer-events-auto"
-                      : "opacity-0 -translate-x-4 scale-95 blur-sm pointer-events-none"
-                  }`}
-                >
-                  <input
-                    type="number"
-                    name="amount"
-                    value={bidAmount}
-                    onChange={(e) => setBidAmount(Number(e.target.value))}
-                    max={
-                      auction.highest_bid
-                        ? auction.highest_bid - 1
-                        : auction.starting_price - 1
-                    }
-                    min={0}
-                    placeholder="Your lower bid"
-                    className="w-2/3 max-w-[100px] p-2 rounded-lg border bg-gray-800 text-white border-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-gray-400 transition"
-                  />
-                  <button
-                    type="submit"
-                    disabled={submittingBid}
-                    className={`px-3 py-2 bg-purple-800 text-white font-semibold rounded-lg border border-purple-700 shadow hover:bg-purple-700 hover:border-purple-500 transition-all duration-300 ease-in-out cursor-pointer ${
-                      submittingBid ? "opacity-50 cursor-not-allowed" : ""
+              <svg
+                className="w-4 h-4 text-gray-500"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636L5.636 18.364M5.636 5.636l12.728 12.728" />
+              </svg>
+              <span className="text-sm">Login to bid</span>
+            </Button>
+          ) : (
+            <div className="relative h-12 w-[160px] transition-all duration-500">
+              {auction.status === "live" && (
+                <div className={`relative w-full h-full ${shake ? "animate-shake" : ""}`}>
+                  {/* Bid Now Button */}
+                  <div
+                    className={`absolute inset-0 w-full h-full flex items-center justify-center transition-all duration-500 ease-in-out z-10 ${
+                      isBidding
+                        ? "opacity-0 scale-95 pointer-events-none"
+                        : "opacity-100 scale-100 pointer-events-auto"
                     }`}
                   >
-                    Bid
-                  </button>
-                </form>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+                    <button
+                      onClick={() => {
+                        setIsBidding(true);
+                        setShake(true);
+                        setTimeout(() => setShake(false), 600);
+                      }}
+                      className="w-full h-full flex items-center justify-center rounded-md border border-purple-700 bg-purple-800 hover:bg-purple-700 font-medium text-white backdrop-blur-sm transition-all duration-300 ease-in-out cursor-pointer shadow-md hover:shadow-lg"
+                      type="button"
+                    >
+                      Place Lower Bid
+                    </button>
+                  </div>
 
+                  {/* Bid Form (slide/scale/blur animated transition) */}
+                  <form
+                    onSubmit={handleBidSubmit}
+                    className={`absolute inset-0 w-full h-full flex items-center justify-center gap-2 transition-all duration-500 ease-in-out z-0 ${
+                      isBidding
+                        ? "opacity-100 translate-x-0 scale-100 blur-none pointer-events-auto"
+                        : "opacity-0 -translate-x-4 scale-95 blur-sm pointer-events-none"
+                    }`}
+                  >
+                    <input
+                      type="number"
+                      name="amount"
+                      value={bidAmount}
+                      onChange={(e) => setBidAmount(Number(e.target.value))}
+                      max={
+                        auction.highest_bid
+                          ? auction.highest_bid - 1
+                          : auction.starting_price - 1
+                      }
+                      min={0}
+                      placeholder="Your lower bid"
+                      className="w-2/3 max-w-[100px] p-2 rounded-lg border bg-gray-800 text-white border-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-gray-400 transition"
+                    />
+                    <button
+                      type="submit"
+                      disabled={submittingBid}
+                      className={`px-3 py-2 bg-purple-800 text-white font-semibold rounded-lg border border-purple-700 shadow hover:bg-purple-700 hover:border-purple-500 transition-all duration-300 ease-in-out cursor-pointer ${
+                        submittingBid ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                    >
+                      Bid
+                    </button>
+                  </form>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
       </div>
 
