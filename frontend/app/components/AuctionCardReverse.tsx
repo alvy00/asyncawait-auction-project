@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
-import { FaArrowDown, FaClock, FaBan } from "react-icons/fa";
+import { FaArrowDown, FaClock, FaBan, FaBullhorn, FaGavel } from "react-icons/fa";
 import { Auction } from "../../lib/interfaces";
 import { Button } from "../../components/ui/button";
 import Image from "next/image";
@@ -272,9 +272,15 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
             {/* Bidding starts / Current Bid Label */}
             <div className={`text-gray-400 text-xs mb-1 font-medium`}>
             {!highestBid ? (
-              <span className="text-gray-300">Bidding starts at:</span>
+              <span className="text-gray-300 flex items-center gap-1">
+                <FaBullhorn className="text-yellow-400" />
+                Bidding starts at:
+              </span>
             ) : (
-              <span className="text-gray-300">Current Lowest bid:</span>
+              <span className="text-gray-300 flex items-center gap-1">
+                <FaGavel className="text-orange-400" />
+                Current Lowest bid:
+              </span>
             )}
             </div>
 

@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { Auction } from "../../lib/interfaces";
 import { motion } from "framer-motion";
 import { Countdown } from "./Countdown";
-import { FaBolt, FaClock, FaFlagCheckered } from "react-icons/fa";
+import { FaBolt, FaBullhorn, FaClock, FaFlagCheckered, FaGavel } from "react-icons/fa";
 
 const FALLBACK_IMAGE = "/fallback.jpg";
 
@@ -314,9 +314,15 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
             {/* Bidding starts / Current Bid Label */}
             <div className={`text-gray-400 text-xs mb-1 font-medium ${isEnded ? "opacity-0" : ""}`}>
               {!auction.highest_bid ? (
-                <span className="text-gray-300">Bidding starts at:</span>
+                <span className="text-gray-300 flex items-center gap-1">
+                  <FaBullhorn className="text-yellow-400" />
+                  Bidding starts at:
+                </span>
               ) : (
-                <span className="text-gray-300">Current bid:</span>
+                <span className="text-gray-300 flex items-center gap-1">
+                  <FaGavel className="text-orange-400" />
+                  Current bid:
+                </span>
               )}
             </div>
           </div>
