@@ -219,7 +219,12 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
       
       <div className="p-5 h-[45%] flex flex-col justify-between bg-gradient-to-t from-black/80 to-transparent min-h-[150px]">
         <div>
-          <h3 className="text-2xl font-bold">{auction.item_name}</h3>
+          <h3
+            className="text-2xl font-bold tracking-wide uppercase mb-2 
+                      text-cyan-100 drop-shadow-sm"
+          >
+            #{auction.item_name}
+          </h3>
           <p className="mt-2 text-sm flex items-center gap-2">
             <FaTag className="text-cyan-400" />
             Original Price:{" "}
@@ -232,7 +237,10 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
               Price dropped to:
             </span>
             <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-cyan-500 text-3xl">
-              ${currentPrice.toFixed(2)}
+              ${currentPrice.toFixed(2)}{" "}
+              <span className="text-base text-green-500 font-semibold">
+                ({Math.round(((auction.starting_price - currentPrice) / currentPrice) * 100)}%)
+              </span>
             </span>
           </p>
         </div>

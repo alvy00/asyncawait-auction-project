@@ -309,7 +309,12 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
         {/* Content with glass background effect */}
         <div className="p-6 bg-gradient-to-b from-black/50 via-black/70 to-black/80 backdrop-blur-md relative z-10 h-[45%] flex flex-col justify-between border-t border-white/10">
           <div>
-            <h3 className="text-white text-2xl font-bold mb-1">{auction.item_name.toUpperCase()}</h3>
+            <h3
+              className="text-2xl font-bold tracking-wide uppercase mb-2 
+                        text-green-100 drop-shadow-sm"
+            >
+              #{auction.item_name}
+            </h3>
             
             {/* Bidding starts / Current Bid Label */}
             <div className={`text-gray-400 text-xs mb-1 font-medium ${isEnded ? "opacity-0" : ""}`}>
