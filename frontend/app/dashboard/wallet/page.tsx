@@ -15,7 +15,7 @@ import {
 } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { Button } from "../../../components/ui/button";
-import { useUser } from "../../../lib/user-context";
+import { User } from "../../../lib/interfaces";
 
 interface Transaction {
   id: string;
@@ -78,8 +78,11 @@ const SAMPLE_TRANSACTIONS: Transaction[] = [
 ];
 
 const WalletPage = () => {
-  const [user, setUser] = useState(null);
-  const [ balance, setBalance] = useState(0);
+  const [user, setUser] = useState<User>(null);
+  const [balance, setBalance] = useState(0);
+  const [totalDeposits, setTotalDeposits] = useState(0);
+  const [withdrawals, setWithdrawals] = useState(0);
+  const [spentOnAucs, setSpentOnAucs] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>(SAMPLE_TRANSACTIONS);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"all" | "deposits" | "withdrawals" | "bids">("all");
@@ -133,6 +136,9 @@ const WalletPage = () => {
       setIsLoading(true);
     } else {
       setBalance(user.money ?? 0);
+      setTotalDeposits(user.total_deposits ?? 0);
+      setWithdrawals(user.total_withdrawals ?? 0);
+      setSpentOnAucs(user.spent_on_bids ?? 0);
       setIsLoading(false);
     }
   }, [user]);
@@ -151,18 +157,6 @@ const WalletPage = () => {
         return true;
     }
   });
-
-  const totalDeposits = transactions
-    .filter((tx) => tx.type === "deposit" || tx.type === "refund")
-    .reduce((sum, tx) => sum + tx.amount, 0);
-
-  const totalWithdrawals = transactions
-    .filter((tx) => tx.type === "withdrawal")
-    .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
-
-  const totalSpentOnBids = transactions
-    .filter((tx) => tx.type === "bid" || tx.type === "win")
-    .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
 
   // Handle deposit
   const handleDeposit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -196,6 +190,7 @@ const WalletPage = () => {
       }
 
       setBalance(balance + numericAmount);
+      setTotalDeposits(totalDeposits + numericAmount);
       toast.success("Deposit successful!");
 
       setShowDepositModal(false);
@@ -246,6 +241,7 @@ const WalletPage = () => {
 
       toast.success(`Successfully withdrew $${numericAmount.toFixed(2)}`);
       setBalance(balance - numericAmount);
+      setWithdrawals(withdrawals + numericAmount);
       setWithdrawAmount(""); // Clear withdrawal input
       setShowWithdrawModal(false);
 
@@ -382,7 +378,7 @@ const WalletPage = () => {
                 <h3 className="text-sm font-medium text-gray-300">Total Withdrawals</h3>
                 <FaArrowDown className="text-red-500" />
               </div>
-              <p className="text-2xl font-bold text-white">${totalWithdrawals.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-white">${withdrawals.toFixed(2)}</p>
             </div>
 
             {/* Spent on Bids */}
@@ -393,7 +389,7 @@ const WalletPage = () => {
                 <h3 className="text-sm font-medium text-gray-300">Spent on Bids</h3>
                 <FaExchangeAlt className="text-blue-500" />
               </div>
-              <p className="text-2xl font-bold text-white">${totalSpentOnBids.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-white">${spentOnAucs.toFixed(2)}</p>
             </div>
           </div>
         </motion.div>
@@ -516,7 +512,7 @@ const WalletPage = () => {
                   placeholder="Enter amount"
                   value={depositAmount}
                   onChange={(e) => setDepositAmount(e.target.value)}
-                  className="..."
+                  className="w-full mb-4 rounded-md border border-white/20 bg-transparent py-2 px-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
 
                 <div className="flex justify-end gap-4">

@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "../../components/ui/button";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import { Auction } from "../../lib/interfaces";
+import { Auction, User } from "../../lib/interfaces";
 import { motion } from "framer-motion";
 import { Countdown } from "./Countdown";
 import { FaBolt, FaBullhorn, FaClock, FaFlagCheckered, FaGavel } from "react-icons/fa";
@@ -27,7 +27,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
   const [bidAmount, setBidAmount] = useState(0);
   const [highestBid, setHighestBid] = useState(auction.highest_bid);
   const [isHovered, setIsHovered] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User>(null);
   const [currentStatus, setCurrentStatus] = useState<"upcoming" | "live" | "ended">(() => {
     const now = new Date();
     if (now < new Date(auction.start_time)) return "upcoming";
@@ -152,6 +152,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
 
       toast.success(`Bid of $${bidAmount.toFixed(2)} placed successfully!`);
       setHighestBid(bidAmount);
+      setWinner(user.name);
       setIsBidding(false);
       setSubmittingBid(false);
       setRefresh(prev => !prev);
@@ -189,6 +190,32 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
         setCurrentStatus("live");
       } else {
         setCurrentStatus("ended");
+
+        const updateStatusEnd = async () => {
+          const data = {
+            auction_id: auction.auction_id,
+            status: "ended"
+          };
+          try {
+            const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/updatestatus', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(data),
+            });
+
+            if (res.ok) {
+              const json = await res.json();
+              console.log(json.message);
+            } else {
+              console.error('Failed to update auction status', res.status);
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        };
+        updateStatusEnd();
       }
     }, 60000);
 
@@ -241,8 +268,8 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
       whileHover={{
-        scale: 1.015,
-        boxShadow: "0 0 14px 4px rgba(144, 238, 144, 0.3)",
+        scale: 1.02,
+        boxShadow: "0 0 3.5px 1px rgba(42, 254, 42, 0.5)",
         transition: { duration: 0.35, ease: "easeOut" },
       }}
       className="relative w-full h-[500px] group overflow-hidden rounded-lg 
@@ -350,7 +377,9 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                     ) : (
                       <>
                         {/* Higest bid and name */}
-                        <span>${highestBid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <span>
+                          ${highestBid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
                         <div className="text-sm font-normal text-white/80 mt-1 flex items-center">
                           <span className="mr-1">by</span>
                           <div className="hover:underline transition-all duration-200">

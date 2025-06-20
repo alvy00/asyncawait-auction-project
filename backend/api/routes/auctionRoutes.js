@@ -114,6 +114,43 @@ auctionRouter.delete('/delete', async (req, res) => {
   }
 });
 
+// Update Auction Status and increment spent_on_bids if ended
+auctionRouter.post('/updatestatus', async (req, res) => {
+  const { auction_id, status } = req.body;
+
+  try {
+    const { data: updatedAuction, error: updateError } = await supabase
+      .from('auctions')
+      .update({ status })
+      .eq('auction_id', auction_id)
+      .select('highest_bid, highest_bidder_id')
+      .single();
+
+    if (updateError) {
+      return res.status(400).json({ message: "Failed to update auction status", error: updateError });
+    }
+    
+    if (status === 'ended' && updatedAuction.highest_bidder_id) {
+      const { highest_bid, highest_bidder_id } = updatedAuction;
+
+      const { error: userError } = await supabase.rpc('increment_user_spent_on_bids', {
+        user_uuid: highest_bidder_id,
+        increment_amount: highest_bid
+      });
+
+      if (userError) {
+        return res.status(400).json({ message: "Failed to increment user's spent_on_bids", error: userError });
+      }
+    }
+
+    return res.status(200).json({ message: "Auction status updated successfully" });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+
 // Get Auction Details by ID
 auctionRouter.post('/aucdetails', async (req, res) => {
   const { auction_id } = req.body;
