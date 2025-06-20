@@ -78,7 +78,7 @@ const SAMPLE_TRANSACTIONS: Transaction[] = [
 ];
 
 const WalletPage = () => {
-  const { user } = useUser();
+  const [user, setUser] = useState(null);
   const [ balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>(SAMPLE_TRANSACTIONS);
   const [isLoading, setIsLoading] = useState(false);
@@ -88,6 +88,44 @@ const WalletPage = () => {
   const [amount, setAmount] = useState("");
   const [depositAmount, setDepositAmount] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
+
+  // fetch user
+  useEffect(() => {
+    const getUser = async () => {
+      const token =
+        localStorage.getItem("sessionToken") ||
+        sessionStorage.getItem("sessionToken");
+      if (!token) {
+        console.warn("No token found");
+        return;
+      }
+
+      try {
+        const res = await fetch(
+          "https://asyncawait-auction-project.onrender.com/api/getuser",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!res.ok) {
+          const err = await res.json();
+          console.error("Failed to fetch user:", err.message);
+          return;
+        }
+
+        const data = await res.json();
+        setUser(data);
+      } catch (e) {
+        console.error("Error fetching user:", e);
+      }
+    };
+    getUser();
+  }, []);
 
   // Loading check
   useEffect(() => {
@@ -292,7 +330,7 @@ const WalletPage = () => {
               <h2 className="text-lg font-semibold text-gray-300 mb-2">Current Balance</h2>
               { user && 
                 <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500 mb-4">
-                  ${user.money.toFixed(2)}
+                  ${balance.toFixed(2)}
                 </div>
               }
 
