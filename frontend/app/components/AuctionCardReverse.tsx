@@ -276,7 +276,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
       className={`relative w-full h-[500px] group rounded-lg overflow-hidden bg-gradient-to-br from-red-900 to-purple-800 text-white border border-white/20 select-none flex flex-col`}
     >
       {/* Image container with fixed height */}
-      <div className="relative h-[55%] w-full overflow-hidden">
+      <div className="relative h-[55%] w-full overflow-hidden group">
         <Image
           src={imageSrc}
           alt={auction.item_name}

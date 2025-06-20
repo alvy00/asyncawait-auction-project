@@ -4,14 +4,17 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { FaChevronLeft, FaChevronRight, FaCheckCircle, FaTimesCircle, FaHourglassHalf } from "react-icons/fa";
+import {
+  FaChevronLeft,
+  FaChevronRight,
+  FaHourglassHalf,
+} from "react-icons/fa";
 import { Button } from "../../../components/ui/button";
 import { useUser } from "../../../lib/user-context";
 import { Auction } from "../../../lib/interfaces";
 
 const FALLBACK_IMAGE = "/fallback.jpg";
 
-// Sample bid data to display
 interface Bid {
   bid_id: string;
   auction_id: string;
@@ -19,6 +22,7 @@ interface Bid {
   item_name: string;
   bid_amount: number;
   created_at: string;
+  status: string;
 }
 
 const MyBidsPage = () => {
@@ -26,109 +30,72 @@ const MyBidsPage = () => {
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [bids, setBids] = useState<Bid[]>([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalBids: 0,
-    activeBids: 0,
-    wonAuctions: 0,
-    lostAuctions: 0,
-    totalSpent: 0
-  });
   const [filter, setFilter] = useState<"all" | "active" | "won" | "lost">("all");
-  
+  const [currentPage, setCurrentPage] = useState(1);
+  const bidsPerPage = 6;
   const router = useRouter();
 
-  // Fetch all auctions
   useEffect(() => {
     const fetchAllAuctions = async () => {
       try {
-        const res = await fetch(
-          "https://asyncawait-auction-project.onrender.com/api/auctions",
-          {
-            method: "GET",
-            headers: {
-              "Content-type": "application/json",
-            },
-          }
-        );
-
-        if (!res.ok) {
-          const r = await res.json();
-          console.error(r.message || r.statusText);
-          return;
-        }
-
+        const res = await fetch("https://asyncawait-auction-project.onrender.com/api/auctions");
         const data = await res.json();
         setAuctions(data);
-
       } catch (e) {
         console.error(e);
       }
     };
-
     fetchAllAuctions();
   }, []);
 
-  // Fetch bid history
   useEffect(() => {
     if (!user) return;
-
     const fetchBids = async () => {
       try {
-        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/bidhistory', {
-          method: 'POST',
-          headers: {
-            'Content-type': 'application/json'
-          },
-          body: JSON.stringify({ user_id: user.user_id })
+        const res = await fetch("https://asyncawait-auction-project.onrender.com/api/auctions/bidhistory", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: user.user_id }),
         });
-
-        if (!res.ok) {
-          const errorData = await res.json();
-          console.error('Error fetching bids:', errorData.message || res.statusText);
-          return;
-        }
-
         const r = await res.json();
         setBids(r);
       } catch (err) {
-        console.error('Network or server error while fetching bids:', err);
-      }finally {
+        console.error("Failed to fetch bids", err);
+      } finally {
         setLoading(false);
       }
     };
-
     fetchBids();
   }, [user]);
 
-  // Update stats
-  // Needs fixing later (lost auctions, activeBids)
   useEffect(() => {
-    if ( !auctions || !bids || !user ) return;
+    setCurrentPage(1);
+  }, [filter]);
 
-    setStats({
-      totalBids: bids.length,
-      activeBids: bids.filter(bid => bid.status === 'active').length,
-      wonAuctions: auctions.filter(a => a.status === 'ended' && a.highest_bidder_id === user.user_id).length,
-      lostAuctions: auctions.filter(a => a.status === 'ended' && a.highest_bidder_id && a.highest_bidder_id !== user.user_id).length,
-      totalSpent: auctions
-                  .filter(
-                    (auction) =>
-                      auction.status === 'ended' &&
-                      auction.user_id === user?.user_id
-                  )
-                  .reduce((acc, auc) => acc + (auc.highest_bid || 0), 0)
-    });
+  const filteredBids = bids.filter((bid) => {
+    switch (filter) {
+      case "active":
+        return bid.status === "active";
+      case "won": {
+        const auction = auctions.find((a) => a.auction_id === bid.auction_id);
+        return auction?.highest_bidder_id === user?.user_id;
+      }
+      case "lost": {
+        const auction = auctions.find((a) => a.auction_id === bid.auction_id);
+        return auction?.highest_bidder_id && auction?.highest_bidder_id !== user?.user_id;
+      }
+      default:
+        return true;
+    }
+  });
 
-  }, [auctions, bids, user]);
+  const indexOfLastBid = currentPage * bidsPerPage;
+  const indexOfFirstBid = indexOfLastBid - bidsPerPage;
+  const currentBids = filteredBids.slice(indexOfFirstBid, indexOfLastBid);
+  const totalPages = Math.ceil(filteredBids.length / bidsPerPage);
 
-
-  const handleViewAuction = (auctionId: string) => {
-    router.push(`/auctions/${auctionId}`);
-  };
-
-  const handlePlaceBid = (auctionId: string) => {
-    router.push(`/auctions/${auctionId}?bid=true`);
-  };
+  const handleViewAuction = (auctionId: string) => router.push(`/auctions/${auctionId}`);
+  const handlePlaceBid = (auctionId: string) => router.push(`/auctions/${auctionId}?bid=true`);
 
   if (loading) {
     return (
@@ -140,112 +107,104 @@ const MyBidsPage = () => {
 
   return (
     <div className="p-6 min-h-screen">
-      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">My Bids</h1>
           <p className="text-gray-400">Track your bidding activity and auction status</p>
         </div>
-        <Button 
-          onClick={() => router.push("/auctions")} 
-          className="mt-4 md:mt-0 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium px-4 py-2 rounded-md flex items-center gap-2 border border-white/10 shadow-lg"
+        <Button
+          onClick={() => router.push("/auctions")}
+          className="mt-4 md:mt-0 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium px-4 py-2 rounded-md border border-white/10 shadow-lg"
         >
           Explore Auctions
         </Button>
       </div>
 
-      {/* Stats Section */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+      {/* Filter Tabs */}
+      <div className="flex flex-wrap gap-2 mb-6">
         {[
-          { label: "Total Bids", value: stats.totalBids },
-          { label: "Active Bids", value: stats.activeBids },
-          { label: "Won Auctions", value: stats.wonAuctions },
-          { label: "Lost Auctions", value: stats.lostAuctions },
-          { label: "Pending Results", value: stats.pendingBids },
-          { label: "Total Spent", value: stats.totalSpent, isCurrency: true },
-        ].map(({ label, value, isCurrency }) => (
-          <div
-            key={label}
-            className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10"
+          { key: "all", label: "All Bids" },
+          { key: "active", label: "Active" },
+          { key: "won", label: "Won" },
+          { key: "lost", label: "Lost" },
+        ].map(({ key, label }) => (
+          <button
+            key={key}
+            onClick={() => setFilter(key as any)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+              filter === key
+                ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white border border-white/20"
+                : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
+            }`}
           >
-            <h3 className="text-gray-400 text-sm mb-1">{label}</h3>
-            <p className="text-2xl font-bold text-white">
-              {isCurrency
-                ? `$${value.toFixed(2)}`
-                : value?.toString().padStart(2, "0")}
-            </p>
-          </div>
+            {label}
+          </button>
         ))}
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        <button 
-          onClick={() => setFilter("all")} 
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${filter === "all" ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white border border-white/20" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"}`}
-        >
-          All Bids
-        </button>
-        <button 
-          onClick={() => setFilter("active")} 
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${filter === "active" ? "bg-gradient-to-r from-green-500 to-teal-500 text-white border border-white/20" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"}`}
-        >
-          Active
-        </button>
-        <button 
-          onClick={() => setFilter("won")} 
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${filter === "won" ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white border border-white/20" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"}`}
-        >
-          Won
-        </button>
-        <button 
-          onClick={() => setFilter("lost")} 
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${filter === "lost" ? "bg-gradient-to-r from-red-500 to-rose-500 text-white border border-white/20" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"}`}
-        >
-          Lost
-        </button>
-      </div>
-
-      {/* Divider */}
       <div className="border-b border-white/10 mb-8"></div>
 
-      {/* Bids List */}
-      <div className="mb-6">
-        <h2 className="text-xl md:text-2xl font-bold text-white mb-6 flex items-center justify-between">
-          <span>My Bidding History</span>
-          <div className="flex gap-2">
-            <button className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white border border-white/10">
-              <FaChevronLeft className="h-4 w-4" />
-            </button>
-            <button className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white border border-white/10">
-              <FaChevronRight className="h-4 w-4" />
-            </button>
-          </div>
-        </h2>
+      <h2 className="text-xl md:text-2xl font-bold text-white mb-6">My Bidding History</h2>
 
-        {bids.length === 0 ? (
-          <div className="bg-white/5 backdrop-blur-md rounded-xl p-8 text-center border border-white/10">
-            <p className="text-gray-400 mb-4">You haven&apos;t placed any bids yet.</p>
-            <Button 
-              onClick={() => router.push("/auctions")} 
-              className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 border border-white/10 shadow-lg"
-            >
-              Explore Auctions
-            </Button>
-          </div>
-        ) : (
+      {filteredBids.length === 0 ? (
+        <div className="bg-white/5 backdrop-blur-md rounded-xl p-8 text-center border border-white/10">
+          <p className="text-gray-400 mb-4">You haven&apos;t placed any bids yet.</p>
+          <Button
+            onClick={() => router.push("/auctions")}
+            className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 border border-white/10 shadow-lg"
+          >
+            Explore Auctions
+          </Button>
+        </div>
+      ) : (
+        <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {bids.map((bid) => (
-              <BidCard 
-                key={bid.bid_id} 
-                bid={bid} 
-                onViewAuction={() => handleViewAuction(bid.auction_id)} 
-                onPlaceBid={() => handlePlaceBid(bid.auction_id)} 
+            {currentBids.map((bid) => (
+              <BidCard
+                key={bid.bid_id}
+                bid={bid}
+                onViewAuction={() => handleViewAuction(bid.auction_id)}
+                onPlaceBid={() => handlePlaceBid(bid.auction_id)}
               />
             ))}
           </div>
-        )}
-      </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-8 gap-2 flex-wrap">
+              <Button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => prev - 1)}
+                className="px-3 py-1 bg-white/10 text-sm text-white hover:bg-white/20 disabled:opacity-40"
+              >
+                <FaChevronLeft />
+              </Button>
+
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`px-3 py-1 rounded text-sm font-medium ${
+                    currentPage === i + 1
+                      ? "bg-white/20 text-white"
+                      : "bg-white/5 text-gray-300 hover:bg-white/10"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <Button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((prev) => prev + 1)}
+                className="px-3 py-1 bg-white/10 text-sm text-white hover:bg-white/20 disabled:opacity-40"
+              >
+                <FaChevronRight />
+              </Button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };
@@ -322,7 +281,7 @@ const BidCard: React.FC<BidCardProps> = ({ bid, onViewAuction, onPlaceBid }) => 
           {/* Image */}
           <div className="relative w-full h-48 overflow-hidden">
             <Image 
-              src={ FALLBACK_IMAGE } 
+              src={ FALLBACK_IMAGE }
               alt={bid.item_name}
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-110"
