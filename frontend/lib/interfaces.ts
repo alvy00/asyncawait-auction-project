@@ -5,6 +5,9 @@ export interface User {
     email: string;
     join_date: string;
     money: number;
+    total_deposits: number;
+    total_withdrawals: number;
+    spent_on_bids: number;
     total_auctions: number;
     total_bids: number;
     auctions_participated: number;

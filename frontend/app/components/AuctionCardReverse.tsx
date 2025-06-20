@@ -170,7 +170,32 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
   }, [auction?.highest_bidder_id, refresh]);
 
   // Status Badge component
-  const StatusBadge = ({ status }: { status: string }) => {
+  const StatusBadge = ({ status, auctionId }) => {
+    useEffect(() => {
+      if (status.toLowerCase() === "ended") {
+        const updateStatusEnd = async () => {
+          try {
+            const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/updatestatus', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ auctionId, status: "ended" }),
+            });
+
+            if (res.ok) {
+              const json = await res.json();
+              console.log(json.message);
+            } else {
+              console.error("Failed to update auction status", res.status);
+            }
+          } catch (error) {
+            console.error("Error updating auction status:", error);
+          }
+        };
+
+        updateStatusEnd();
+      }
+    }, [status, auctionId]);
+
     let bgClasses = "";
     let text = "";
     let Icon = null;
@@ -245,7 +270,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
       animate={{ opacity: 1, y: 0 }}
       whileHover={{
         scale: 1.02,
-        boxShadow: `0 0 15px 4px rgba(128, 90, 213, 0.4)`,
+        boxShadow: "0 0 5px 1px rgba(255, 0, 183, 0.7)",
         transition: { duration: 0.35, ease: "easeOut" },
       }}
       className={`relative w-full h-[500px] group rounded-lg overflow-hidden bg-gradient-to-br from-red-900 to-purple-800 text-white border border-white/20 select-none flex flex-col`}
@@ -262,7 +287,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
         />
       </div>
 
-      <StatusBadge status={auction.status} />
+      <StatusBadge status={auction.status} auctionId={auction.auction_id}/>
 
       {/* Info section fills remaining space */}
       <div className="p-5 flex flex-col justify-between h-[45%] bg-gradient-to-t from-black/80 to-transparent">
