@@ -12,7 +12,7 @@ import { useAuth } from '../../lib/auth-context';
 import toast from 'react-hot-toast';
 import { Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MdDashboard } from "react-icons/md";
+import { MdAddCircle, MdDashboard, MdOutlineCreateNewFolder } from "react-icons/md";
 import { User } from '../../lib/interfaces';
 import { HiOutlineUserAdd } from "react-icons/hi";
 import { CiLogin } from "react-icons/ci";
@@ -401,7 +401,7 @@ export const Navbar = () => {
                             </Link>
                           </motion.div>
                           
-                          {user.is_admin &&<motion.div variants={menuItemVariants}>
+                          {user.is_admin && <motion.div variants={menuItemVariants}>
                             <Link 
                               href="/admin" 
                               className="flex items-center gap-2 px-4 py-2 text-white hover:bg-[#162a3d]/70 hover:text-orange-400 text-sm transition-all duration-200"
@@ -411,6 +411,17 @@ export const Navbar = () => {
                               Admin
                             </Link>
                           </motion.div>}
+
+                          <motion.div variants={menuItemVariants}>
+                            <Link 
+                              href="/auctions/create" 
+                              className="flex items-center gap-2 px-4 py-2 text-white hover:bg-[#162a3d]/70 hover:text-orange-400 text-sm transition-all duration-200"
+                              onClick={() => setAvatarDropdownOpen(false)}
+                            >
+                              <MdOutlineCreateNewFolder className="text-lg" />
+                              Create Auction
+                            </Link>
+                          </motion.div>
                           
                           <motion.div variants={menuItemVariants}>
                             <button 
@@ -418,12 +429,16 @@ export const Navbar = () => {
                                 handleLogOut();
                                 setAvatarDropdownOpen(false);
                               }}
-                              className="flex items-center gap-2 px-4 py-2 text-red-400 hover:bg-[#162a3d]/70 hover:text-red-300 text-sm w-full text-left transition-all duration-200"
+                              className="flex items-center gap-2 px-4 py-2 text-red-400 
+                                        hover:bg-red-700/30 hover:text-red-300 
+                                        text-sm w-full text-left transition-colors duration-200 
+                                        cursor-pointer rounded"
                             >
                               <LogOut size={16} />
                               Logout
                             </button>
                           </motion.div>
+
                         </motion.div>
                       </motion.div>
                     )}
