@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -78,19 +79,25 @@ const SAMPLE_TRANSACTIONS: Transaction[] = [
 
 const WalletPage = () => {
   const { user } = useUser();
-  const [ balance, setBalance] = useState(user.money);
+  const [ balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>(SAMPLE_TRANSACTIONS);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"all" | "deposits" | "withdrawals" | "bids">("all");
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [amount, setAmount] = useState("");
+  const [depositAmount, setDepositAmount] = useState("");
+  const [withdrawAmount, setWithdrawAmount] = useState("");
 
+  // Loading check
   useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => setIsLoading(false), 1000);
-    return () => clearTimeout(timer);
-  }, []);
+    if (!user) {
+      setIsLoading(true);
+    } else {
+      setBalance(user.money ?? 0);
+      setIsLoading(false);
+    }
+  }, [user]);
 
   const filteredTransactions = transactions.filter((transaction) => {
     switch (activeTab) {
@@ -121,24 +128,25 @@ const WalletPage = () => {
 
   // Handle deposit
   const handleDeposit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); 
+    e.preventDefault();
+
+    if (!depositAmount) {
+      toast.error("Please enter an amount");
+      return;
+    }
+
+    const numericAmount = Number(depositAmount);
+    if (isNaN(numericAmount) || numericAmount <= 0) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
 
     try {
-      const formData = new FormData(e.currentTarget);
-      const amount = formData.get('amount');
-
-      if (!amount) {
-        toast.error("Please enter an amount");
-        return;
-      }
-
-      const data = { user_id: user.user_id, amount: Number(amount) };
+      const data = { user_id: user.user_id, amount: numericAmount };
 
       const res = await fetch('https://asyncawait-auction-project.onrender.com/api/deposit', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
 
@@ -149,11 +157,11 @@ const WalletPage = () => {
         return;
       }
 
-      setBalance(balance+amount);
+      setBalance(balance + numericAmount);
       toast.success("Deposit successful!");
-      
+
       setShowDepositModal(false);
-      setAmount("");
+      setDepositAmount("");  // reset deposit input
 
     } catch (error) {
       console.error(error);
@@ -165,13 +173,19 @@ const WalletPage = () => {
   const handleWithdrawal = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const withdrawalAmount = Number(amount);
-
-    if (!amount || isNaN(withdrawalAmount) || withdrawalAmount <= 0) {
+    if (!withdrawAmount) {
       toast.error("Please enter a valid amount");
       return;
     }
-    if (withdrawalAmount > user.money) {
+
+    const numericAmount = Number(withdrawAmount);
+
+    if (isNaN(numericAmount) || numericAmount <= 0) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
+
+    if (numericAmount > (user?.money ?? 0)) {
       toast.error("Insufficient funds");
       return;
     }
@@ -182,7 +196,7 @@ const WalletPage = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ user_id: user.user_id, amount: withdrawalAmount }),
+        body: JSON.stringify({ user_id: user.user_id, amount: numericAmount }),
       });
 
       const result = await res.json();
@@ -192,11 +206,9 @@ const WalletPage = () => {
         return;
       }
 
-      // Optionally update local UI or refetch user balance here
-
-      toast.success(`Successfully withdrew $${withdrawalAmount.toFixed(2)}`);
-      setBalance(balance-withdrawalAmount);
-      setAmount("");
+      toast.success(`Successfully withdrew $${numericAmount.toFixed(2)}`);
+      setBalance(balance - numericAmount);
+      setWithdrawAmount(""); // Clear withdrawal input
       setShowWithdrawModal(false);
 
     } catch (error) {
@@ -457,14 +469,13 @@ const WalletPage = () => {
               </button>
 
               <h3 className="text-lg font-semibold text-white mb-4">Deposit Funds</h3>
-
               <form onSubmit={handleDeposit} className="...">
                 <input
                   type="number"
                   name="amount"
                   placeholder="Enter amount"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  value={depositAmount}
+                  onChange={(e) => setDepositAmount(e.target.value)}
                   className="..."
                 />
 
@@ -520,8 +531,8 @@ const WalletPage = () => {
               type="number"
               name="amount"
               placeholder="Enter amount"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              value={withdrawAmount}
+              onChange={(e) => setWithdrawAmount(e.target.value)}
               className="w-full mb-4 rounded-md border border-white/20 bg-transparent py-2 px-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
 
