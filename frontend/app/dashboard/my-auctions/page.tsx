@@ -15,53 +15,6 @@ import { useUser } from "../../../lib/user-context";
 
 const FALLBACK_IMAGE = "/fallback.jpg";
 
-// Sample auction data to display when no data is returned from the server
-const SAMPLE_AUCTIONS: Auction[] = [
-  {
-    auction_id: "sample-1",
-    creator: "You",
-    item_name: "Vintage Camera Collection",
-    description: "A rare collection of vintage cameras from the 1950s in excellent condition.",
-    category: "electronics",
-    starting_price: 199.99,
-    highest_bid: 250.00,
-    start_time: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-    end_time: new Date(Date.now() + 172800000).toISOString(), // 2 days from now
-    status: "live",
-    images: ["https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1000&auto=format&fit=crop"],
-    condition: "used"
-  },
-  {
-    auction_id: "sample-2",
-    creator: "You",
-    item_name: "Limited Edition Art Print",
-    description: "Signed and numbered limited edition print by renowned artist.",
-    category: "art",
-    starting_price: 349.99,
-    highest_bid: 349.99,
-    start_time: new Date(Date.now() + 86400000).toISOString(), // 1 day from now
-    end_time: new Date(Date.now() + 604800000).toISOString(), // 7 days from now
-    status: "upcoming",
-    images: ["https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=1000&auto=format&fit=crop"],
-    condition: "new"
-  },
-  {
-    auction_id: "sample-3",
-    creator: "You",
-    item_name: "Antique Pocket Watch",
-    description: "18th century gold-plated pocket watch with intricate engravings.",
-    category: "other",
-    starting_price: 599.99,
-    highest_bid: 780.50,
-    highest_bidder_id: "sample-user",
-    start_time: new Date(Date.now() - 604800000).toISOString(), // 7 days ago
-    end_time: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-    status: "ended",
-    images: ["https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?q=80&w=1000&auto=format&fit=crop"],
-    condition: "refurbished"
-  }
-];
-
 const MyAuctionsPage = () => {
   const { user } = useUser();
   const [auctions, setAuctions] = useState<Auction[]>();
@@ -74,10 +27,11 @@ const MyAuctionsPage = () => {
     expired: 0,
     totalBids: 0,
   });
-  
+  const [currentPage, setCurrentPage] = useState(1);
+  const auctionsPerPage = 6;
+
   const router = useRouter();
 
-  // Fetch all auctions on mount
   useEffect(() => {
     const fetchAllAuctions = async () => {
       try {
@@ -108,7 +62,6 @@ const MyAuctionsPage = () => {
     fetchAllAuctions();
   }, []);
 
-  // Update stats
   useEffect(() => {
     if (!auctions || !user) return;
 
@@ -126,7 +79,7 @@ const MyAuctionsPage = () => {
     const timer = setTimeout(() => {
       setLoading(false);
     }, 1000);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -155,10 +108,8 @@ const MyAuctionsPage = () => {
 
       toast.success("Auction deleted successfully");
 
-      // Remove deleted auction from state
       setAuctions(prev => prev?.filter(a => a.auction_id !== auctionId));
 
-      // Update stats
       const deletedAuction = auctions?.find(a => a.auction_id === auctionId);
       if (deletedAuction) {
         setStats(prev => ({
@@ -176,6 +127,12 @@ const MyAuctionsPage = () => {
       toast.error("An error occurred while deleting");
     }
   };
+
+  const filteredAuctions = auctions?.filter(a => a.user_id === user?.user_id) || [];
+  const totalPages = Math.ceil(filteredAuctions.length / auctionsPerPage);
+  const indexOfLast = currentPage * auctionsPerPage;
+  const indexOfFirst = indexOfLast - auctionsPerPage;
+  const currentAuctions = filteredAuctions.slice(indexOfFirst, indexOfLast);
 
   if (loading) {
     return (
@@ -244,7 +201,7 @@ const MyAuctionsPage = () => {
           </div>
         </h2>
 
-        {auctions?.length === 0 ? (
+        {currentAuctions.length === 0 ? (
           <div className="bg-white/5 backdrop-blur-md rounded-xl p-8 text-center border border-white/10">
             <p className="text-gray-400 mb-4">You haven&apos;t created any auctions yet.</p>
             <Button 
@@ -255,10 +212,9 @@ const MyAuctionsPage = () => {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {auctions
-              ?.filter(auction => auction?.user_id === user?.user_id)
-              .map(auction => (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {currentAuctions.map(auction => (
                 <AuctionCard
                   key={auction.auction_id}
                   auction={auction}
@@ -266,18 +222,27 @@ const MyAuctionsPage = () => {
                   onDelete={() => handleDelete(auction.auction_id)}
                 />
               ))}
-          </div>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex justify-center mt-8 space-x-2">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-4 py-2 rounded-md border border-white/10 text-sm font-medium transition-all duration-300 ${
+                    page === currentPage
+                      ? "bg-white/10 text-white"
+                      : "bg-white/5 text-gray-300 hover:bg-white/10"
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
+          </>
         )}
       </div>
-
-      {/* More Products Link */}
-      {auctions.length > 0 && (
-        <div className="flex justify-end mt-6">
-          <button className="text-blue-400 hover:text-blue-300 flex items-center gap-1 text-sm">
-            More Products <FaChevronRight className="h-3 w-3" />
-          </button>
-        </div>
-      )}
     </div>
   );
 };
@@ -413,7 +378,7 @@ const AuctionCard: React.FC<DashboardAuctionCardProps> = ({ auction, onEdit, onD
             </div>
 
             {/* Action buttons */}
-            <div className="grid grid-cols-2 gap-3">
+            {/* <div className="grid grid-cols-2 gap-3">
               <Button 
                 onClick={(e) => {
                   e.stopPropagation();
@@ -432,7 +397,8 @@ const AuctionCard: React.FC<DashboardAuctionCardProps> = ({ auction, onEdit, onD
               >
                 Delete
               </Button>
-            </div>
+            </div> */}
+
           </div>
         </div>
       </div>
