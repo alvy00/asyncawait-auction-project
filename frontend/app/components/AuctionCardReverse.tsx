@@ -115,6 +115,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
       setHighestBid(amount);
       setBidAmount(amount);
       setIsBidding(false);
+      setWinner(user.name);
       setRefresh(prev => !prev);
     } catch (err) {
       console.error("Bid submission error:", err);
@@ -303,7 +304,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
           >
             <div className="text-gray-200">by</div>
             <div className="hover:underline transition-all duration-200">
-              {auction.highest_bidder_name || "—"}
+              {winner || "—"}
             </div>
           </div>
 

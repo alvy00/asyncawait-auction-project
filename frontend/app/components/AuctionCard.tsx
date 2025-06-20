@@ -35,6 +35,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
     return "ended";
   });
   const [favourited, setFavourited] = useState(isFavourited);
+  const [refresh, setRefresh] = useState(false);
   const [shake, setShake] = useState(false);
 
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : FALLBACK_IMAGE;
@@ -95,8 +96,8 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
         });
 
         if (!res.ok) {
-          const errorBody = await res.text(); // Use .text() to see raw response
-          console.error('Failed to fetch user. Status:', res.status, 'Response:', errorBody);
+          const errorBody = await res.text();
+          //console.error('Failed to fetch user. Status:', res.status, 'Response:', errorBody);
           return;
         }
 
@@ -110,7 +111,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
     };
 
     getHighestBidder();
-  }, [auction?.highest_bidder_id])
+  }, [auction?.highest_bidder_id, refresh])
   
   // submit bid
   const handleBidSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -118,39 +119,46 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
     setSubmittingBid(true);
 
     try {
-        const formData = new FormData(e.currentTarget);
-        
-        const body = {
-          auction_id: auction.auction_id,
-          amount: formData.get('amount'),
-        };
-        
-        // https://asyncawait-auction-project.onrender.com/api/auctions/bid
-        // http://localhost:8000/api/auctions/bid
-        const res = await fetch("https://asyncawait-auction-project.onrender.com/api/auctions/bid", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(body),
-        });
+      const formData = new FormData(e.currentTarget);
+      const amountStr = formData.get('amount');
+      const bidAmount = amountStr ? parseFloat(amountStr.toString()) : 0;
 
-        if (!res.ok) {
-          const error = await res.json();
-          console.error("Error placing bid:", error);
-          toast.error(error?.message || "Failed to place bid.");
-          return;
-        }
-
-        toast.success(`Bid of $${bidAmount} placed successfully!`);
-        setHighestBid(bidAmount);
-        setIsBidding(false);
+      if (bidAmount > user.money) {
+        toast.error("Insufficient balance, please deposit more money!");
         setSubmittingBid(false);
-      } catch (err) {
-        console.error("Bid submission error:", err);
-        toast.error("Something went wrong. Please try again.");
+        return;
       }
+
+      const body = {
+        auction_id: auction.auction_id,
+        amount: bidAmount,
+      };
+
+      const res = await fetch("https://asyncawait-auction-project.onrender.com/api/auctions/bid", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        console.error("Error placing bid:", error);
+        toast.error(error?.message || "Failed to place bid.");
+        return;
+      }
+
+      toast.success(`Bid of $${bidAmount.toFixed(2)} placed successfully!`);
+      setHighestBid(bidAmount);
+      setIsBidding(false);
+      setSubmittingBid(false);
+      setRefresh(prev => !prev);
+    } catch (err) {
+      console.error("Bid submission error:", err);
+      toast.error("Something went wrong. Please try again.");
+    }
   };
 
   // animation
@@ -185,9 +193,8 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
     }, 60000);
 
     return () => clearInterval(interval);
-  }, [auction.start_time, auction.end_time]);
+  }, [auction.start_time, auction.end_time, refresh]);
 
-  
   // handle fav click
   const handleFavoriteClick = async () => {
     const url = favourited
@@ -218,15 +225,15 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
     }
   };
 
-    // shake effect
-    useEffect(() => {
-      if (shake) {
-        const timer = setTimeout(() => {
-          setShake(false);
-        }, 600);
-        return () => clearTimeout(timer);
-      }
-    }, [shake]);
+  // shake effect
+  useEffect(() => {
+    if (shake) {
+      const timer = setTimeout(() => {
+        setShake(false);
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [shake]);
 
   return (
     <motion.div 
@@ -318,7 +325,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
             
             {/* Bidding starts / Current Bid Label */}
             <div className={`text-gray-400 text-xs mb-1 font-medium ${isEnded ? "opacity-0" : ""}`}>
-              {!auction.highest_bid ? (
+              {!highestBid ? (
                 <span className="text-gray-300 flex items-center gap-1">
                   <FaBullhorn className="text-yellow-400" />
                   Bidding starts at:
@@ -338,7 +345,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
               <div className="flex items-center justify-between mb-4">
                 {!isEnded && (
                   <div className="text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-orange-500 font-bold text-3xl flex flex-col">
-                    {!auction.highest_bid ? (
+                    {!highestBid ? (
                       `$${auction.starting_price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                     ) : (
                       <>
@@ -347,7 +354,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                         <div className="text-sm font-normal text-white/80 mt-1 flex items-center">
                           <span className="mr-1">by</span>
                           <div className="hover:underline transition-all duration-200">
-                            {auction.highest_bidder_name || "—"}
+                            {winner || "—"}
                           </div>
                         </div>
                       </>

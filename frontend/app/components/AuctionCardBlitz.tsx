@@ -292,7 +292,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
           >
             <div className="text-gray-200">by</div>
             <div className="hover:underline transition-all duration-200">
-              {auction.highest_bidder_name || "—"}
+              {winner || "—"}
             </div>
           </div>
 

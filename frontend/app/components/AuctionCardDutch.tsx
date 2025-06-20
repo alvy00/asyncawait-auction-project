@@ -239,7 +239,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
             <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-cyan-500 text-3xl">
               ${currentPrice.toFixed(2)}{" "}
               <span className="text-base text-green-500 font-semibold">
-                ({Math.round(((auction.starting_price - currentPrice) / currentPrice) * 100)}%)
+                ({Math.round(((auction.starting_price - currentPrice) / auction.starting_price) * 100)}%)
               </span>
             </span>
           </p>
@@ -250,6 +250,16 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
           </span>
         </div>
       </div>
+      
+      {/* AuctionCreator Badge */}
+      {auctionCreator && (
+        <div className="flex items-center text-white text-sm bg-white/5 backdrop-blur-sm px-2 py-1 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          {auctionCreator}
+        </div>
+      )}
 
       {auction.status === "live" && !submittingBid && (
         <div className="absolute bottom-5 right-5 z-20 flex flex-col items-end">
@@ -314,6 +324,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
         </div>
       )}
 
+      {/* Overlay during bidding */}
       {submittingBid && (
         <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-xl font-bold text-white z-50 pointer-events-auto space-x-4">
           <motion.div
