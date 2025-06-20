@@ -159,7 +159,32 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
   }, [auction?.highest_bidder_id, refresh]);
 
   // Status Badge component
-  const StatusBadge = ({ status }: { status: string }) => {
+  const StatusBadge = ({ status, auctionId }) => {
+    useEffect(() => {
+      if (status.toLowerCase() === "ended") {
+        const updateStatusEnd = async () => {
+          try {
+            const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/updatestatus', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ auctionId, status: "ended" }),
+            });
+
+            if (res.ok) {
+              const json = await res.json();
+              console.log(json.message);
+            } else {
+              console.error("Failed to update auction status", res.status);
+            }
+          } catch (error) {
+            console.error("Error updating auction status:", error);
+          }
+        };
+
+        updateStatusEnd();
+      }
+    }, [status, auctionId]);
+
     let bgClasses = "";
     let text = "";
     let Icon = null;
@@ -195,7 +220,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
     );
   };
 
-    // Live Badge Animation
+  // Live Badge Animation
   useEffect(() => {
     if (auction.status === "live") {
       controls.start({
@@ -255,7 +280,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
       </div>
 
       {/* Status Badge */}
-      <StatusBadge status={auction.status} />
+      <StatusBadge status={auction.status} auctionId={auction.auction_id}/>
 
       {/* Content area */}
       <div className="p-5 flex flex-col justify-between h-[45%] bg-gradient-to-t from-black/80 to-transparent">

@@ -153,7 +153,32 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
     }
   }, [isBidding]);
 
-  const StatusBadge = ({ status }: { status: string }) => {
+  const StatusBadge = ({ status, auctionId }) => {
+    useEffect(() => {
+      if (status.toLowerCase() === "ended") {
+        const updateStatusEnd = async () => {
+          try {
+            const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/updatestatus', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ auctionId, status: "ended" }),
+            });
+
+            if (res.ok) {
+              const json = await res.json();
+              console.log(json.message);
+            } else {
+              console.error("Failed to update auction status", res.status);
+            }
+          } catch (error) {
+            console.error("Error updating auction status:", error);
+          }
+        };
+
+        updateStatusEnd();
+      }
+    }, [status, auctionId]);
+
     let bgClasses = "";
     let text = "";
     let Icon = null;
@@ -214,7 +239,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
         />
       </div>
 
-      <StatusBadge status={auction.status} />
+      <StatusBadge status={auction.status} auctionId={auction.auction_id}/>
       
       
       <div className="p-5 h-[45%] flex flex-col justify-between bg-gradient-to-t from-black/80 to-transparent min-h-[150px]">
