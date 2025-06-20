@@ -190,6 +190,32 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
         setCurrentStatus("live");
       } else {
         setCurrentStatus("ended");
+
+        const updateStatusEnd = async () => {
+          const data = {
+            auction_id: auction.auction_id,
+            status: "ended"
+          };
+          try {
+            const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/updatestatus', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(data),
+            });
+
+            if (res.ok) {
+              const json = await res.json();
+              console.log(json.message);
+            } else {
+              console.error('Failed to update auction status', res.status);
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        };
+        updateStatusEnd();
       }
     }, 60000);
 
@@ -351,7 +377,9 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                     ) : (
                       <>
                         {/* Higest bid and name */}
-                        <span>${highestBid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <span>
+                          ${highestBid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
                         <div className="text-sm font-normal text-white/80 mt-1 flex items-center">
                           <span className="mr-1">by</span>
                           <div className="hover:underline transition-all duration-200">
