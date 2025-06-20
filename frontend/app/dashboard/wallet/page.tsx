@@ -290,9 +290,11 @@ const WalletPage = () => {
               <div className="pointer-events-none absolute -inset-1 bg-gradient-to-tr from-orange-500/10 via-purple-500/5 to-blue-500/10 opacity-30 transition-opacity duration-700"></div>
 
               <h2 className="text-lg font-semibold text-gray-300 mb-2">Current Balance</h2>
-              <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500 mb-4">
-                ${user.money.toFixed(2)}
-              </div>
+              { user && 
+                <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500 mb-4">
+                  ${user.money.toFixed(2)}
+                </div>
+              }
 
               <div className="flex gap-3 mt-4">
                 <Button
