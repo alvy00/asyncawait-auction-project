@@ -194,8 +194,8 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{
-        scale: 1.015,
-        boxShadow: "0 0 14px 4px rgba(0,191,255,0.45)",
+        scale: 1.02,
+        boxShadow: "0 0 5px 1px rgba(0,191,255,0.8)",
         transition: { duration: 0.35, ease: "easeOut" },
       }}
       className={`relative w-full h-[500px] rounded-lg overflow-hidden bg-gradient-to-br from-white-900 to-blue-800 text-white border border-white/20 select-none ${

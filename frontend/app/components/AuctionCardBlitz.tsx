@@ -233,8 +233,8 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{
-        scale: 1.015,
-        boxShadow: `0 0 12px 3px rgba(255, 69, 0, 0.35)`,
+        scale: 1.02,
+        boxShadow: "0 0 5px 1px rgba(255, 69, 0, 0.45)",
         transition: { duration: 0.35, ease: "easeOut" },
       }}
       className={`relative w-full h-[500px] group rounded-lg overflow-hidden 
