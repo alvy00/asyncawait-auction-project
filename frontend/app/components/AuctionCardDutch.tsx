@@ -228,13 +228,13 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
       }`}
     >
       {/* Image container with fixed height */}
-      <div className="relative h-[55%] w-full overflow-hidden">
+      <div className="relative h-[55%] w-full overflow-hidden group">
         <Image
           src={imageSrc}
           alt={auction.item_name}
           fill
           style={{ objectFit: "cover" }}
-          className="brightness-90 object-cover transition-transform duration-700 group-hover:scale-110"
+          className="brightness-90 group-hover:brightness-110 object-cover transition-transform duration-700 group-hover:scale-110"
           priority
         />
       </div>

@@ -268,7 +268,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
     >
 
       {/* Image container */}
-      <div className="relative h-[55%] w-full overflow-hidden">
+      <div className="relative h-[55%] w-full overflow-hidden group">
         <Image
           src={imageSrc}
           alt={auction.item_name}
