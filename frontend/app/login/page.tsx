@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
-import { Checkbox } from '../../components/ui/checkbox';
-import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
-import { useAuth } from '../../lib/auth-context';
-import { getSessionToken, clearSessionToken, isSessionExpired } from '../../lib/utils';
-import { FaEnvelope, FaFacebookF, FaGoogle, FaLock } from 'react-icons/fa';
-import BackButton from '../components/BackButton';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
+import { Checkbox } from "../../components/ui/checkbox";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { useAuth } from "../../lib/auth-context";
+import { getSessionToken, clearSessionToken, isSessionExpired } from "../../lib/utils";
+import { FaEnvelope, FaFacebookF, FaGoogle, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import BackButton from "../components/BackButton";
+import { motion } from "framer-motion";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -24,6 +24,7 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSessionExpiry = () => {
     clearSessionToken();
@@ -32,23 +33,39 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
-    const token = getSessionToken();
-    const expired = isSessionExpired();
+    try {
+      const token = getSessionToken();
+      const expired = isSessionExpired();
 
-    if (!token || expired) {
-      clearSessionToken();
+      if (!token || expired) {
+        clearSessionToken();
+        setCheckingAuth(false);
+      } else {
+        router.push("/");
+      }
+    } catch (err) {
+      console.error("Storage access error:", err);
       setCheckingAuth(false);
-    } else {
-      router.push('/');
     }
-  }, []);
+  }, [router]);
+
+  // Prefetch dashboard routes after mount
+  useEffect(() => {
+    router.prefetch("/auctions/all");
+    router.prefetch("/auctions/upcoming");
+    router.prefetch("/auctions/past");
+  }, [router]);
 
   // Multi-tab sync + auto-logout
   useEffect(() => {
     const handleVisibilityOrFocus = () => {
-      const token = getSessionToken();
-      const expired = isSessionExpired();
-      if (token && expired) handleSessionExpiry();
+      try {
+        const token = getSessionToken();
+        const expired = isSessionExpired();
+        if (token && expired) handleSessionExpiry();
+      } catch (e) {
+        console.error("Storage error", e);
+      }
     };
 
     const handleStorageChange = (e: StorageEvent) => {
@@ -68,6 +85,14 @@ export default function LoginPage() {
     };
   }, []);
 
+  // Auto-close logout modal after 8s
+  useEffect(() => {
+    if (showLogoutModal) {
+      const timeout = setTimeout(() => setShowLogoutModal(false), 8000);
+      return () => clearTimeout(timeout);
+    }
+  }, [showLogoutModal]);
+
   if (checkingAuth) return null;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -77,43 +102,38 @@ export default function LoginPage() {
     try {
       const data = new FormData(e.currentTarget);
       const body = {
-        email: data.get('email'),
-        password: data.get('password')
+        email: data.get("email"),
+        password: data.get("password"),
       };
 
-      const res = await fetch('https://asyncawait-auction-project.onrender.com/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+      const res = await fetch("https://asyncawait-auction-project.onrender.com/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
       });
 
       const result = await res.json();
 
       if (!res.ok) {
-        toast.error(result?.message || 'Login failed. Please check your credentials.');
+        toast.error(result?.message || "Login failed. Please check your credentials.");
         return;
       }
 
       if (result.token) {
         login(result.token, rememberMe);
         window.dispatchEvent(new Event("authChange"));
-        toast.success('Login successful!');
-        router.push('/');
-        router.prefetch('/auctions/all');
-        router.prefetch('/auctions/upcoming');
-        router.prefetch('/auctions/past');
+        toast.success("Login successful!");
+        router.push("/");
       }
     } catch (error) {
-      toast.error('Something went wrong. Please try again.');
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
-  
 
   return (
     <>
-
       {showLogoutModal && (
         <div className="fixed z-50 inset-0 bg-black/60 flex items-center justify-center">
           <div className="bg-white dark:bg-[#1F2937] p-6 rounded-lg shadow-xl max-w-sm text-center">
@@ -134,22 +154,18 @@ export default function LoginPage() {
       )}
 
       <div className="min-h-screen bg-[#0A111B] flex flex-col lg:flex-row relative overflow-hidden">
-        {/* Animated background elements */}
+        {/* Bubbles */}
         <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-          {/* Orange/red gradient bubble - top right */}
-          <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-orange-500 rounded-full filter blur-[80px] opacity-20"></div>
-          
-          {/* Dark accent bubble - bottom left */}
-          <div className="absolute bottom-[-10%] left-[10%] w-[400px] h-[400px] bg-gray-800 rounded-full filter blur-[70px] opacity-30"></div>
+          <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-orange-500 rounded-full filter blur-[80px] opacity-20" />
+          <div className="absolute bottom-[-10%] left-[10%] w-[400px] h-[400px] bg-gray-800 rounded-full filter blur-[70px] opacity-30" />
         </div>
-        
-        {/* Left side - Login Form */}
+
+        {/* Login Form */}
         <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 lg:p-16 relative z-10">
-                  {/* Back button */}
           <div className="absolute top-4 left-4 z-10">
             <BackButton />
           </div>
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -160,11 +176,11 @@ export default function LoginPage() {
                 <Image src="/logo-white.png" alt="AuctaSync Logo" width={180} height={45} />
               </Link>
             </div>
-            
+
             <h1 className="text-3xl font-bold mb-2 text-white font-serif">Welcome back</h1>
             <p className="text-gray-400 mb-8">Please enter your details to sign in</p>
-            
-            <form onSubmit={handleSubmit} className="space-y-6" aria-live="polite">
+
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-gray-300">Email</Label>
                 <div className="flex items-center bg-[#1A2333] border border-gray-700 rounded-lg px-3 py-2">
@@ -175,8 +191,8 @@ export default function LoginPage() {
                     type="email"
                     placeholder="name@example.com"
                     required
+                    autoFocus
                     className="w-full bg-transparent border-0 text-white focus:ring-0 placeholder:text-gray-500"
-                    aria-describedby="email-error"
                   />
                 </div>
               </div>
@@ -193,12 +209,19 @@ export default function LoginPage() {
                   <Input
                     id="password"
                     name="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     required
                     className="w-full bg-transparent border-0 text-white focus:ring-0 placeholder:text-gray-500"
-                    aria-describedby="password-error"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="ml-3 text-gray-500 hover:text-gray-300"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
                 </div>
               </div>
 
@@ -208,12 +231,8 @@ export default function LoginPage() {
                   checked={rememberMe}
                   onCheckedChange={(checked) => setRememberMe(!!checked)}
                   className="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-                  aria-describedby="remember-error"
                 />
-                <label
-                  htmlFor="remember"
-                  className="text-sm font-medium text-gray-300 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
+                <label htmlFor="remember" className="text-sm font-medium text-gray-300">
                   Remember me
                 </label>
               </div>
@@ -226,16 +245,16 @@ export default function LoginPage() {
                 {isLoading ? (
                   <div className="flex items-center justify-center">
                     <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
                     Signing in...
                   </div>
-                ) : 'Sign In'}
+                ) : "Sign In"}
               </Button>
 
               <div className="text-center">
-                <span className="text-gray-400">Don&apos;t have an account?</span>{' '}
+                <span className="text-gray-400">Don&apos;t have an account?</span>{" "}
                 <Link href="/signup" className="text-orange-400 font-medium hover:text-orange-300">
                   Sign up
                 </Link>
@@ -246,18 +265,24 @@ export default function LoginPage() {
                   <div className="w-full border-t border-gray-700"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-[#0F1729] text-gray-400">
-                    Or continue with
-                  </span>
+                  <span className="px-2 bg-[#0F1729] text-gray-400">Or continue with</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <Button variant="outline" className="w-full border-gray-700 bg-gray-900 text-white hover:bg-gray-800 hover:text-white">
+                <Button
+                  variant="outline"
+                  className="w-full border-gray-700 bg-gray-900 text-white hover:bg-gray-800"
+                  onClick={() => toast("Google login coming soon!")}
+                >
                   <FaGoogle className="mr-2 h-5 w-5 text-orange-400" />
                   Google
                 </Button>
-                <Button variant="outline" className="w-full border-gray-700 bg-gray-900 text-white hover:bg-gray-800 hover:text-white">
+                <Button
+                  variant="outline"
+                  className="w-full border-gray-700 bg-gray-900 text-white hover:bg-gray-800"
+                  onClick={() => toast("Facebook login coming soon!")}
+                >
                   <FaFacebookF className="mr-2 h-5 w-5 text-orange-400" />
                   Facebook
                 </Button>
@@ -265,8 +290,8 @@ export default function LoginPage() {
             </form>
           </motion.div>
         </div>
-        
-        {/* Right side - Image */}
+
+        {/* Right Side */}
         <div className="hidden lg:block lg:w-1/2 relative">
           <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-600 opacity-70"></div>
           <Image
@@ -277,33 +302,31 @@ export default function LoginPage() {
             priority
           />
           <div className="absolute inset-0 flex flex-col justify-center items-center p-16 text-white">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               className="max-w-md text-center backdrop-blur-sm bg-black/20 p-8 rounded-xl border border-white/10"
             >
               <h2 className="text-3xl font-bold mb-6 font-serif">Unlock Exclusive Auctions</h2>
-              <p className="text-lg mb-8">Sign in to access your personal dashboard, place bids, and track your favorite auctions in real-time.</p>
+              <p className="text-lg mb-8">
+                Sign in to access your personal dashboard, place bids, and track your favorite auctions in real-time.
+              </p>
               <div className="flex justify-center space-x-4">
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center border border-white/10">
-                  <div className="text-4xl font-bold mb-2">10K+</div>
-                  <div className="text-sm">Active Auctions</div>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center border border-white/10">
-                  <div className="text-4xl font-bold mb-2">50K+</div>
-                  <div className="text-sm">Happy Users</div>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center border border-white/10">
-                  <div className="text-4xl font-bold mb-2">99%</div>
-                  <div className="text-sm">Success Rate</div>
-                </div>
+                {["10K+ Active Auctions", "50K+ Happy Users", "99% Success Rate"].map((item, i) => {
+                  const [number, label] = item.split(" ");
+                  return (
+                    <div key={i} className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center border border-white/10">
+                      <div className="text-4xl font-bold mb-2">{number}</div>
+                      <div className="text-sm">{label} {item.split(" ").slice(2).join(" ")}</div>
+                    </div>
+                  );
+                })}
               </div>
             </motion.div>
           </div>
         </div>
       </div>
-
     </>
-);
+  );
 }

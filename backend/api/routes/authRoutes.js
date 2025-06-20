@@ -1,5 +1,6 @@
 import express from 'express'
 import supabase from '../../config/supabaseClient.js';
+import { type } from 'os';
 
 
 const authRouter = express.Router();
@@ -9,7 +10,7 @@ authRouter.get('/ping', (req, res) => {
     return res.status(200).json({ message: "Server is active" });
 });
 
-//Get Current Logged IN User's Database Data
+// Get Current Logged IN User's Database Data
 authRouter.get('/getuser', async (req, res) => {
     const authHeader = req.headers.authorization;
   
@@ -58,7 +59,7 @@ authRouter.post('/fetchuser', async (req, res) => {
 });
 
 
-//User SignUP
+// User SignUP
 authRouter.post('/signup', async (req, res) => {
     const { name, username, email, password } = req.body;
     if(!name || !username || !email || !password) return res.status(400).json({message: 'All fields are required!'})
@@ -103,7 +104,7 @@ authRouter.post('/signup', async (req, res) => {
 });
 
 
-//User Login
+// User Login
 authRouter.post('/login', async (req, res) => {
     const { email, password } = req.body;
     if(!email || !password) return res.status(400).json({message: "All fields required!"})
@@ -126,5 +127,143 @@ authRouter.post('/login', async (req, res) => {
         return res.status(500).json({ message: 'Internal server error.' });
     }
 });
+
+// User Deposit
+authRouter.post('/deposit', async (req, res) => {
+  const { user_id, amount } = req.body;
+
+  if (!user_id || !amount) {
+    return res.status(400).json({ message: "All fields required!" });
+  }
+
+  try {
+    const { data: transactionData, error: insertError } = await supabase
+      .from('transactions')
+      .insert([{ user_id, type: "deposit", amount }])
+      .select();
+
+    if (insertError) {
+      return res.status(400).json({ message: insertError.message });
+    }
+
+    const { error: rpcError } = await supabase.rpc('increment_user_total_deposits', {
+      user_id,
+      deposit_amount: amount
+    });
+
+    if (rpcError) {
+      return res.status(400).json({ message: rpcError.message });
+    }
+
+    return res.status(200).json({ message: "Deposit successful", transaction: transactionData[0] });
+
+  } catch (e) {
+    console.error('Deposit Error:', e);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// User Withdrawal
+authRouter.post('/withdraw', async (req, res) => {
+  const { user_id, amount } = req.body;
+
+  if (!user_id || !amount) {
+    return res.status(400).json({ message: "All fields required!" });
+  }
+
+  const withdrawalAmount = Number(amount);
+  if (isNaN(withdrawalAmount) || withdrawalAmount <= 0) {
+    return res.status(400).json({ message: "Invalid withdrawal amount" });
+  }
+
+  try {
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('money')
+      .eq('user_id', user_id)
+      .single();
+
+    if (userError) {
+      return res.status(400).json({ message: userError.message });
+    }
+    if (!userData || userData.money < withdrawalAmount) {
+      return res.status(400).json({ message: "Insufficient funds" });
+    }
+
+    const { data: transactionData, error: insertError } = await supabase
+      .from('transactions')
+      .insert([{ user_id, type: 'withdrawal', amount: -withdrawalAmount }])
+      .select();
+
+    if (insertError) {
+      return res.status(400).json({ message: insertError.message });
+    }
+
+    const { error: rpcError } = await supabase.rpc('increment_user_total_withdrawals', {
+      user_id,
+      withdrawal_amount: withdrawalAmount,
+    });
+
+    if (rpcError) {
+      return res.status(400).json({ message: rpcError.message });
+    }
+
+    const { error: updateMoneyError } = await supabase
+      .from('users')
+      .update({ money: userData.money - withdrawalAmount })
+      .eq('user_id', user_id);
+
+    if (updateMoneyError) {
+      return res.status(400).json({ message: updateMoneyError.message });
+    }
+
+    return res.status(200).json({ message: "Withdrawal successful", transaction: transactionData[0] });
+
+  } catch (e) {
+    console.error('Withdrawal Error:', e);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// User spent_on_bids (Win)
+authRouter.post('/record-win', async (req, res) => {
+  const { user_id, amount } = req.body;
+
+  if (!user_id || !amount) {
+    return res.status(400).json({ message: "All fields required!" });
+  }
+
+  const winAmount = Number(amount);
+  if (isNaN(winAmount) || winAmount <= 0) {
+    return res.status(400).json({ message: "Invalid amount" });
+  }
+
+  try {
+    const { data: transactionData, error: insertError } = await supabase
+      .from('transactions')
+      .insert([{ user_id, type: 'win', amount: -winAmount }])
+      .select();
+
+    if (insertError) {
+      return res.status(400).json({ message: insertError.message });
+    }
+
+    const { error: rpcError } = await supabase.rpc('increment_user_spent_on_bids', {
+      user_id,
+      spent_amount: winAmount,
+    });
+
+    if (rpcError) {
+      return res.status(400).json({ message: rpcError.message });
+    }
+
+    return res.status(200).json({ message: "Win recorded successfully", transaction: transactionData[0] });
+
+  } catch (e) {
+    console.error('Win Error:', e);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 
 export default authRouter;

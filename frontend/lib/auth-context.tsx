@@ -8,22 +8,26 @@ type AuthContextType = {
   loggedIn: boolean;
   login: (token: string, remember: boolean) => void;
   logout: (reason?: "manual" | "expired") => void;
+  token?: string;
+  expiresAt?: number;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loggedIn, setLoggedIn] = useState(false);
+  const [token, setToken] = useState<string | undefined>();
+  const [expiresAt, setExpiresAt] = useState<number | undefined>();
   const router = useRouter();
 
   const getToken = () =>
     localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
 
-  const getExpiresAt = () =>
-    parseInt(
-      localStorage.getItem("expiresAt") || sessionStorage.getItem("expiresAt") || "0",
-      10
-    );
+  const getExpiresAt = () => {
+    const raw = localStorage.getItem("expiresAt") || sessionStorage.getItem("expiresAt");
+    const parsed = parseInt(raw || "", 10);
+    return isNaN(parsed) ? 0 : parsed;
+  };
 
   const clearSession = () => {
     localStorage.removeItem("sessionToken");
@@ -31,6 +35,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.removeItem("expiresAt");
     sessionStorage.removeItem("expiresAt");
     setLoggedIn(false);
+    setToken(undefined);
+    setExpiresAt(undefined);
   };
 
   const logout = (reason: "manual" | "expired" = "manual") => {
@@ -39,71 +45,74 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (reason === "expired") {
       toast.error("You were logged out due to inactivity");
     }
-    router.push("/login");
+    if (window.location.pathname !== "/login") {
+      router.push("/login");
+    }
   };
 
-  const login = (token: string, remember: boolean) => {
-    const expiresAt = Date.now() + 60 * 60 * 1000; // 1 hour
-
+  const login = (tokenValue: string, remember: boolean) => {
+    const exp = Date.now() + 60 * 60 * 1000; // 1 hour
     const storage = remember ? localStorage : sessionStorage;
-    storage.setItem("sessionToken", token);
-    storage.setItem("expiresAt", expiresAt.toString());
+    storage.setItem("sessionToken", tokenValue);
+    storage.setItem("expiresAt", exp.toString());
 
     setLoggedIn(true);
+    setToken(tokenValue);
+    setExpiresAt(exp);
   };
 
-  // Initial auth check
+  // Initial check
   useEffect(() => {
-    const token = getToken();
-    const expiresAt = getExpiresAt();
+    const existingToken = getToken();
+    const exp = getExpiresAt();
 
-    if (token && Date.now() < expiresAt) {
+    if (existingToken && Date.now() < exp) {
       setLoggedIn(true);
+      setToken(existingToken);
+      setExpiresAt(exp);
     } else {
       clearSession();
     }
   }, []);
 
-  // Interval check for session expiration
+  // Session expiration check every minute
   useEffect(() => {
     const interval = setInterval(() => {
-      const expiresAt = getExpiresAt();
-      if (expiresAt && Date.now() >= expiresAt) {
+      const exp = getExpiresAt();
+      if (exp && Date.now() >= exp) {
         logout("expired");
       }
     }, 60 * 1000);
-
     return () => clearInterval(interval);
-  }, []);
+  }, [router]);
 
   // Check expiration on tab focus
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        const expiresAt = getExpiresAt();
-        if (expiresAt && Date.now() >= expiresAt) {
+        const exp = getExpiresAt();
+        if (exp && Date.now() >= exp) {
           logout("expired");
         }
       }
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, []);
+  }, [router]);
 
   // Multi-tab logout sync
   useEffect(() => {
     const syncLogout = (e: StorageEvent) => {
       if (e.key === "authChange") {
-        clearSession();
-        router.push("/login");
+        logout("expired"); // this clears and redirects appropriately
       }
     };
     window.addEventListener("storage", syncLogout);
     return () => window.removeEventListener("storage", syncLogout);
-  }, []);
+  }, [router]);
 
   return (
-    <AuthContext.Provider value={{ loggedIn, login, logout }}>
+    <AuthContext.Provider value={{ loggedIn, login, logout, token, expiresAt }}>
       {children}
     </AuthContext.Provider>
   );

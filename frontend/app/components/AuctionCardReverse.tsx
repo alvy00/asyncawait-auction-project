@@ -115,6 +115,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
       setHighestBid(amount);
       setBidAmount(amount);
       setIsBidding(false);
+      setWinner(user.name);
       setRefresh(prev => !prev);
     } catch (err) {
       console.error("Bid submission error:", err);
@@ -267,7 +268,12 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
       <div className="p-5 flex flex-col justify-between h-[45%] bg-gradient-to-t from-black/80 to-transparent">
       
         <div>
-          <h3 className="text-2xl font-bold">{auction.item_name}</h3>
+          <h3
+            className="text-2xl font-bold tracking-wide uppercase mb-2 
+                      text-purple-100 drop-shadow-sm"
+          >
+            #{auction.item_name}
+          </h3>
           <div className="mt-2 text-lg">
             {/* Bidding starts / Current Bid Label */}
             <div className={`text-gray-400 text-xs mb-1 font-medium`}>
@@ -298,7 +304,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
           >
             <div className="text-gray-200">by</div>
             <div className="hover:underline transition-all duration-200">
-              {auction.highest_bidder_name || "—"}
+              {winner || "—"}
             </div>
           </div>
 
