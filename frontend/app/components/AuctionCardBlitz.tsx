@@ -7,6 +7,7 @@ import Image from "next/image";
 import { Countdown } from "./Countdown";
 import toast from "react-hot-toast";
 import { Button } from "../../components/ui/button";
+import FavoriteBadge from "./FavouriteBadge";
 
 interface AuctionCardProps {
   auction: Auction;
@@ -279,9 +280,10 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
         />
       </div>
 
-      {/* Status Badge */}
+      {/* Status and Favorite Badge */}
       <StatusBadge status={auction.status} auctionId={auction.auction_id}/>
-
+      <FavoriteBadge userId={user?.user_id} auctionId={auction.auction_id} initialFavorited={auction.isFavorite} isHovered={isHovered} />
+      
       {/* Content area */}
       <div className="p-5 flex flex-col justify-between h-[45%] bg-gradient-to-t from-black/80 to-transparent">
         <div>

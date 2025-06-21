@@ -1,0 +1,77 @@
+import { useEffect } from "react";
+import { motion } from "framer-motion";
+import { FaBolt, FaHourglassHalf, FaStopwatch } from "react-icons/fa";
+
+const StatusBadge = ({ status, auctionId }) => {
+  useEffect(() => {
+    if (status.toLowerCase() === "ended") {
+      const updateStatusEnd = async () => {
+        try {
+          const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/updatestatus', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ auctionId, status: "ended" }),
+          });
+
+          if (res.ok) {
+            const json = await res.json();
+            console.log(json.message);
+          } else {
+            console.error("Failed to update auction status", res.status);
+          }
+        } catch (error) {
+          console.error("Error updating auction status:", error);
+        }
+      };
+
+      updateStatusEnd();
+    }
+  }, [status, auctionId]);
+
+  let bgClasses = "";
+  let text = "";
+  let Icon = null;
+  let tooltipText = "";
+
+  switch (status.toLowerCase()) {
+    case "live":
+      bgClasses = "bg-gradient-to-r from-blue-500 to-blue-400";
+      text = "DUTCH | LIVE";
+      Icon = FaHourglassHalf;
+      tooltipText = "Auction is currently live";
+      break;
+    case "upcoming":
+      bgClasses = "bg-gradient-to-r from-yellow-500 to-yellow-400";
+      text = "DUTCH | UPCOMING";
+      Icon = FaBolt;
+      tooltipText = "Auction starts soon";
+      break;
+    case "ended":
+      bgClasses = "bg-gradient-to-r from-gray-700 to-gray-600";
+      text = "DUTCH | ENDED";
+      Icon = FaStopwatch;
+      tooltipText = "Auction has ended";
+      break;
+    default:
+      return null;
+  }
+
+  return (
+    <div className="absolute top-4 left-4 z-10 group/status cursor-pointer">
+      <motion.div
+        className={`${bgClasses} text-white text-xs font-bold px-4 py-1 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm`}
+      >
+        {Icon && <Icon className="text-white" />}
+        <span>{text}</span>
+      </motion.div>
+
+      {/* Tooltip */}
+      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 text-[11px] text-emerald-100 bg-emerald-900/80 rounded-md shadow-xl opacity-0 group-hover/status:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap backdrop-blur-sm z-20">
+        <span className="block text-center">{tooltipText}</span>
+        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 bg-emerald-900/80 shadow-md" />
+      </div>
+    </div>
+  );
+};
+
+export default StatusBadge;
