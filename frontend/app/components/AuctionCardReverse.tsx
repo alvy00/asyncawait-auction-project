@@ -7,6 +7,7 @@ import { Button } from "../../components/ui/button";
 import Image from "next/image";
 import { Countdown } from "./Countdown";
 import toast from "react-hot-toast";
+import FavoriteBadge from "./FavouriteBadge";
 
 interface AuctionCardProps {
   auction: Auction;
@@ -286,9 +287,11 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
           priority
         />
       </div>
-
+      
+      {/* Status and Favorite Badge */}
       <StatusBadge status={auction.status} auctionId={auction.auction_id}/>
-
+      <FavoriteBadge userId={user?.user_id} auctionId={auction.auction_id} initialFavorited={auction.isFavorite} isHovered={isHovered} />
+      
       {/* Info section fills remaining space */}
       <div className="p-5 flex flex-col justify-between h-[45%] bg-gradient-to-t from-black/80 to-transparent">
       

@@ -7,6 +7,8 @@ import toast from "react-hot-toast";
 import { Button } from "../../components/ui/button";
 import { Auction } from "../../lib/interfaces";
 import { Countdown } from "./Countdown";
+import StatusBadge from "./StatusBadge";
+import FavoriteBadge from "./FavouriteBadge";
 
 interface AuctionCardProps {
   auction: Auction;
@@ -22,6 +24,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
   const [user, setUser] = useState(null);
   const [shake, setShake] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : "/fallback.jpg";
   const token =
@@ -153,67 +156,6 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
     }
   }, [isBidding]);
 
-  const StatusBadge = ({ status, auctionId }) => {
-    useEffect(() => {
-      if (status.toLowerCase() === "ended") {
-        const updateStatusEnd = async () => {
-          try {
-            const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/updatestatus', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ auctionId, status: "ended" }),
-            });
-
-            if (res.ok) {
-              const json = await res.json();
-              console.log(json.message);
-            } else {
-              console.error("Failed to update auction status", res.status);
-            }
-          } catch (error) {
-            console.error("Error updating auction status:", error);
-          }
-        };
-
-        updateStatusEnd();
-      }
-    }, [status, auctionId]);
-
-    let bgClasses = "";
-    let text = "";
-    let Icon = null;
-
-    switch (status.toLowerCase()) {
-      case "live":
-        bgClasses = "bg-gradient-to-r from-blue-500 to-blue-400";
-        text = "DUTCH | LIVE";
-        Icon = FaHourglassHalf;
-        break;
-      case "upcoming":
-        bgClasses = "bg-gradient-to-r from-yellow-500 to-yellow-400";
-        text = "DUTCH | UPCOMING";
-        Icon = FaBolt;
-        break;
-      case "ended":
-        bgClasses = "bg-gradient-to-r from-gray-700 to-gray-600";
-        text = "DUTCH | ENDED";
-        Icon = FaStopwatch;
-        break;
-      default:
-        return null;
-    }
-
-    return (
-      <motion.div
-        animate={status.toLowerCase() === "live" ? controls : { scale: 1 }}
-        className={`${bgClasses} text-white text-xs font-bold px-4 py-1 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm absolute top-4 left-4 z-10`}
-      >
-        {Icon && <Icon className="text-white animate-pulse" />}
-        <span>{text}</span>
-      </motion.div>
-    );
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -226,6 +168,8 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
       className={`relative w-full h-[500px] rounded-lg overflow-hidden bg-gradient-to-br from-white-900 to-blue-800 text-white border border-white/20 select-none ${
         shake ? "animate-shake" : ""
       }`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image container with fixed height */}
       <div className="relative h-[55%] w-full overflow-hidden group">
@@ -238,9 +182,10 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
           priority
         />
       </div>
-
-      <StatusBadge status={auction.status} auctionId={auction.auction_id}/>
       
+      {/* Status and Favorite Badge */}
+      <StatusBadge status={auction.status} auctionId={auction.auction_id}/>
+      <FavoriteBadge userId={user?.user_id} auctionId={auction.auction_id} initialFavorited={auction.isFavorite} isHovered={isHovered} />
       
       <div className="p-5 h-[45%] flex flex-col justify-between bg-gradient-to-t from-black/80 to-transparent min-h-[150px]">
         <div>
