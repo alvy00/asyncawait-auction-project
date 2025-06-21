@@ -9,7 +9,7 @@ import { Auction, User } from "../../lib/interfaces";
 import { motion } from "framer-motion";
 import { Countdown } from "./Countdown";
 import { FaBolt, FaBullhorn, FaClock, FaFlagCheckered, FaGavel } from "react-icons/fa";
-import FavoritingButton from "./FavouriteBadge";
+import FavoriteBadge from "./FavouriteBadge";
 
 const FALLBACK_IMAGE = "/fallback.jpg";
 
@@ -301,7 +301,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
           </div>
 
           {/* Favorite button - Updated to show on group hover */}
-          <FavoritingButton
+          <FavoriteBadge
             userId={user?.user_id}
             auctionId={auction.auction_id}
             initialFavorited={isFavourited}

@@ -10,7 +10,7 @@ interface FavoritingButtonProps {
   isHovered: boolean;
 }
 
-const FavoritingButton = ({
+const FavoriteBadge = ({
   userId,
   auctionId,
   initialFavorited = false,
@@ -102,4 +102,4 @@ const FavoritingButton = ({
   );
 };
 
-export default FavoritingButton;
+export default FavoriteBadge;

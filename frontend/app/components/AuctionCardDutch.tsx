@@ -8,6 +8,7 @@ import { Button } from "../../components/ui/button";
 import { Auction } from "../../lib/interfaces";
 import { Countdown } from "./Countdown";
 import StatusBadge from "./StatusBadge";
+import FavoriteBadge from "./FavouriteBadge";
 
 interface AuctionCardProps {
   auction: Auction;
@@ -23,6 +24,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
   const [user, setUser] = useState(null);
   const [shake, setShake] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : "/fallback.jpg";
   const token =
@@ -166,6 +168,8 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
       className={`relative w-full h-[500px] rounded-lg overflow-hidden bg-gradient-to-br from-white-900 to-blue-800 text-white border border-white/20 select-none ${
         shake ? "animate-shake" : ""
       }`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image container with fixed height */}
       <div className="relative h-[55%] w-full overflow-hidden group">
@@ -178,9 +182,10 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
           priority
         />
       </div>
-
-      <StatusBadge status={auction.status} auctionId={auction.auction_id}/>
       
+      {/* Status and Favorite Badge */}
+      <StatusBadge status={auction.status} auctionId={auction.auction_id}/>
+      <FavoriteBadge userId={user?.user_id} auctionId={auction.auction_id} initialFavorited={auction.isFavorite} isHovered={isHovered} />
       
       <div className="p-5 h-[45%] flex flex-col justify-between bg-gradient-to-t from-black/80 to-transparent min-h-[150px]">
         <div>
