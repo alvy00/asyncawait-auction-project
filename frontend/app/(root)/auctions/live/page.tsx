@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import AuctionCard from "../../../components/AuctionCard";
 import AuctionCardBlitz from "../../../components/AuctionCardBlitz";
 import AuctionCardDutch from "../../../components/AuctionCardDutch";
@@ -13,7 +13,6 @@ import { motion } from "framer-motion";
 const LiveAuctionsPage = () => {
   const [user, setUser] = useState<User>();
   const [auctions, setAuctions] = useState<Auction[]>([]);
-  const [filteredAuctions, setFilteredAuctions] = useState<Auction[]>([]);
   const [favAuctionIDs, setFavAuctionIDs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFavsLoading, setIsFavsLoading] = useState(true);
@@ -27,7 +26,9 @@ const LiveAuctionsPage = () => {
     const getUser = async () => {
       const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
       if (!token) {
-        setIsFavsLoading(false); // no user, so no favs to load
+        setUser(undefined);
+        setFavAuctionIDs([]);
+        setIsFavsLoading(false);
         return;
       }
 
@@ -43,6 +44,8 @@ const LiveAuctionsPage = () => {
         if (!res.ok) {
           const err = await res.json();
           console.error("Failed to fetch user:", err.message);
+          setUser(undefined);
+          setFavAuctionIDs([]);
           setIsFavsLoading(false);
           return;
         }
@@ -51,6 +54,8 @@ const LiveAuctionsPage = () => {
         setUser(data);
       } catch (e) {
         console.error("Error fetching user:", e);
+        setUser(undefined);
+        setFavAuctionIDs([]);
         setIsFavsLoading(false);
       }
     };
@@ -72,6 +77,7 @@ const LiveAuctionsPage = () => {
         if (!res.ok) {
           const r = await res.json();
           console.error(r.message || r.statusText);
+          setAuctions([]);
           return;
         }
 
@@ -85,6 +91,7 @@ const LiveAuctionsPage = () => {
         );
       } catch (e) {
         console.error(e);
+        setAuctions([]);
       } finally {
         setIsLoading(false);
       }
@@ -96,11 +103,13 @@ const LiveAuctionsPage = () => {
   // Fetch Favourited Auctions
   useEffect(() => {
     if (!user?.user_id) {
+      setFavAuctionIDs([]);
       setIsFavsLoading(false);
       return;
     }
 
     const fetchFavAuctionIDs = async () => {
+      setIsFavsLoading(true);
       try {
         const res = await fetch(
           "https://asyncawait-auction-project.onrender.com/api/auctions/favauctions",
@@ -116,6 +125,7 @@ const LiveAuctionsPage = () => {
         if (!res.ok) {
           const r = await res.json();
           console.error(r.message || r.statusText);
+          setFavAuctionIDs([]);
           return;
         }
 
@@ -123,6 +133,7 @@ const LiveAuctionsPage = () => {
         setFavAuctionIDs(data);
       } catch (e) {
         console.error(e);
+        setFavAuctionIDs([]);
       } finally {
         setIsFavsLoading(false);
       }
@@ -131,29 +142,21 @@ const LiveAuctionsPage = () => {
     fetchFavAuctionIDs();
   }, [user?.user_id]);
 
-  // Set Filtered Auctions
-  useEffect(() => {
-    const filtered = auctions
+  // Memoize filtered auctions with favorite status
+  const filteredAuctions = useMemo(() => {
+    return auctions
       .filter((auction) => {
-        const matchesSearch = auction.item_name
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase());
-
-        const matchesFilter =
-          activeFilter === "all" ||
-          auction.category?.toLowerCase() === activeFilter.toLowerCase();
-
+        const matchesSearch = auction.item_name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesFilter = activeFilter === "all" || auction.category?.toLowerCase() === activeFilter.toLowerCase();
         return matchesSearch && matchesFilter;
       })
       .map((auction) => ({
         ...auction,
         isFavorite: favAuctionIDs.includes(auction.auction_id),
       }));
-
-    setFilteredAuctions(filtered);
   }, [auctions, searchTerm, activeFilter, favAuctionIDs]);
 
-
+  const isAnyLoading = isLoading || isFavsLoading;
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -166,7 +169,6 @@ const LiveAuctionsPage = () => {
       },
     },
   };
-  const isAnyLoading = isLoading || isFavsLoading;
 
   return (
     <section className="py-16 min-h-screen relative overflow-hidden">
@@ -208,7 +210,12 @@ const LiveAuctionsPage = () => {
         </motion.div>
 
         {/* Search + Filter */}
-        <motion.div className="mb-10" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
+        <motion.div
+          className="mb-10"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
           <div className="relative max-w-md mx-auto mb-6">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-20">
               <FaSearch className="h-5 w-5 text-gray-400" />
@@ -277,33 +284,23 @@ const LiveAuctionsPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.25 }}
               >
-
                 {auction.auction_type === "regular" && (
                   <AuctionCard
+                    key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
                     auction={auction}
                     auctionCreator={auction.creator}
                     isFavourited={auction.isFavorite}
                   />
                 )}
                 {auction.auction_type === "blitz" && (
-                  <AuctionCardBlitz 
-                    auction={auction} 
-                    auctionCreator={auction.creator}
-                  />
+                  <AuctionCardBlitz auction={auction} auctionCreator={auction.creator} />
                 )}
                 {auction.auction_type === "dutch" && (
-                  <AuctionCardDutch
-                    auction={auction} 
-                    auctionCreator={auction.creator}
-                  />
+                  <AuctionCardDutch auction={auction} auctionCreator={auction.creator} />
                 )}
                 {auction.auction_type === "reverse" && (
-                  <AuctionCardReverse 
-                    auction={auction} 
-                    auctionCreator={auction.creator}
-                  />
+                  <AuctionCardReverse auction={auction} auctionCreator={auction.creator} />
                 )}
-
               </motion.div>
             ))}
           </motion.div>

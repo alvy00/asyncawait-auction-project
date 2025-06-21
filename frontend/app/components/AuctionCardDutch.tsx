@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { Button } from "../../components/ui/button";
 import { Auction } from "../../lib/interfaces";
 import { Countdown } from "./Countdown";
+import StatusBadge from "./StatusBadge";
 
 interface AuctionCardProps {
   auction: Auction;
@@ -152,67 +153,6 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
       return () => clearTimeout(timer);
     }
   }, [isBidding]);
-
-  const StatusBadge = ({ status, auctionId }) => {
-    useEffect(() => {
-      if (status.toLowerCase() === "ended") {
-        const updateStatusEnd = async () => {
-          try {
-            const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/updatestatus', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ auctionId, status: "ended" }),
-            });
-
-            if (res.ok) {
-              const json = await res.json();
-              console.log(json.message);
-            } else {
-              console.error("Failed to update auction status", res.status);
-            }
-          } catch (error) {
-            console.error("Error updating auction status:", error);
-          }
-        };
-
-        updateStatusEnd();
-      }
-    }, [status, auctionId]);
-
-    let bgClasses = "";
-    let text = "";
-    let Icon = null;
-
-    switch (status.toLowerCase()) {
-      case "live":
-        bgClasses = "bg-gradient-to-r from-blue-500 to-blue-400";
-        text = "DUTCH | LIVE";
-        Icon = FaHourglassHalf;
-        break;
-      case "upcoming":
-        bgClasses = "bg-gradient-to-r from-yellow-500 to-yellow-400";
-        text = "DUTCH | UPCOMING";
-        Icon = FaBolt;
-        break;
-      case "ended":
-        bgClasses = "bg-gradient-to-r from-gray-700 to-gray-600";
-        text = "DUTCH | ENDED";
-        Icon = FaStopwatch;
-        break;
-      default:
-        return null;
-    }
-
-    return (
-      <motion.div
-        animate={status.toLowerCase() === "live" ? controls : { scale: 1 }}
-        className={`${bgClasses} text-white text-xs font-bold px-4 py-1 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm absolute top-4 left-4 z-10`}
-      >
-        {Icon && <Icon className="text-white animate-pulse" />}
-        <span>{text}</span>
-      </motion.div>
-    );
-  };
 
   return (
     <motion.div
