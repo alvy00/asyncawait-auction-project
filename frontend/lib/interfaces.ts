@@ -3,6 +3,8 @@ export interface User {
     user_id: string;
     name: string;
     email: string;
+    image_url: string;
+    bio: string;
     join_date: string;
     money: number;
     total_deposits: number;
