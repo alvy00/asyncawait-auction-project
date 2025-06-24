@@ -8,6 +8,8 @@ import { Countdown } from "./Countdown";
 import toast from "react-hot-toast";
 import { Button } from "../../components/ui/button";
 import FavoriteBadge from "./FavouriteBadge";
+import StatusBadge from "./StatusBadge";
+import AuctionDetailsModal from "./AuctionDetailsModal";
 
 interface AuctionCardProps {
   auction: Auction;
@@ -28,6 +30,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
   const [user, setUser] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
   const [refresh, setRefresh] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [shake, setShake] = useState(false);
 
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : "/fallback.jpg";
@@ -160,66 +163,46 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
   }, [auction?.highest_bidder_id, refresh]);
 
   // Status Badge component
-  const StatusBadge = ({ status, auctionId }) => {
-    useEffect(() => {
-      if (status.toLowerCase() === "ended") {
-        const updateStatusEnd = async () => {
-          try {
-            const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/updatestatus', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ auctionId, status: "ended" }),
-            });
+  // const StatusBadge = ({ status, auctionId }) => {
+  //   useEffect(() => {
+  //     if (status.toLowerCase() === "ended") {
+  //       const updateStatusEnd = async () => {
+  //         try {
+  //           const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/updatestatus', {
+  //             method: 'POST',
+  //             headers: { 'Content-Type': 'application/json' },
+  //             body: JSON.stringify({ auctionId, status: "ended" }),
+  //           });
 
-            if (res.ok) {
-              const json = await res.json();
-              console.log(json.message);
-            } else {
-              console.error("Failed to update auction status", res.status);
-            }
-          } catch (error) {
-            console.error("Error updating auction status:", error);
-          }
-        };
+  //           if (res.ok) {
+  //             const json = await res.json();
+  //             console.log(json.message);
+  //           } else {
+  //             console.error("Failed to update auction status", res.status);
+  //           }
+  //         } catch (error) {
+  //           console.error("Error updating auction status:", error);
+  //         }
+  //       };
 
-        updateStatusEnd();
-      }
-    }, [status, auctionId]);
+  //       updateStatusEnd();
+  //     }
+  //   }, [status, auctionId]);
 
-    let bgClasses = "";
-    let text = "";
-    let Icon = null;
+  //   let bgClasses = "";
+  //   let text = "";
+  //   let Icon = null;
 
-    switch (status.toLowerCase()) {
-      case "live":
-        bgClasses = "bg-gradient-to-r from-orange-800 to-orange-600";
-        text = "BLITZ | LIVE";
-        Icon = FaBolt;
-        break;
-      case "upcoming":
-        bgClasses = "bg-gradient-to-r from-yellow-500 to-yellow-400";
-        text = "BLITZ | UPCOMING";
-        Icon = FaHourglassHalf;
-        break;
-      case "ended":
-        bgClasses = "bg-gradient-to-r from-gray-700 to-gray-600";
-        text = "BLITZ | ENDED";
-        Icon = FaStopwatch;
-        break;
-      default:
-        return null;
-    }
-
-    return (
-      <motion.div
-        animate={status.toLowerCase() === "live" ? controls : { scale: 1 }}
-        className={`${bgClasses} text-white text-xs font-bold px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm absolute top-4 left-4`}
-      >
-        {Icon && <Icon className="text-white" />}
-        <span>{text}</span>
-      </motion.div>
-    );
-  };
+  //   return (
+  //     <motion.div
+  //       animate={status.toLowerCase() === "live" ? controls : { scale: 1 }}
+  //       className={`${bgClasses} text-white text-xs font-bold px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm absolute top-4 left-4`}
+  //     >
+  //       {Icon && <Icon className="text-white" />}
+  //       <span>{text}</span>
+  //     </motion.div>
+  //   );
+  // };
 
   // Live Badge Animation
   useEffect(() => {
@@ -256,6 +239,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
         setIsHovered(false);
         setIsBidding(false);
       }}
+      onClick={() => setDetailsOpen(true)}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{
@@ -281,7 +265,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
       </div>
 
       {/* Status and Favorite Badge */}
-      <StatusBadge status={auction.status} auctionId={auction.auction_id}/>
+      <StatusBadge type={"blitz"} status={auction.status} auctionId={auction.auction_id}/>
       <FavoriteBadge userId={user?.user_id} auctionId={auction.auction_id} initialFavorited={auction.isFavorite} isHovered={isHovered} />
       
       {/* Content area */}
@@ -425,6 +409,16 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
           <span>Submitting Bid...</span>
         </div>
       )}
+
+      {/* Auction details Modal */}
+      <AuctionDetailsModal
+        open={detailsOpen}
+        onClose={() => {
+          console.log("Closing modal");
+          setDetailsOpen(false);
+        }}
+        auction={auction}
+      />
 
       {/* Shake animation styles */}
       <style>

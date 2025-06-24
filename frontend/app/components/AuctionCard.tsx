@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { Auction, User } from "../../lib/interfaces";
 import { motion } from "framer-motion";
 import { Countdown } from "./Countdown";
+import AuctionDetailsModal from "./AuctionDetailsModal";
 import { FaBolt, FaBullhorn, FaClock, FaFlagCheckered, FaGavel } from "react-icons/fa";
 import FavoriteBadge from "./FavouriteBadge";
 
@@ -36,6 +37,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
     return "ended";
   });
   const [favourited, setFavourited] = useState(isFavourited);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [shake, setShake] = useState(false);
 
@@ -221,7 +223,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
     }, 60000);
 
     return () => clearInterval(interval);
-  }, [auction.start_time, auction.end_time, refresh]);
+  }, [auction.start_time, auction.end_time, refresh, auction.auction_id]);
 
 
 
@@ -251,8 +253,9 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
     >
+
       {/* Background & Glass layers */}
-      <div className="relative h-full overflow-hidden rounded-lg bg-gradient-to-br from-green-900 to-black-800 to-transparent backdrop-blur-xl shadow-2xl border border-white/20">
+      <div onClick={() => setDetailsOpen(true)} className="relative h-full overflow-hidden rounded-lg bg-gradient-to-br from-green-900 to-black-800 to-transparent backdrop-blur-xl shadow-2xl border border-white/20">
         {/* Glassmorphism glow effects */}
         <div className="absolute inset-0 overflow-hidden rounded-xl sm:rounded-2xl">
           <div className="absolute -inset-1 bg-gradient-to-tr from-orange-500/10 via-purple-500/5 to-blue-500/10 opacity-30 group-hover:opacity-40 transition-opacity duration-700"></div>
@@ -428,7 +431,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
             </div>
           </div>
         </div>
-
+        
         {/* Submitting overlay */}
         {submittingBid && (
           <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-xl font-bold text-white z-50 pointer-events-auto space-x-4">
@@ -441,31 +444,42 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
           </div>
         )}
       </div>
+      
+
+      {/* Auction details Modal */}
+      <AuctionDetailsModal
+        open={detailsOpen}
+        onClose={() => {
+          console.log("Closing modal");
+          setDetailsOpen(false);
+        }}
+        auction={auction}
+      />
 
       {/* Shake animation */}
       <style>
         {`
-        @keyframes gentle-shake {
-          0%, 100% { transform: translateX(0); }
-          30% { transform: translateX(-0.3px); }
-          50% { transform: translateX(0.3px); }
-          70% { transform: translateX(-0.2px); }
-        }
-        .animate-shake {
-          animation: gentle-shake 0.4s ease-in-out;
-        }
-        
-        @keyframes fadeInScale {
-  0% {
-    opacity: 0;
-    transform: scale(0.95) translateX(-50%);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateX(-50%);
-  }
-}
-      `}
+          @keyframes gentle-shake {
+            0%, 100% { transform: translateX(0); }
+            30% { transform: translateX(-0.3px); }
+            50% { transform: translateX(0.3px); }
+            70% { transform: translateX(-0.2px); }
+          }
+          .animate-shake {
+            animation: gentle-shake 0.4s ease-in-out;
+          }
+          
+          @keyframes fadeInScale {
+            0% {
+              opacity: 0;
+              transform: scale(0.95) translateX(-50%);
+            }
+            100% {
+              opacity: 1;
+              transform: scale(1) translateX(-50%);
+            }
+          }
+        `}
       </style>
     </motion.div>
   );
