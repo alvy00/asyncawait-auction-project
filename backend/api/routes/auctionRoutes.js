@@ -118,8 +118,12 @@ auctionRouter.delete('/delete', async (req, res) => {
 auctionRouter.post('/updatestatus', async (req, res) => {
   const { auction_id, status } = req.body;
 
+  if (!auction_id || !status) {
+    return res.status(400).json({ message: "Missing auction_id or status" });
+  }
+
   try {
-    const { data: updatedAuction, error: updateError } = await supabase
+    const { data: auction, error: updateError } = await supabase
       .from('auctions')
       .update({ status })
       .eq('auction_id', auction_id)
@@ -129,24 +133,27 @@ auctionRouter.post('/updatestatus', async (req, res) => {
     if (updateError) {
       return res.status(400).json({ message: "Failed to update auction status", error: updateError });
     }
-    
-    if (status === 'ended' && updatedAuction.highest_bidder_id) {
-      const { highest_bid, highest_bidder_id } = updatedAuction;
 
-      const { error: userError } = await supabase.rpc('increment_user_spent_on_bids', {
+    if (status === 'ended' && auction?.highest_bidder_id && auction?.highest_bid) {
+      const { highest_bid, highest_bidder_id } = auction;
+
+      const { error: rpcError } = await supabase.rpc('increment_user_spent_on_bids', {
         user_uuid: highest_bidder_id,
-        increment_amount: highest_bid
+        increment_amount: highest_bid,
       });
 
-      if (userError) {
-        return res.status(400).json({ message: "Failed to increment user's spent_on_bids", error: userError });
+      if (rpcError) {
+        return res.status(400).json({
+          message: "Auction status updated but failed to increment user's spent_on_bids",
+          error: rpcError,
+        });
       }
     }
 
     return res.status(200).json({ message: "Auction status updated successfully" });
-  } catch (e) {
-    console.error(e);
-    return res.status(500).json({ message: "Server error" });
+  } catch (err) {
+    console.error("Unexpected error in /updatestatus:", err);
+    return res.status(500).json({ message: "Internal server error" });
   }
 });
 

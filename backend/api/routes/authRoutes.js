@@ -41,7 +41,6 @@ authRouter.get('/getuser', async (req, res) => {
     return res.status(200).json(userDatabaseData);
 });
 
-
 // Get User's DB Data w/ user_id
 authRouter.post('/fetchuser', async (req, res) => {
     const { user_id } = req.body;
@@ -57,7 +56,6 @@ authRouter.post('/fetchuser', async (req, res) => {
     //console.log(data);
     return res.json(data);
 });
-
 
 // User SignUP
 authRouter.post('/signup', async (req, res) => {
@@ -103,7 +101,6 @@ authRouter.post('/signup', async (req, res) => {
     }
 });
 
-
 // User Login
 authRouter.post('/login', async (req, res) => {
     const { email, password } = req.body;
@@ -126,6 +123,82 @@ authRouter.post('/login', async (req, res) => {
         console.error('Login error:', e);
         return res.status(500).json({ message: 'Internal server error.' });
     }
+});
+
+// User Name Update
+authRouter.post('/nameupdate', async (req, res) => {
+  const { user_id, name } = req.body;
+
+  if (!user_id || typeof name !== "string" || name.trim() === "") {
+    return res.status(400).json({ message: "Invalid user_id or name" });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .update({ name })
+      .eq("user_id", user_id);
+
+    if (error) {
+      return res.status(400).json({ message: "Error updating name", error });
+    }
+
+    return res.status(200).json({ message: "Name updated successfully", data });
+  } catch (e) {
+    console.error("Unexpected error in /nameupdate:", e);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+// User Email Update
+authRouter.post('/emailupdate', async (req, res) => {
+  const { user_id, email } = req.body;
+
+  if (!user_id || typeof email !== "string" || !email.includes("@")) {
+    return res.status(400).json({ message: "Invalid user_id or email" });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .update({ email })
+      .eq("user_id", user_id);
+
+    if (error) {
+      return res.status(400).json({ message: "Error updating email", error });
+    }
+
+    return res.status(200).json({ message: "Email updated successfully", data });
+  } catch (e) {
+    console.error("Unexpected error in /emailupdate:", e);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+// User Bio Update
+authRouter.post('/bioupdate', async (req, res) => {
+  const { user_id, bio } = req.body;
+
+  if (!user_id || typeof bio !== "string") {
+    return res.status(400).json({ message: "Missing or invalid user_id or bio text" });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .update({ bio })
+      .eq("user_id", user_id);
+
+    if (error) {
+      console.error("Failed to update bio:", error.message);
+      return res.status(500).json({ message: "Failed to update bio", error: error.message });
+    }
+
+    return res.status(200).json({ message: "Bio updated successfully", data });
+  } catch (e) {
+    console.error("Unexpected error in /bioupdate:", e);
+    return res.status(500).json({ message: "Server error" });
+  }
 });
 
 // User Deposit

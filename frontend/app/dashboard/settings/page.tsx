@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { User, UserCircle, CreditCard, Bell, Shield } from "lucide-react";
 import { User as UserType } from "../../../lib/interfaces";
-import toast from "react-hot-toast";
 
 // Import components
 import ProfileSettings from "./_components/ProfileSettings";
@@ -13,21 +12,49 @@ import NotificationSettings from "./_components/NotificationSettings";
 import SecuritySettings from "./_components/SecuritySettings";
 import DeleteAccountSection from "./_components/DeleteAccountSection";
 
-// Sample user data
-const SAMPLE_USER: UserType = {
-  name: "John Doe",
-  email: "john@example.com",
-  money: 2500.75,
-  total_bids: 32,
-  bids_won: 12
-};
 
 type TabType = "profile" | "payment" | "notifications" | "security";
 
 const SettingsPage = () => {
+  const [user, setUser] = useState<UserType>(null);
   const [activeTab, setActiveTab] = useState<TabType>("profile");
-  const [user, setUser] = useState<UserType>(SAMPLE_USER);
   const [isLoading, setIsLoading] = useState(false);
+
+
+  // fetch User
+  useEffect(() => {
+    setIsLoading(true);
+
+    const getUser = async () => {
+      const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
+      if (!token) return
+
+      try {
+        const res = await fetch("https://asyncawait-auction-project.onrender.com/api/getuser", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          console.error("Failed to fetch user:", err.message);
+          setUser(undefined);
+          return;
+        }
+
+        const data = await res.json();
+        setUser(data);
+        setIsLoading(false);
+      } catch (e) {
+        console.error("Error fetching user:", e);
+        setUser(undefined);
+      }
+    };
+    getUser();
+  }, []);
 
   // Simulate loading effect
   useState(() => {
@@ -94,8 +121,8 @@ const SettingsPage = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as TabType)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${activeTab === tab.id
-                  ? 'bg-gradient-to-r from-orange-500 to-pink-600 text-white shadow-lg shadow-orange-500/20'
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 cursor-pointer ${activeTab === tab.id
+                  ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg shadow-orange-500/20'
                   : 'bg-white/10 text-gray-300 hover:bg-white/20'}`}
               >
                 {tab.icon}
