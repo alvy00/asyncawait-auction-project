@@ -8,6 +8,8 @@ import Image from "next/image";
 import { Countdown } from "./Countdown";
 import toast from "react-hot-toast";
 import FavoriteBadge from "./FavouriteBadge";
+import StatusBadge from "./StatusBadge";
+import AuctionDetailsModal from "./AuctionDetailsModal";
 
 interface AuctionCardProps {
   auction: Auction;
@@ -28,6 +30,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
   const [user, setUser] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
   const [refresh, setRefresh] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [shake, setShake] = useState(false);
 
 
@@ -171,66 +174,48 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
   }, [auction?.highest_bidder_id, refresh]);
 
   // Status Badge component
-  const StatusBadge = ({ status, auctionId }) => {
-    useEffect(() => {
-      if (status.toLowerCase() === "ended") {
-        const updateStatusEnd = async () => {
-          try {
-            const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/updatestatus', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ auctionId, status: "ended" }),
-            });
+  // const StatusBadge = ({ status, auctionId }) => {
+  //   useEffect(() => {
+  //     if (status.toLowerCase() === "ended") {
+  //       const updateStatusEnd = async () => {
+  //         try {
+  //           const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/updatestatus', {
+  //             method: 'POST',
+  //             headers: { 'Content-Type': 'application/json' },
+  //             body: JSON.stringify({ auctionId, status: "ended" }),
+  //           });
 
-            if (res.ok) {
-              const json = await res.json();
-              console.log(json.message);
-            } else {
-              console.error("Failed to update auction status", res.status);
-            }
-          } catch (error) {
-            console.error("Error updating auction status:", error);
-          }
-        };
+  //           if (res.ok) {
+  //             const json = await res.json();
+  //             console.log(json.message);
+  //           } else {
+  //             console.error("Failed to update auction status", res.status);
+  //           }
+  //         } catch (error) {
+  //           console.error("Error updating auction status:", error);
+  //         }
+  //       };
 
-        updateStatusEnd();
-      }
-    }, [status, auctionId]);
+  //       updateStatusEnd();
+  //     }
+  //   }, [status, auctionId]);
 
-    let bgClasses = "";
-    let text = "";
-    let Icon = null;
+  //   let bgClasses = "";
+  //   let text = "";
+  //   let Icon = null;
 
-    switch (status.toLowerCase()) {
-      case "live":
-        bgClasses = "bg-gradient-to-r from-purple-700 to-purple-600";
-        text = "REVERSE | LIVE";
-        Icon = FaArrowDown;
-        break;
-      case "upcoming":
-        bgClasses = "bg-gradient-to-r from-yellow-600 to-yellow-500";
-        text = "REVERSE | UPCOMING";
-        Icon = FaClock;
-        break;
-      case "ended":
-        bgClasses = "bg-gradient-to-r from-gray-700 to-gray-600";
-        text = "REVERSE | ENDED";
-        Icon = FaBan;
-        break;
-      default:
-        return null;
-    }
+    
 
-    return (
-      <motion.div
-        animate={status.toLowerCase() === "live" ? controls : { scale: 1 }}
-        className={`${bgClasses} text-white text-xs font-bold px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm absolute top-4 left-4`}
-      >
-        {Icon && <Icon className="text-white animate-pulse" />}
-        <span>{text}</span>
-      </motion.div>
-    );
-  };
+  //   return (
+  //     <motion.div
+  //       animate={status.toLowerCase() === "live" ? controls : { scale: 1 }}
+  //       className={`${bgClasses} text-white text-xs font-bold px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm absolute top-4 left-4`}
+  //     >
+  //       {Icon && <Icon className="text-white animate-pulse" />}
+  //       <span>{text}</span>
+  //     </motion.div>
+  //   );
+  // };
 
   // Live Badge Animation
   useEffect(() => {
@@ -274,6 +259,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
         boxShadow: "0 0 5px 1px rgba(255, 0, 183, 0.7)",
         transition: { duration: 0.35, ease: "easeOut" },
       }}
+      onClick={() => setDetailsOpen(true)}
       className={`relative w-full h-[500px] group rounded-lg overflow-hidden bg-gradient-to-br from-red-900 to-purple-800 text-white border border-white/20 select-none flex flex-col`}
     >
       {/* Image container with fixed height */}
@@ -289,7 +275,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
       </div>
       
       {/* Status and Favorite Badge */}
-      <StatusBadge status={auction.status} auctionId={auction.auction_id}/>
+      <StatusBadge type={"reverse"} status={auction.status} auctionId={auction.auction_id}/>
       <FavoriteBadge userId={user?.user_id} auctionId={auction.auction_id} initialFavorited={auction.isFavorite} isHovered={isHovered} />
       
       {/* Info section fills remaining space */}
@@ -455,6 +441,15 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
           <span>Submitting Bid...</span>
         </div>
       )}
+
+      {/* Auction details Modal */}
+      <AuctionDetailsModal
+        open={detailsOpen}
+        onClose={() => {
+          setDetailsOpen(false);
+        }}
+        auction={auction}
+      />
 
       {/* Shake animation styles */}
       <style>
