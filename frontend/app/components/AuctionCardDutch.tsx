@@ -9,6 +9,7 @@ import { Auction } from "../../lib/interfaces";
 import { Countdown } from "./Countdown";
 import StatusBadge from "./StatusBadge";
 import FavoriteBadge from "./FavouriteBadge";
+import AuctionDetailsModal from "./AuctionDetailsModal";
 
 interface AuctionCardProps {
   auction: Auction;
@@ -25,6 +26,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
   const [shake, setShake] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : "/fallback.jpg";
   const token =
@@ -32,6 +34,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
       ? localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken")
       : null;
 
+  // fetch user
   useEffect(() => {
     const getUser = async () => {
       const token =
@@ -58,6 +61,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
     getUser();
   }, []);
 
+  // handle bid
   const submitBid = async () => {
     setSubmittingBid(true);
     setShowConfirmModal(false);
@@ -105,6 +109,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
     setShowConfirmModal(true);
   };
 
+  // price drop mechanism
   useEffect(() => {
     const startTimestamp = new Date(auction.start_time).getTime();
     const endTimestamp = new Date(auction.end_time).getTime();
@@ -170,6 +175,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={() => setDetailsOpen(true)}
     >
       {/* Image container with fixed height */}
       <div className="relative h-[55%] w-full overflow-hidden group">
@@ -184,7 +190,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
       </div>
       
       {/* Status and Favorite Badge */}
-      <StatusBadge status={auction.status} auctionId={auction.auction_id}/>
+      <StatusBadge type={"dutch"} status={auction.status} auctionId={auction.auction_id}/>
       <FavoriteBadge userId={user?.user_id} auctionId={auction.auction_id} initialFavorited={auction.isFavorite} isHovered={isHovered} />
       
       <div className="p-5 h-[45%] flex flex-col justify-between bg-gradient-to-t from-black/80 to-transparent min-h-[150px]">
@@ -306,6 +312,15 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
         </div>
       )}
 
+      {/* Auction details Modal */}
+      <AuctionDetailsModal
+        open={detailsOpen}
+        onClose={() => {
+          console.log("Closing modal");
+          setDetailsOpen(false);
+        }}
+        auction={auction}
+      />
       <style>
         {`
           @keyframes gentle-shake {
