@@ -23,6 +23,15 @@ const ProfileSettings = ({ user, onUpdate }: ProfileSettingsProps) => {
 
   const imageSrc = user.image_url || "/fallback_user_avatar.png";
 
+  // Simulate loading effect
+  useState(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  });
+
   // Handle update name, email, bio
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -174,14 +183,14 @@ const ProfileSettings = ({ user, onUpdate }: ProfileSettingsProps) => {
                     type="button"
                     onClick={() => setIsEditing(false)}
                     disabled={isLoading}
-                    className="bg-white/10 hover:bg-white/20 text-white py-2 px-4 rounded-lg transition-all"
+                    className="bg-white/10 hover:bg-white/20 text-white py-2 px-4 rounded-lg transition-all cursor-pointer"
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white py-2 px-4 rounded-lg transition-all shadow-md shadow-orange-400/20"
+                    className="bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white py-2 px-4 rounded-lg transition-all shadow-md shadow-orange-400/20 cursor-pointer"
                   >
                     Save Changes
                   </Button>
@@ -191,7 +200,7 @@ const ProfileSettings = ({ user, onUpdate }: ProfileSettingsProps) => {
                   type="button"
                   onClick={() => setIsEditing(true)}
                   disabled={isLoading}
-                  className="bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white py-2 px-4 rounded-lg transition-all shadow-md shadow-orange-400/20"
+                  className="bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white py-2 px-4 rounded-lg transition-all shadow-md shadow-orange-400/20 cursor-pointer"
                 >
                   Edit Profile
                 </Button>

@@ -6,13 +6,16 @@ import { getUser } from '../controllers/authController.js';
 
 const auctionRouter = express.Router();
 
+
+// -------------------------------------- AUCTIONS -------------------------------------------------
+
 // Get all auctions
 auctionRouter.get('/', async (req, res) => {
     try {
         const currentTime = new Date();
         const { data, error } = await supabase.from('auctions').select('*');
 
-        // Update status of auctions
+        // Update status
         await supabase
         .from('auctions')
         .update({ status: 'ended' })
@@ -20,7 +23,7 @@ auctionRouter.get('/', async (req, res) => {
         .lt('end_time', currentTime);
 
         if (error) {
-            return res.status(400).json({ message: error.message });
+            return res.status(400).json({ message: error.message, data: data});
         }
 
         res.status(200).json(data);
@@ -64,6 +67,7 @@ auctionRouter.post('/create', async (req, res) => {
             return res.status(500).json({
                 error: 'Database Insert Failed',
                 message: error.message,
+                data: data
             });
         }
 
@@ -104,7 +108,7 @@ auctionRouter.delete('/delete', async (req, res) => {
       .eq('auction_id', auction_id);
 
     if (error) {
-      return res.status(400).json({ message: 'Error deleting auction', error });
+      return res.status(400).json({ message: 'Error deleting auction', error, data: data });
     }
 
     return res.status(200).json({ message: 'Auction deleted successfully', data });
@@ -131,7 +135,7 @@ auctionRouter.post('/updatestatus', async (req, res) => {
       .single();
 
     if (updateError) {
-      return res.status(400).json({ message: "Failed to update auction status", error: updateError });
+      return res.status(400).json({ message: "Failed to update auction status", error: updateError, data: data });
     }
 
     if (status === 'ended' && auction?.highest_bidder_id && auction?.highest_bid) {
@@ -157,7 +161,6 @@ auctionRouter.post('/updatestatus', async (req, res) => {
   }
 });
 
-
 // Get Auction Details by ID
 auctionRouter.post('/aucdetails', async (req, res) => {
   const { auction_id } = req.body;
@@ -174,7 +177,7 @@ auctionRouter.post('/aucdetails', async (req, res) => {
 
     if (error) {
       console.error("Supabase error:", error.message);
-      return res.status(500).json({ message: "Error fetching auction details." });
+      return res.status(500).json({ message: "Error fetching auction details.", data: data });
     }
 
     return res.status(200).json(data);
@@ -197,7 +200,7 @@ auctionRouter.get('/:id', async (req, res) => {
 
     if (error) {
       console.error("Supabase error:", error.message);
-      return res.status(500).json({ message: "Error fetching auction details." });
+      return res.status(500).json({ message: "Error fetching auction details.", data: data });
     }
 
     return res.status(200).json(data);
@@ -206,6 +209,80 @@ auctionRouter.get('/:id', async (req, res) => {
     return res.status(500).json({ message: "Unexpected server error." });
   }
 });
+
+// Favourite Auctions
+auctionRouter.post('/favourite', async (req, res) => {
+    try{
+        const { auction_id, user_id } = req.body;
+
+        const { data, error } = await supabase
+            .from('user_favorites')
+            .insert([{ user_id: user_id, auction_id: auction_id }]);
+
+        if (error) {
+            console.error('Error favoriting auction:', error);
+            return res.status(400).json({ message: 'Error favoriting auction', error, data: data });
+        }
+
+        return res.status(200).json({ message: 'Auction favorited successfully', data });
+    }catch(e){
+        console.error('Error in favorite auction route:', e);
+        return res.status(500).json({ message: 'Something went wrong' });
+    }
+});
+
+// Unfavorite Auctions
+auctionRouter.post('/unfavourite', async (req, res) => {
+  try {
+    const { auction_id, user_id } = req.body;
+
+    const { data, error } = await supabase
+      .from('user_favorites')
+      .delete()
+      .eq('user_id', user_id)
+      .eq('auction_id', auction_id);
+
+    if (error) {
+      console.error('Error unfavoriting auction:', error);
+      return res.status(400).json({ message: 'Error unfavoriting auction', error, data: data });
+    }
+
+    return res.status(200).json({ message: 'Auction unfavorited successfully', data });
+  } catch (e) {
+    console.error('Error in unfavorite auction route:', e);
+    return res.status(500).json({ message: 'Something went wrong' });
+  }
+});
+
+// Fetch All Favourite Auction IDs for a User
+auctionRouter.post('/favauctions', async (req, res) => {
+  try {
+    const { user_id } = req.body;
+
+    if (!user_id) {
+      return res.status(400).json({ message: 'Missing user_id' });
+    }
+
+    const { data, error } = await supabase
+      .from('user_favorites')
+      .select('auction_id')
+      .eq('user_id', user_id);
+
+    if (error) {
+      console.error('Supabase error:', error.message);
+      return res.status(500).json({ message: 'Failed to fetch favourites', error, data: data });
+    }
+
+    const auctionIds = data.map(fav => fav.auction_id);
+    console.log(auctionIds);
+    return res.status(200).json(auctionIds);
+  } catch (e) {
+    console.error('Server error:', e);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// -------------------------------------- BIDS -------------------------------------------------
 
 // Place Bid (Dutch)
 auctionRouter.post('/bidcurrent', async (req, res) => {
@@ -226,7 +303,7 @@ auctionRouter.post('/bidcurrent', async (req, res) => {
 
     if (auctionErr || !auction) {
       console.error('Auction not found:', auctionErr);
-      return res.status(400).json({ message: 'Auction not found!' });
+      return res.status(400).json({ message: 'Auction not found!', data: data });
     }
 
     const now = new Date();
@@ -246,7 +323,7 @@ auctionRouter.post('/bidcurrent', async (req, res) => {
       return res.status(400).json({ message: 'Please enter a valid bid amount' });
     }
 
-    // Place bid transaction RPC
+    // bid transaction RPC
     const { data: bid, error: bidErr } = await supabase.rpc('place_bid_transaction', {
       p_auction_id: auction_id,
       p_bid_amount: amount,
@@ -266,7 +343,7 @@ auctionRouter.post('/bidcurrent', async (req, res) => {
 
     if (bidErr) {
       console.error('Error placing bid:', bidErr);
-      return res.status(400).json({ message: 'Bid could not be placed!', error: bidErr });
+      return res.status(400).json({ message: 'Bid could not be placed!', error: bidErr, data: data });
     }
 
     console.log('Bid placed successfully:', bid);
@@ -298,7 +375,7 @@ auctionRouter.post('/bid', async (req, res) => {
 
         if (auctionErr) {
             console.error('Auction not found:', auctionErr);
-            return res.status(400).json({ message: 'Auction not found!' });
+            return res.status(400).json({ message: 'Auction not found!', data: auction });
         }
 
         if (new Date() > new Date(auction.end_time)) {
@@ -336,7 +413,7 @@ auctionRouter.post('/bid', async (req, res) => {
 
         if (bidErr) {
             console.error('Error placing bid:', bidErr);
-            return res.status(400).json({ message: 'Bid could not be placed!', error: bidErr });
+            return res.status(400).json({ message: 'Bid could not be placed!', error: bidErr, data: bid });
         }
 
         console.log('Bid placed successfully:', bid);
@@ -367,7 +444,7 @@ auctionRouter.post('/bidlow', async (req, res) => {
 
     if (auctionErr || !auction) {
       console.error('Auction not found:', auctionErr);
-      return res.status(400).json({ message: 'Auction not found!' });
+      return res.status(400).json({ message: 'Auction not found!', data: auction });
     }
 
     if (new Date() > new Date(auction.end_time)) {
@@ -398,7 +475,7 @@ auctionRouter.post('/bidlow', async (req, res) => {
 
     if (bidErr) {
       console.error('Error placing bid:', bidErr);
-      return res.status(400).json({ message: 'Bid could not be placed!', error: bidErr });
+      return res.status(400).json({ message: 'Bid could not be placed!', error: bidErr, data: bid });
     }
 
     console.log('Lower bid placed successfully:', bid);
@@ -425,92 +502,19 @@ auctionRouter.post('/bidhistory', async (req, res) => {
 
   if (error) {
     console.error('Error fetching bids:', error.message);
-    return res.status(500).json({ error: 'Failed to fetch bid history' });
+    return res.status(500).json({ error: 'Failed to fetch bid history', data: data });
   }
 
-  // Format date
   const formatted = data.map((bid) => ({
     ...bid,
     created_at: new Date(bid.created_at).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-    }), // e.g., "May 10, 2025"
+    }),
   }));
 
   return res.status(200).json(formatted);
-});
-
-// Favourite Auctions
-auctionRouter.post('/favourite', async (req, res) => {
-    try{
-        const { auction_id, user_id } = req.body;
-
-        const { data, error } = await supabase
-            .from('user_favorites')
-            .insert([{ user_id: user_id, auction_id: auction_id }]);
-
-        if (error) {
-            console.error('Error favoriting auction:', error);
-            return res.status(400).json({ message: 'Error favoriting auction', error });
-        }
-
-        return res.status(200).json({ message: 'Auction favorited successfully', data });
-    }catch(e){
-        console.error('Error in favorite auction route:', e);
-        return res.status(500).json({ message: 'Something went wrong' });
-    }
-});
-
-// Unfavorite Auctions
-auctionRouter.post('/unfavourite', async (req, res) => {
-  try {
-    const { auction_id, user_id } = req.body;
-
-    const { data, error } = await supabase
-      .from('user_favorites')
-      .delete()
-      .eq('user_id', user_id)
-      .eq('auction_id', auction_id);
-
-    if (error) {
-      console.error('Error unfavoriting auction:', error);
-      return res.status(400).json({ message: 'Error unfavoriting auction', error });
-    }
-
-    return res.status(200).json({ message: 'Auction unfavorited successfully', data });
-  } catch (e) {
-    console.error('Error in unfavorite auction route:', e);
-    return res.status(500).json({ message: 'Something went wrong' });
-  }
-});
-
-// Fetch All Favourite Auction IDs for a User
-auctionRouter.post('/favauctions', async (req, res) => {
-  try {
-    const { user_id } = req.body;
-
-    if (!user_id) {
-      return res.status(400).json({ message: 'Missing user_id' });
-    }
-
-    const { data, error } = await supabase
-      .from('user_favorites')
-      .select('auction_id')
-      .eq('user_id', user_id);
-
-    if (error) {
-      console.error('Supabase error:', error.message);
-      return res.status(500).json({ message: 'Failed to fetch favourites', error });
-    }
-
-    const auctionIds = data.map(fav => fav.auction_id);
-    console.log(auctionIds);
-    return res.status(200).json(auctionIds);
-  } catch (e) {
-    console.error('Server error:', e);
-    return res.status(500).json({ message: 'Internal server error' });
-  }
 });
 
 

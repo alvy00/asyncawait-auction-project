@@ -7,7 +7,7 @@ const authRouter = express.Router();
 
 // Server Ping
 authRouter.get('/ping', (req, res) => {
-    return res.status(200).json({ message: "Server is active" });
+  return res.status(200).json({ message: "Server is active" });
 });
 
 // Get Current Logged IN User's Database Data
@@ -19,42 +19,53 @@ authRouter.get('/getuser', async (req, res) => {
     }
   
     const token = authHeader.split(" ")[1];
-  
-    const { data: authData, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !authData?.user) {
-      console.error("Supabase auth error:", authError?.message);
-      return res.status(401).json({ message: "User not authenticated" });
+    
+    try{
+      const { data: authData, error: authError } = await supabase.auth.getUser(token);
+      if (authError || !authData?.user) {
+        console.error("Supabase auth error:", authError?.message);
+        return res.status(401).json({ message: "User not authenticated", data: authData });
+      }
+    
+      const { data: userDatabaseData, error: dbError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('user_id', authData.user.id)
+        .single();
+    
+      if (dbError || !userDatabaseData) {
+        console.error("Supabase DB error:", dbError?.message);
+        return res.status(404).json({ message: "User data not found", data: userDatabaseData });
+      }
+    
+      //console.log(userDatabaseData);
+      return res.status(200).json(userDatabaseData);
+      
+    }catch(e){
+      console.error(e);
     }
-  
-    const { data: userDatabaseData, error: dbError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('user_id', authData.user.id)
-      .single();
-  
-    if (dbError || !userDatabaseData) {
-      console.error("Supabase DB error:", dbError?.message);
-      return res.status(404).json({ message: "User data not found" });
-    }
-  
-    console.log(userDatabaseData);
-    return res.status(200).json(userDatabaseData);
+    
 });
 
 // Get User's DB Data w/ user_id
 authRouter.post('/fetchuser', async (req, res) => {
     const { user_id } = req.body;
 
-    const { data, error } = await supabase
+    try{
+      const { data, error } = await supabase
         .from('users')
         .select('*')
         .eq("user_id", user_id)
-        .single(); // <-- fix: call the function
+        .single();
 
-    if (error) return res.status(400).json({ message: "DB error", error });
+      if (error) return res.status(400).json({ message: "DB error", error, data: data });
 
-    //console.log(data);
-    return res.json(data);
+      //console.log(data);
+      return res.json(data);
+    }catch(e){
+      console.error(e);
+    }
+    
 });
 
 // User SignUP
@@ -81,7 +92,7 @@ authRouter.post('/signup', async (req, res) => {
             email, 
             password
         })
-        if(signupErr) return res.status(400).json({message: signupErr.message})
+        if(signupErr) return res.status(400).json({message: signupErr.message, data: signupData})
 
 
         const { error: profileErr } = await supabase.from('users').insert([{
@@ -90,7 +101,7 @@ authRouter.post('/signup', async (req, res) => {
             username,
             email,
         }]);
-        if(profileErr) return res.status(400).json({message: profileErr.message})
+        if(profileErr) return res.status(400).json({message: profileErr.message, data: profileErr})
 
 
         res.status(201).json({message: 'User created successfully!'});
@@ -111,7 +122,7 @@ authRouter.post('/login', async (req, res) => {
             email,
             password
         })
-        if (error || !data || !data.session) return res.status(401).json({ message: error?.message || 'Invalid login credentials.' });
+        if (error || !data || !data.session) return res.status(401).json({ message: error?.message || 'Invalid login credentials.', data: data });
 
         return res.status(200).json({
             message: 'Login successful!',
@@ -140,7 +151,7 @@ authRouter.post('/nameupdate', async (req, res) => {
       .eq("user_id", user_id);
 
     if (error) {
-      return res.status(400).json({ message: "Error updating name", error });
+      return res.status(400).json({ message: "Error updating name", error, data: data });
     }
 
     return res.status(200).json({ message: "Name updated successfully", data });
@@ -165,7 +176,7 @@ authRouter.post('/emailupdate', async (req, res) => {
       .eq("user_id", user_id);
 
     if (error) {
-      return res.status(400).json({ message: "Error updating email", error });
+      return res.status(400).json({ message: "Error updating email", error, data: data });
     }
 
     return res.status(200).json({ message: "Email updated successfully", data });
@@ -191,7 +202,7 @@ authRouter.post('/bioupdate', async (req, res) => {
 
     if (error) {
       console.error("Failed to update bio:", error.message);
-      return res.status(500).json({ message: "Failed to update bio", error: error.message });
+      return res.status(500).json({ message: "Failed to update bio", error: error.message, data: data });
     }
 
     return res.status(200).json({ message: "Bio updated successfully", data });
@@ -216,7 +227,7 @@ authRouter.post('/deposit', async (req, res) => {
       .select();
 
     if (insertError) {
-      return res.status(400).json({ message: insertError.message });
+      return res.status(400).json({ message: insertError.message, data: transactionData });
     }
 
     const { error: rpcError } = await supabase.rpc('increment_user_total_deposits', {
@@ -260,7 +271,7 @@ authRouter.post('/withdraw', async (req, res) => {
       return res.status(400).json({ message: userError.message });
     }
     if (!userData || userData.money < withdrawalAmount) {
-      return res.status(400).json({ message: "Insufficient funds" });
+      return res.status(400).json({ message: "Insufficient funds", data: userData });
     }
 
     const { data: transactionData, error: insertError } = await supabase
@@ -318,7 +329,7 @@ authRouter.post('/record-win', async (req, res) => {
       .select();
 
     if (insertError) {
-      return res.status(400).json({ message: insertError.message });
+      return res.status(400).json({ message: insertError.message, data: transactionData });
     }
 
     const { error: rpcError } = await supabase.rpc('increment_user_spent_on_bids', {
