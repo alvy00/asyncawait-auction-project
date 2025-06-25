@@ -175,10 +175,10 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={() => setDetailsOpen(true)}
     >
+      
       {/* Image container with fixed height */}
-      <div className="relative h-[55%] w-full overflow-hidden group">
+      <div onClick={() => setDetailsOpen(true)} className="relative h-[55%] w-full overflow-hidden group">
         <Image
           src={imageSrc}
           alt={auction.item_name}
@@ -193,8 +193,9 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
       <StatusBadge type={"dutch"} status={auction.status} auctionId={auction.auction_id}/>
       <FavoriteBadge userId={user?.user_id} auctionId={auction.auction_id} initialFavorited={auction.isFavorite} isHovered={isHovered} />
       
+      {/* Info section */}
       <div className="p-5 h-[45%] flex flex-col justify-between bg-gradient-to-t from-black/80 to-transparent min-h-[150px]">
-        <div>
+        <div onClick={() => setDetailsOpen(true)}>
           <h3
             className="text-2xl font-bold tracking-wide uppercase mb-2 
                       text-cyan-100 drop-shadow-sm"
@@ -321,6 +322,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
         }}
         auction={auction}
       />
+
       <style>
         {`
           @keyframes gentle-shake {

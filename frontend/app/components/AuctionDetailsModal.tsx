@@ -161,7 +161,7 @@ export default function AuctionDetailsModal({
                     alt="Auction Image"
                     layout="fill"
                     objectFit="cover"
-                    className="brightness-85 rounded-xl"
+                    className="brightness-85 rounded-xl hover:brightness-100"
                   />
                 </motion.div>
               </AnimatePresence>

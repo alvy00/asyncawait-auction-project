@@ -239,7 +239,6 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
         setIsHovered(false);
         setIsBidding(false);
       }}
-      onClick={() => setDetailsOpen(true)}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{
@@ -253,7 +252,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
     >
 
       {/* Image container */}
-      <div className="relative h-[55%] w-full overflow-hidden group">
+      <div onClick={() => setDetailsOpen(true)} className="relative h-[55%] w-full overflow-hidden group">
         <Image
           src={imageSrc}
           alt={auction.item_name}
@@ -270,7 +269,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
       
       {/* Content area */}
       <div className="p-5 flex flex-col justify-between h-[45%] bg-gradient-to-t from-black/80 to-transparent">
-        <div>
+        <div onClick={() => setDetailsOpen(true)}>
           <h3
             className="text-2xl font-bold tracking-wide uppercase mb-2 
                       text-orange-100 drop-shadow-sm"
@@ -297,12 +296,12 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
 
           {/* Higest bid and name */}
           <div
-            className="mt-1 text-sm flex items-center gap-2 select-none cursor-pointer
+            className="mt-1 text-sm flex items-center gap-2 select-none
             text-yellow-300 font-semibold tracking-wide
             transition-all duration-300 ease-in-out"
           >
             <div className="text-gray-200">by</div>
-            <div className="hover:underline transition-all duration-200">
+            <div className="transition-all duration-200">
               {winner || "—"}
             </div>
           </div>
