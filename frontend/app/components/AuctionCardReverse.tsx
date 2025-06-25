@@ -259,11 +259,10 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
         boxShadow: "0 0 5px 1px rgba(255, 0, 183, 0.7)",
         transition: { duration: 0.35, ease: "easeOut" },
       }}
-      onClick={() => setDetailsOpen(true)}
       className={`relative w-full h-[500px] group rounded-lg overflow-hidden bg-gradient-to-br from-red-900 to-purple-800 text-white border border-white/20 select-none flex flex-col`}
-    >
+    > 
       {/* Image container with fixed height */}
-      <div className="relative h-[55%] w-full overflow-hidden group">
+      <div onClick={() => setDetailsOpen(true)} className="relative h-[55%] w-full overflow-hidden group">
         <Image
           src={imageSrc}
           alt={auction.item_name}
@@ -278,10 +277,10 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
       <StatusBadge type={"reverse"} status={auction.status} auctionId={auction.auction_id}/>
       <FavoriteBadge userId={user?.user_id} auctionId={auction.auction_id} initialFavorited={auction.isFavorite} isHovered={isHovered} />
       
-      {/* Info section fills remaining space */}
+      {/* Info section */}
       <div className="p-5 flex flex-col justify-between h-[45%] bg-gradient-to-t from-black/80 to-transparent">
       
-        <div>
+        <div onClick={() => setDetailsOpen(true)}>
           <h3
             className="text-2xl font-bold tracking-wide uppercase mb-2 
                       text-purple-100 drop-shadow-sm"
@@ -311,13 +310,13 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
 
           {/* Higest bid and name */}
           <div
-            className="mt-1 text-sm flex items-center gap-2 select-none cursor-pointer
+            className="mt-1 text-sm flex items-center gap-2 select-none
             text-red-300 font-semibold tracking-wide
             transition-all duration-300 ease-in-out
             "
           >
             <div className="text-gray-200">by</div>
-            <div className="hover:underline transition-all duration-200">
+            <div className="transition-all duration-200">
               {winner || "—"}
             </div>
           </div>
@@ -424,9 +423,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
             </div>
           )}
           </div>
-        
         </div>
-
 
       </div>
 
