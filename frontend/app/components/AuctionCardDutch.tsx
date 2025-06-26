@@ -197,8 +197,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
       <div className="p-5 h-[45%] flex flex-col justify-between bg-gradient-to-t from-black/80 to-transparent min-h-[150px]">
         <div onClick={() => setDetailsOpen(true)}>
           <h3
-            className="text-2xl font-bold tracking-wide uppercase mb-2 
-                      text-cyan-100 drop-shadow-sm"
+            className="text-2xl font-bold tracking-wide uppercase mb-2 text-cyan-100 drop-shadow-sm cursor-pointer"
           >
             #{auction.item_name}
           </h3>

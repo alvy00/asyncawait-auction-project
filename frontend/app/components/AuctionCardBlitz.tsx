@@ -271,8 +271,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
       <div className="p-5 flex flex-col justify-between h-[45%] bg-gradient-to-t from-black/80 to-transparent">
         <div onClick={() => setDetailsOpen(true)}>
           <h3
-            className="text-2xl font-bold tracking-wide uppercase mb-2 
-                      text-orange-100 drop-shadow-sm"
+            className="text-2xl font-bold tracking-wide uppercase mb-2 text-orange-100 drop-shadow-sm cursor-pointer"
           >
             #{auction.item_name}
           </h3>

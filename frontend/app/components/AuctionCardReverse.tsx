@@ -282,8 +282,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
       
         <div onClick={() => setDetailsOpen(true)}>
           <h3
-            className="text-2xl font-bold tracking-wide uppercase mb-2 
-                      text-purple-100 drop-shadow-sm"
+            className="text-2xl font-bold tracking-wide uppercase mb-2 text-purple-100 drop-shadow-sm cursor-pointer"
           >
             #{auction.item_name}
           </h3>
