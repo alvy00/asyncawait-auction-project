@@ -19,7 +19,7 @@ const LiveAuctionsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
 
-  const categories = ["all", "watches", "jewelry", "art", "collectibles", "fashion"];
+  const categories = ["all", "electronics", "art", "vehicles", "fashion", "other"];
 
   // Get User
   useEffect(() => {

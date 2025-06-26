@@ -32,7 +32,10 @@ const MyAuctionsPage = () => {
 
   const router = useRouter();
 
+  // fetch all auctions created by the current user
   useEffect(() => {
+    if (!user || !user.user_id) return;
+    
     const fetchAllAuctions = async () => {
       try {
         const res = await fetch(
@@ -52,7 +55,7 @@ const MyAuctionsPage = () => {
         }
 
         const data = await res.json();
-        setAuctions(data);
+        setAuctions(data.filter((auction) => auction.user_id === user.user_id));
 
       } catch (e) {
         console.error(e);
@@ -60,8 +63,9 @@ const MyAuctionsPage = () => {
     };
 
     fetchAllAuctions();
-  }, []);
+  }, [user, user?.user_id]);
 
+  // set stats
   useEffect(() => {
     if (!auctions || !user) return;
 
@@ -75,6 +79,7 @@ const MyAuctionsPage = () => {
     });
   }, [auctions, user]);
 
+  // loading
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
@@ -83,10 +88,12 @@ const MyAuctionsPage = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // edit (unimplemented)
   const handleEdit = (auctionId: string) => {
     router.push(`/dashboard/my-auctions/edit/${auctionId}`);
   };
 
+  // delete
   const handleDelete = async (auctionId: string) => {
     if (!confirm("Are you sure you want to delete this auction?")) return;
 
@@ -177,13 +184,6 @@ const MyAuctionsPage = () => {
         ))}
       </div>
 
-      {/* More Details Link */}
-      <div className="flex justify-end mb-6">
-        <button className="text-blue-400 hover:text-blue-300 flex items-center gap-1 text-sm">
-          More Details <FaChevronRight className="h-3 w-3" />
-        </button>
-      </div>
-
       {/* Divider */}
       <div className="border-b border-white/10 mb-8"></div>
 
@@ -191,14 +191,14 @@ const MyAuctionsPage = () => {
       <div className="mb-6">
         <h2 className="text-xl md:text-2xl font-bold text-white mb-6 flex items-center justify-between">
           <span>My Auction Products</span>
-          <div className="flex gap-2">
+          {/* <div className="flex gap-2">
             <button className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white">
               <FaChevronLeft className="h-4 w-4" />
             </button>
             <button className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white">
               <FaChevronRight className="h-4 w-4" />
             </button>
-          </div>
+          </div> */}
         </h2>
 
         {currentAuctions.length === 0 ? (
@@ -320,7 +320,7 @@ const AuctionCard: React.FC<DashboardAuctionCardProps> = ({ auction, onEdit, onD
                 e.stopPropagation();
                 onEdit();
               }}
-              className="bg-white/10 hover:bg-white/20 backdrop-blur-md p-2 rounded-full transition-all duration-300 hover:scale-110 border border-white/20 shadow-lg"
+              className="bg-white/10 hover:bg-purple-500/70 backdrop-blur-md p-2 rounded-full transition-all duration-300 hover:scale-110 border border-white/20 shadow-lg cursor-pointer"
             >
               <FaEdit className="h-4 w-4 text-white" />
             </motion.button>
@@ -335,7 +335,7 @@ const AuctionCard: React.FC<DashboardAuctionCardProps> = ({ auction, onEdit, onD
                 e.stopPropagation();
                 onDelete();
               }}
-              className="bg-white/10 hover:bg-red-500/70 backdrop-blur-md p-2 rounded-full transition-all duration-300 hover:scale-110 border border-white/20 shadow-lg"
+              className="bg-white/10 hover:bg-red-500/70 backdrop-blur-md p-2 rounded-full transition-all duration-300 hover:scale-110 border border-white/20 shadow-lg cursor-pointer"
             >
               <FaTrash className="h-4 w-4 text-white" />
             </motion.button>
