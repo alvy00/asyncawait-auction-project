@@ -150,6 +150,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
         const error = await res.json();
         console.error("Error placing bid:", error);
         toast.error(error?.message || "Failed to place bid.");
+        setSubmittingBid(false);
         return;
       }
 
@@ -159,9 +160,11 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
       setIsBidding(false);
       setSubmittingBid(false);
       setRefresh(prev => !prev);
+
     } catch (err) {
       console.error("Bid submission error:", err);
       toast.error("Something went wrong. Please try again.");
+      setSubmittingBid(false);
     }
   };
 
@@ -255,7 +258,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
     >
 
       {/* Background & Glass layers */}
-      <div onClick={() => setDetailsOpen(true)} className="relative h-full overflow-hidden rounded-lg bg-gradient-to-br from-green-900 to-black-800 to-transparent backdrop-blur-xl shadow-2xl border border-white/20">
+      <div className="relative h-full overflow-hidden rounded-lg bg-gradient-to-br from-green-900 to-black-800 to-transparent backdrop-blur-xl shadow-2xl border border-white/20">
         {/* Glassmorphism glow effects */}
         <div className="absolute inset-0 overflow-hidden rounded-xl sm:rounded-2xl">
           <div className="absolute -inset-1 bg-gradient-to-tr from-orange-500/10 via-purple-500/5 to-blue-500/10 opacity-30 group-hover:opacity-40 transition-opacity duration-700"></div>
@@ -268,9 +271,10 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
             src={imageSrc}
             alt={auction.item_name}
             fill
+            onClick={() => setDetailsOpen(true)}
             className="brightness-90 group-hover:brightness-110 object-cover transition-transform duration-700 group-hover:scale-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60"></div>
+          <div onClick={() => setDetailsOpen(true)} className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60"></div>
 
           {/* Status badge with scoped tooltip */}
           <div className="absolute top-4 left-4 z-10 cursor-pointer">
@@ -316,7 +320,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
 
         {/* Content */}
         <div className="p-6 bg-gradient-to-b from-black/50 via-black/70 to-black/80 backdrop-blur-md relative z-10 h-[45%] flex flex-col justify-between border-t border-white/10">
-          <div>
+          <div onClick={() => setDetailsOpen(true)}>
             <h3 className="text-2xl font-bold tracking-wide uppercase mb-2 text-green-100 drop-shadow-sm">
               #{auction.item_name}
             </h3>
@@ -338,7 +342,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
 
           {/* Price + Countdown */}
           <div className="flex items-center justify-between mb-4">
-            <div className="text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-orange-500 font-bold text-3xl">
+            <div onClick={() => setDetailsOpen(true)} className="text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-orange-500 font-bold text-3xl">
               {highestBid
                 ? `$${highestBid.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
@@ -413,6 +417,11 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                       name="amount"
                       value={bidAmount}
                       onChange={(e) => setBidAmount(Number(e.target.value))}
+                      min={
+                        auction.starting_price === highestBid
+                          ? auction.starting_price
+                          : Math.max(auction.starting_price, highestBid) + 1
+                      }
                       placeholder="Your bid"
                       className="w-2/3 max-w-[100px] p-2 rounded-lg border bg-gray-800 text-white border-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder-gray-400 transition"
                     />

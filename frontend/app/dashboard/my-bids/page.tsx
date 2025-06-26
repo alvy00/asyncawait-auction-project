@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -5,9 +6,11 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import {
+  FaCheckCircle,
   FaChevronLeft,
   FaChevronRight,
   FaHourglassHalf,
+  FaTimesCircle,
 } from "react-icons/fa";
 import { Button } from "../../../components/ui/button";
 import { useUser } from "../../../lib/user-context";
@@ -16,6 +19,7 @@ import { Auction } from "../../../lib/interfaces";
 const FALLBACK_IMAGE = "/fallback.jpg";
 
 interface Bid {
+  is_highest_bidder: any;
   bid_id: string;
   auction_id: string;
   user_id: string;
@@ -216,7 +220,7 @@ interface BidCardProps {
   onPlaceBid: () => void;
 }
 
-const BidCard: React.FC<BidCardProps> = ({ bid, onViewAuction, onPlaceBid }) => { 
+const BidCard: React.FC<BidCardProps> = ({ bid, onViewAuction }) => { 
 
   const getStatusColor = () => {
     switch (bid.status) {
@@ -247,21 +251,6 @@ const BidCard: React.FC<BidCardProps> = ({ bid, onViewAuction, onPlaceBid }) => 
         return null;
     }
   };
-
-  const getStatusText = () => {
-    switch (bid.status) {
-      case "active":
-        return bid.is_highest_bidder ? "Highest Bidder" : "Outbid";
-      case "won":
-        return "Won";
-      case "lost":
-        return "Lost";
-      case "pending":
-        return "Pending";
-      default:
-        return "";
-    }
-  };
   
   return (
     <motion.div 
@@ -290,7 +279,6 @@ const BidCard: React.FC<BidCardProps> = ({ bid, onViewAuction, onPlaceBid }) => 
             {/* Status tag */}
             <div className={`absolute top-4 left-4 bg-gradient-to-r ${getStatusColor()} text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm`}>
               {getStatusIcon()}
-              <span>{getStatusText()}</span>
             </div>
           </div>
           
@@ -352,14 +340,6 @@ const BidCard: React.FC<BidCardProps> = ({ bid, onViewAuction, onPlaceBid }) => 
               >
                 View Auction
               </Button>
-              { (
-                <Button 
-                  onClick={onPlaceBid}
-                  className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white text-sm py-2 border border-white/10 shadow-lg"
-                >
-                  Place New Bid
-                </Button>
-              )}
             </div>
           </div>
         </div>
