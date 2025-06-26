@@ -321,7 +321,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
         {/* Content */}
         <div className="p-6 bg-gradient-to-b from-black/50 via-black/70 to-black/80 backdrop-blur-md relative z-10 h-[45%] flex flex-col justify-between border-t border-white/10">
           <div onClick={() => setDetailsOpen(true)}>
-            <h3 className="text-2xl font-bold tracking-wide uppercase mb-2 text-green-100 drop-shadow-sm">
+            <h3 className="text-2xl font-bold tracking-wide uppercase mb-2 text-green-100 drop-shadow-sm cursor-pointer">
               #{auction.item_name}
             </h3>
 

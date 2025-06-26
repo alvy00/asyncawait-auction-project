@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -16,7 +17,7 @@ import { Button } from "../../../components/ui/button";
 import { useUser } from "../../../lib/user-context";
 import { Auction } from "../../../lib/interfaces";
 
-const FALLBACK_IMAGE = "/fallback.jpg";
+  const imageSrc = "/fallback.jpg";
 
 interface Bid {
   is_highest_bidder: any;
@@ -36,9 +37,10 @@ const MyBidsPage = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "active" | "won" | "lost">("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const bidsPerPage = 6;
+  const bidsPerPage = 10;
   const router = useRouter();
 
+  // fetch auctions
   useEffect(() => {
     const fetchAllAuctions = async () => {
       try {
@@ -52,6 +54,7 @@ const MyBidsPage = () => {
     fetchAllAuctions();
   }, []);
 
+  // fetch bids
   useEffect(() => {
     if (!user) return;
     const fetchBids = async () => {
@@ -76,6 +79,7 @@ const MyBidsPage = () => {
     setCurrentPage(1);
   }, [filter]);
 
+  // filter bids
   const filteredBids = bids.filter((bid) => {
     switch (filter) {
       case "active":
@@ -162,7 +166,7 @@ const MyBidsPage = () => {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
             {currentBids.map((bid) => (
               <BidCard
                 key={bid.bid_id}
@@ -253,98 +257,62 @@ const BidCard: React.FC<BidCardProps> = ({ bid, onViewAuction }) => {
   };
   
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="relative group h-full"
-    >
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-xl shadow-2xl border border-white/20 h-full">
-        {/* Glassmorphism card highlights */}
-        <div className="absolute inset-0 overflow-hidden rounded-xl">
-          <div className="absolute -inset-1 bg-gradient-to-tr from-orange-500/10 via-purple-500/5 to-blue-500/10 opacity-30 group-hover:opacity-40 transition-opacity duration-700"></div>
-          <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-white/5 to-transparent rotate-12 transform scale-2 opacity-20 group-hover:opacity-30 transition-opacity duration-700"></div>
+  <motion.div 
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
+    className="w-full px-4 py-3 border-b border-white/10 hover:bg-white/5 transition"
+  >
+    <div className="flex items-start gap-4">
+      
+      {/* Image / Placeholder */}
+      <div className="w-20 h-20 rounded-md overflow-hidden bg-white/10 relative shrink-0">
+        {/* Optional image */}
+        {/* <Image src={imageSrc} alt={bid.item_name} fill className="object-cover" /> */}
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex justify-between items-start">
+          <h3 className="text-white font-semibold truncate">{bid.item_name}</h3>
+          <span className="text-orange-400 font-bold text-sm">
+            ${bid.bid_amount.toFixed(2)}
+          </span>
         </div>
-        
-        <div className="flex flex-col h-full">
-          {/* Image */}
-          <div className="relative w-full h-48 overflow-hidden">
-            <Image 
-              src={ FALLBACK_IMAGE }
-              alt={bid.item_name}
-              fill
-              className="object-cover transition-transform duration-700 group-hover:scale-110"
-            />
-            
-            {/* Status tag */}
-            <div className={`absolute top-4 left-4 bg-gradient-to-r ${getStatusColor()} text-white text-xs font-medium px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm`}>
-              {getStatusIcon()}
-            </div>
-          </div>
-          
-          {/* Content */}
-          <div className="p-4 flex-1 flex flex-col justify-between">
-            <div>
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="text-white text-lg font-bold truncate">{bid.item_name}</h3>
-                <div className="text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-orange-500 font-bold text-xl">
-                  ${bid.bid_amount.toFixed(2)}
-                </div>
-              </div>
-              
-              {/* Category and condition */}
-              {/* <div className="flex items-center gap-2 mb-4">
-                <span className="text-xs bg-white/10 text-gray-300 px-2 py-0.5 rounded">
-                  {bid.category?.charAt(0).toUpperCase() + bid.category?.slice(1)}
-                </span>
-                <span className="text-xs bg-white/10 text-gray-300 px-2 py-0.5 rounded">
-                  {bid.condition?.charAt(0).toUpperCase() + bid.condition?.slice(1)}
-                </span>
-              </div> */}
-              
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <p className="text-gray-400 text-xs mb-1">Bid Placed</p>
-                  <p className="text-white text-sm">
-                     {new Date(bid.created_at.replace('+00', 'Z')).toLocaleDateString('en-GB', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                      })}
-                  </p>
-                </div>
-                {/* <div>
-                  <p className="text-gray-400 text-xs mb-1">Current Highest</p>
-                  <p className="text-white text-sm">${bid.current_highest_bid?.toFixed(2)}</p>
-                </div> */}
-                {/* <div>
-                  <p className="text-gray-400 text-xs mb-1">Your Status</p>
-                  <p className={`text-sm ${bid.is_highest_bidder ? "text-green-400" : "text-orange-400"}`}>
-                    {bid.is_highest_bidder ? "Highest Bidder" : "Outbid"}
-                  </p>
-                </div> */}
-                <div>
-                  <p className="text-gray-400 text-xs mb-1">Time Remaining</p>
-                  <p className="text-white text-sm">
-                    <span>---</span>
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            {/* Action buttons */}
-            <div className="flex flex-col sm:flex-row gap-2 mt-2">
-              <Button 
-                onClick={onViewAuction}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm py-2 border border-white/10 shadow-lg"
-              >
-                View Auction
-              </Button>
-            </div>
-          </div>
+
+        <div className="flex flex-wrap items-center gap-2 text-xs text-gray-300 mt-1">
+          {bid.category && (
+            <span className="bg-white/10 px-2 py-0.5 rounded">
+              {bid.category.charAt(0).toUpperCase() + bid.category.slice(1)}
+            </span>
+          )}
+          {bid.condition && (
+            <span className="bg-white/10 px-2 py-0.5 rounded">
+              {bid.condition.charAt(0).toUpperCase() + bid.condition.slice(1)}
+            </span>
+          )}
+          <span>
+            {new Date(bid.created_at.replace('+00', 'Z')).toLocaleDateString('en-GB', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+            })}
+          </span>
+          <span className={bid.is_highest_bidder ? "text-green-400" : "text-orange-400"}>
+            {bid.is_highest_bidder ? "Highest Bidder" : "Outbid"}
+          </span>
         </div>
       </div>
-    </motion.div>
+
+      {/* Action */}
+      <Button
+        onClick={onViewAuction}
+        className="ml-auto text-xs bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5"
+      >
+        View
+      </Button>
+    </div>
+  </motion.div>
   );
 };
 
