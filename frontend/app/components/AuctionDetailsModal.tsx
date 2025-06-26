@@ -265,8 +265,9 @@ export default function AuctionDetailsModal({
                     )
                   }
                 />
-                <InfoCard icon={<FaCalendarAlt />} label="Start" value={new Date(auction?.start_time).toLocaleString()} />
-                <InfoCard icon={<FaCalendarAlt />} label="End" value={new Date(auction?.end_time).toLocaleString()} />
+                <InfoCard icon={<FaCalendarAlt />} label="Created At" value={new Date(auction?.created_at).toLocaleString()} />
+                <InfoCard icon={<FaCalendarAlt />} label="Starts At" value={new Date(auction?.start_time).toLocaleString()} />
+                <InfoCard icon={<FaCalendarAlt />} label="Ends At" value={new Date(auction?.end_time).toLocaleString()} />
                 <InfoCard icon={<FaRegClock />} label="Time Left" value={<Countdown endTime={auction?.end_time} />} />
                 <InfoCard icon={<FaGavel />} label="Auction Type" value={auction?.auction_type?.toUpperCase() || "Standard"} />
               </div>
