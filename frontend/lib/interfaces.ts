@@ -32,6 +32,7 @@ export interface Auction {
   highest_bid?: number;
   highest_bidder_id?: string;
   highest_bidder_name?: string;
+  created_at: string;
   start_time: string;
   end_time: string;
   status?: string;

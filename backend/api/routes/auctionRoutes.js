@@ -13,13 +13,17 @@ const auctionRouter = express.Router();
 auctionRouter.get('/', async (req, res) => {
     try {
         const currentTime = new Date();
-        const { data, error } = await supabase.from('auctions').select('*');
+
+        // fetch all auctions
+        const { data, error } = await supabase.from('auctions')
+                                              .select('*')
+                                              .order('created_at', {ascending: false});
 
         // Update status
         await supabase
         .from('auctions')
         .update({ status: 'ended' })
-        .eq('status', 'ongoing')
+        .eq('status', 'live')
         .lt('end_time', currentTime);
 
         if (error) {
