@@ -25,7 +25,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "../../components/ui/avatar";
-import { Tooltip } from "../../components/ui/tooltip";
+import { Tooltip, TooltipTrigger, TooltipContent } from "../../components/ui/tooltip";
 
 interface AuctionDetailsModalProps {
   open: boolean;
@@ -65,301 +65,202 @@ export default function AuctionDetailsModal({
   auction,
 }: AuctionDetailsModalProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [zoomed, setZoomed] = useState(false);
-
   if (!auction) return null;
-
   const images = auction.images || [];
-
-  const nextImage = () =>
-    setCurrentImageIndex((prev) => (prev + 1) % images.length);
-  const prevImage = () =>
-    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
-
   const topBidders = auction.top_bidders || [];
 
+  const details = [
+    { icon: <FaTag />, label: 'Category', value: auction.category },
+    { icon: <FaBoxes />, label: 'Condition', value: auction.condition },
+    { icon: <FaDollarSign />, label: 'Start', value: `$${auction.starting_price.toFixed(2)}` },
+  ];
+
   return (
-    <>
-      <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-        <DialogContent
-          className="
-            max-w-4xl max-h-[90vh] p-6
-            overflow-y-auto
-            bg-white/5 backdrop-blur-xxl
-            border border-white/30
-            rounded-sm
-            text-white font-mono
-            shadow-lg flex flex-col items-center
-            custom-scrollbar
-          "
-          style={{ scrollbarGutter: "stable" }}
+    <Dialog open={open} onOpenChange={isOpen => !isOpen && onClose()}>
+      <DialogContent className="max-w-xl w-full max-h-[90vh] p-0 bg-transparent border-none shadow-none flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 40, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 40, scale: 0.98 }}
+          transition={{ duration: 0.35, ease: 'easeOut' }}
+          className="w-full flex flex-col items-center"
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="w-full flex flex-col items-center"
-          >
-            <DialogHeader className="w-full">
-              <DialogTitle></DialogTitle>
-              <motion.h2
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4, ease: "easeOut", delay: 0.1 }}
-                className="
-                  text-center
-                  text-4xl
-                  font-extrabold
-                  tracking-wide
-                  bg-gradient-to-r
-                  from-cyan-400
-                  via-blue-400
-                  to-purple-500
-                  bg-clip-text
-                  text-transparent
-                  drop-shadow-md
-                  my-3
-                  mb-5
-                  select-none
-                  cursor-default
-                  hover:scale-105
-                  transition-transform
-                  duration-300
-                  overflow-hidden
-                "
+          {/* Hero Image with overlayed name and badge */}
+          <div className="relative w-full aspect-[16/7] bg-black/30 rounded-t-3xl overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentImageIndex}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                className="absolute inset-0"
               >
-                -- {auction.item_name} --
-              </motion.h2>
-            </DialogHeader>
-
-            {/* Image Section */}
-            <div
-              className="
-                relative w-full max-w-3xl h-[400px]
-                rounded-xl overflow-hidden
-                border border-white/30
-                bg-white/20 backdrop-blur-md
-                shadow-inner
-                group cursor-pointer
-                mb-8
-              "
-              onClick={() => setZoomed(!zoomed)}
-            >
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentImageIndex}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.4 }}
-                  className={`absolute inset-0 transition-transform duration-300 rounded-xl
-                    ${zoomed ? "scale-110 cursor-zoom-out" : "cursor-zoom-in"}
-                  `}
-                >
-                  <Image
-                    src={images[currentImageIndex] || "/placeholder.jpg"}
-                    alt="Auction Image"
-                    layout="fill"
-                    objectFit="cover"
-                    className="brightness-85 rounded-xl hover:brightness-100"
-                  />
-                </motion.div>
-              </AnimatePresence>
-
-              {images.length > 1 && (
-                <>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      prevImage();
-                    }}
-                    className="
-                      absolute left-3 top-1/2 -translate-y-1/2
-                      bg-white/20 backdrop-blur-md
-                      p-3 rounded-full
-                      text-white/90
-                      hover:bg-white/30 hover:text-white
-                      shadow-md
-                      transition
-                    "
-                    aria-label="Previous image"
-                  >
-                    <FaArrowLeft />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      nextImage();
-                    }}
-                    className="
-                      absolute right-3 top-1/2 -translate-y-1/2
-                      bg-white/20 backdrop-blur-md
-                      p-3 rounded-full
-                      text-white/90
-                      hover:bg-white/30 hover:text-white
-                      shadow-md
-                      transition
-                    "
-                    aria-label="Next image"
-                  >
-                    <FaArrowRight />
-                  </button>
-                </>
-              )}
-
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-3">
-                {images.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCurrentImageIndex(i);
-                    }}
-                    className={`
-                      w-5 h-5 rounded-full border border-white/40 transition-all
-                      ${
-                        i === currentImageIndex
-                          ? "bg-white scale-125 shadow-lg"
-                          : "bg-white/30 hover:bg-white/50"
-                      }
-                    `}
-                    aria-label={`Go to image ${i + 1}`}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Info Section */}
-            <div className="w-full max-w-3xl flex flex-col items-center gap-6 cursor-default">
-              <InfoCard
-                label="Description"
-                value={
-                  <div
-                    className="
-                      max-h-40 overflow-y-auto pr-2
-                      custom-scrollbar
-                      rounded-md
-                      cursor-default
-                    "
-                    style={{ scrollbarGutter: "stable" }}
-                  >
-                    {auction.description}
-                  </div>
-                }
-              />
-              <div className="grid grid-cols-2 gap-6 text-sm cursor-default w-full max-w-xl">
-                <InfoCard icon={<FaTag />} label="Category" value={auction.category} />
-                <InfoCard icon={<FaBoxes />} label="Condition" value={auction.condition} />
-                <InfoCard icon={<FaDollarSign />} label="Start Price" value={`$${auction.starting_price.toFixed(2)}`} />
-                <InfoCard
-                  icon={<FaGavel />}
-                  label="Current Bid"
-                  value={
-                    auction.highest_bid ? (
-                      <span className="text-green-400 font-semibold drop-shadow">
-                        ${auction.highest_bid.toFixed(2)}
-                      </span>
-                    ) : (
-                      "N/A"
-                    )
-                  }
+                <Image
+                  src={images[currentImageIndex] || "/fallback.jpg"}
+                  alt="Auction Image"
+                  fill
+                  className="object-cover w-full h-full rounded-t-3xl"
+                  sizes="(max-width: 768px) 100vw, 900px"
+                  priority
                 />
-                <InfoCard icon={<FaCalendarAlt />} label="Created At" value={new Date(auction?.created_at).toLocaleString()} />
-                <InfoCard icon={<FaCalendarAlt />} label="Starts At" value={new Date(auction?.start_time).toLocaleString()} />
-                <InfoCard icon={<FaCalendarAlt />} label="Ends At" value={new Date(auction?.end_time).toLocaleString()} />
-                <InfoCard icon={<FaRegClock />} label="Time Left" value={<Countdown endTime={auction?.end_time} />} />
-                <InfoCard icon={<FaGavel />} label="Auction Type" value={auction?.auction_type?.toUpperCase() || "Standard"} />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-purple-900/20 to-transparent" />
+              </motion.div>
+            </AnimatePresence>
+            {/* Overlayed name and badge (top left) */}
+            <div className="absolute top-0 left-0 p-6 flex flex-col gap-2 z-10">
+              <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight text-white drop-shadow-lg" style={{ textShadow: '0 2px 16px rgba(0,0,0,0.45)' }}>{auction.item_name}</h2>
+              <span className="inline-block text-xs md:text-base font-semibold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 text-white px-4 py-1 rounded-full shadow-md border border-white/30 ring-2 ring-blue-400/30 animate-pulse w-fit">
+                {auction.auction_type?.toUpperCase() || "STANDARD"}
+              </span>
+            </div>
+            {/* Image navigation */}
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={e => { e.stopPropagation(); setCurrentImageIndex((currentImageIndex - 1 + images.length) % images.length); }}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur p-2 rounded-full text-white/90 hover:bg-white/40 shadow-md transition"
+                  aria-label="Previous image"
+                >
+                  <FaArrowLeft />
+                </button>
+                <button
+                  onClick={e => { e.stopPropagation(); setCurrentImageIndex((currentImageIndex + 1) % images.length); }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur p-2 rounded-full text-white/90 hover:bg-white/40 shadow-md transition"
+                  aria-label="Next image"
+                >
+                  <FaArrowRight />
+                </button>
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                  {images.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={e => { e.stopPropagation(); setCurrentImageIndex(i); }}
+                      className={`w-2.5 h-2.5 md:w-3 md:h-3 rounded-full border border-white/40 transition-all ${i === currentImageIndex ? "bg-white scale-125 shadow-lg" : "bg-white/30 hover:bg-white/60"}`}
+                      aria-label={`Go to image ${i + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+          {/* Details Section below image, compact and scrollable if needed */}
+          <div className="w-full bg-white/20 backdrop-blur-2xl px-6 md:px-10 py-6 md:py-8 flex flex-col gap-5 md:gap-7 text-white rounded-b-3xl max-h-[60vh] overflow-y-auto custom-scrollbar">
+            {/* Current Bid - emphasized and moved up */}
+            <div className="flex flex-col items-center justify-center mb-2">
+              <span className="text-lg font-semibold text-white/80">Current Bid</span>
+              <span className="text-3xl md:text-4xl font-extrabold text-green-400 drop-shadow-sm mt-1 flex items-center gap-2">
+                <FaGavel className="inline-block text-green-300" />
+                {auction.highest_bid ? `$${auction.highest_bid.toFixed(2)}` : 'No Bids'}
+              </span>
+            </div>
+            {/* Description */}
+            <div className="text-base md:text-lg font-medium leading-relaxed tracking-wide text-white/95 mb-2 text-center">
+              {auction.description}
+            </div>
+            <div className="w-full h-px bg-white/15 mb-2" />
+            {/* Meta Info Row */}
+            <div className="flex flex-row flex-wrap items-center justify-center gap-x-6 gap-y-3 w-full mb-2">
+              {details.map((d, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <span className="text-xl md:text-2xl">{d.icon}</span>
+                  <span className="text-sm md:text-base font-medium text-white/80">{d.value}</span>
+                  {i < details.length - 1 && <span className="h-6 w-px bg-white/20 mx-3 hidden sm:inline-block" />}
+                </div>
+              ))}
+            </div>
+            <div className="w-full h-px bg-white/10 mb-2" />
+            {/* Dates Row: Only Start and End */}
+            <div className="flex flex-row flex-wrap items-center justify-center gap-x-8 gap-y-2 w-full mb-2">
+              <div className="flex items-center gap-2">
+                <FaCalendarAlt className="text-lg md:text-xl" />
+                <span className="font-semibold text-white/80">Starts:</span>
+                <span className="text-white/80">{new Date(auction.start_time).toLocaleString()}</span>
+              </div>
+              <span className="h-6 w-px bg-white/20 mx-3 hidden sm:inline-block" />
+              <div className="flex items-center gap-2">
+                <FaCalendarAlt className="text-lg md:text-xl" />
+                <span className="font-semibold text-white/80">Ends:</span>
+                <span className="text-white/80">{new Date(auction.end_time).toLocaleString()}</span>
               </div>
             </div>
-
-            {/* Top Bidders */}
-            <div className="mt-10 w-full max-w-3xl">
-              <h4 className="text-white/90 font-semibold text-lg mb-5 tracking-wide drop-shadow-sm text-center">
+            <div className="w-full h-px bg-white/15 mb-2" />
+            {/* Top Bidders Row */}
+            <div className="w-full mt-2 md:mt-4 px-0 md:px-0 relative">
+              <h4 className="text-white/90 font-semibold text-lg md:text-xl mb-3 tracking-wide drop-shadow-sm text-center">
                 Top Bidders
               </h4>
-              <div className="flex gap-8 justify-center flex-wrap">
-                {topBidders.map((bidder, i) => (
-                  <Tooltip key={i} content={`$${bidder.amount.toFixed(2)}`}>
-                    <div className="flex flex-col items-center gap-2 cursor-pointer select-none">
-                      <Avatar className="ring-2 ring-white/40 hover:ring-white transition-shadow">
-                        <AvatarImage src={bidder.avatar} alt={bidder.name} />
-                        <AvatarFallback>{bidder.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm text-white/80 font-semibold drop-shadow-sm">
-                        {bidder.name}
-                      </span>
-                    </div>
-                  </Tooltip>
-                ))}
-              </div>
+              {topBidders.length === 0 ? (
+                <div className="text-center text-white/60 italic py-6">No bidders yet.</div>
+              ) : (
+                <div className="flex gap-6 overflow-x-auto pb-2 justify-center custom-scrollbar">
+                  {topBidders.map((bidder, i) => (
+                    <Tooltip key={i}>
+                      <TooltipTrigger asChild>
+                        <div className="flex flex-col items-center gap-2 cursor-pointer select-none min-w-[64px]">
+                          <Avatar className="ring-2 ring-white/60 hover:ring-blue-400 transition-shadow w-16 h-16 md:w-20 md:h-20 shadow-lg">
+                            <AvatarImage src={bidder.avatar} alt={bidder.name} />
+                            <AvatarFallback>{bidder.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <span className="text-xs md:text-base text-white/90 font-semibold drop-shadow-sm truncate max-w-[70px] text-center">{bidder.name}</span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs font-mono animate-fade-in">
+                        ${bidder.amount.toFixed(2)}
+                      </TooltipContent>
+                    </Tooltip>
+                  ))}
+                </div>
+              )}
             </div>
-
-          </motion.div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Scrollbar styling */}
-      <style>{`
-        .custom-scrollbar {
-          scrollbar-width: thin; /* Firefox */
-          scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
-          scrollbar-gutter: stable;
-          overflow-y: auto;
-          padding-right: 10px; /* Optional, can adjust/remove */
-        }
-
-        /* WebKit-based browsers */
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 8px;
-          background: transparent; /* overlay, no track background */
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background-color: rgba(255, 255, 255, 0.3);
-          border-radius: 9999px;
-          transition: background-color 0.3s;
-        }
-
-        .custom-scrollbar:hover::-webkit-scrollbar-thumb,
-        .custom-scrollbar:active::-webkit-scrollbar-thumb {
-          background-color: rgba(255, 255, 255, 0.6);
-        }
-      `}</style>
-    </>
+          </div>
+        </motion.div>
+        {/* Custom Scrollbar Styling */}
+        <style>{`
+          .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+            scrollbar-gutter: stable;
+            overflow-y: auto;
+            padding-right: 10px;
+          }
+          .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+            background: transparent;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 9999px;
+            transition: background-color 0.3s;
+          }
+          .custom-scrollbar:hover::-webkit-scrollbar-thumb,
+          .custom-scrollbar:active::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.6);
+          }
+          @keyframes fade-in {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+          }
+          .animate-fade-in {
+            animation: fade-in 0.25s ease;
+          }
+        `}</style>
+      </DialogContent>
+    </Dialog>
   );
 }
 
-function InfoCard({
-  icon,
-  label,
-  value,
-}: {
-  icon?: React.ReactNode;
-  label: string;
-  value: React.ReactNode;
-}) {
+function TimelineItem({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div
-      className="
-        flex items-center gap-3
-        px-5 py-4
-        rounded-xl
-        bg-white/30 backdrop-blur-md
-        border border-white/50
-        shadow-lg
-        transition
-        hover:bg-white/40
-        hover:shadow-xl
-        text-center
-        justify-center
-      "
-    >
-      <div className="text-white/90 text-lg">{icon}</div>
-      <div>
-        <div className="text-sm text-white font-semibold tracking-wide">{label}</div>
-        <div className="text-sm text-white font-mono">{value}</div>
-      </div>
-    </div>
+    <span className="flex items-center gap-2">
+      <span className="text-lg md:text-xl">{icon}</span>
+      <span className="font-semibold text-white/80">{label}:</span>
+      <span>{value}</span>
+    </span>
   );
+}
+
+function TimelineConnector() {
+  return <span className="mx-2 text-white/40 text-2xl">•</span>;
 }

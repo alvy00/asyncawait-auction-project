@@ -39,6 +39,11 @@ export interface Auction {
   images?: string[];
   condition: "new" | "used" | "refurbished";
   isFavorite?: boolean;
+  top_bidders?: Array<{
+    name: string;
+    avatar: string;
+    amount: number;
+  }>;
 }
 
 export interface PastAuctionCardProps{
