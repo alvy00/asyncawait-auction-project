@@ -6,6 +6,11 @@ import TestimonialsSection from '../components/TestimonialsSection';
 import LiveAuctionsSection from '../components/LiveAuctionsSection';
 import CategoryShowcase from '../components/CategoryShowcase';
 import CategorySection from '../components/CategorySection';
+import { AuctionTypesSection } from '../components/auction-types/AuctionTypesSection';
+import { WhyChooseUsSection } from '../components/WhyChooseUsSection';
+import { CTASection } from '../components/CTASection';
+import { ConversionSection } from '../components/ConversionSection';
+import { NewsletterSection } from '../components/NewsletterSection';
 
 
 export default function Home() {
@@ -58,8 +63,13 @@ export default function Home() {
         {/* <AnimatedBackground /> */}
         <HeroSection />
         <CategoryShowcase />
+        <AuctionTypesSection />
         <LiveAuctionsSection />
-        <CategorySection />
+        <WhyChooseUsSection />
+        <ConversionSection />
+        {/* <CategorySection /> */}
+        <NewsletterSection />
+        <CTASection />
         <TestimonialsSection />
       </main>
     </>
