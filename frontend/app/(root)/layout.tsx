@@ -16,9 +16,7 @@ export default function HomeLayout({
   return (
     <div className="bg-[#0A111B]">
       <Navbar />
-      <main className="pt-10">
         {children}
-      </main>
       <Footer />
     </div>
   );

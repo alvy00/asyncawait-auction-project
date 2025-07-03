@@ -117,6 +117,7 @@ export const Navbar = () => {
       { name: 'Past Auctions', href: '/auctions/past' },
     ]},
     { name: 'How it works', href: '/how-it-works' },
+    { name: 'Leaderboards', href: '/leaderboards' },
     { name: 'Contact', href: '/contact' },
   ];
 

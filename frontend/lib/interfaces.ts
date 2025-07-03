@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-export interface User {
+ export interface User {
+    username: string;
     user_id: string;
     name: string;
     email: string;
