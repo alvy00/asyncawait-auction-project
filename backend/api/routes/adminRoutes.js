@@ -105,7 +105,7 @@ adminRouter.post('/newsletter', async (req, res) => {
         Authorization: `Token ${process.env.BUTTONDOWN_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({email_address: email }),
     });
 
     if (!response.ok) {

@@ -1,24 +1,26 @@
 "use client";
+
 import { motion } from "framer-motion";
 import { Mail, Sparkles, Bell, Star, ArrowRight } from "lucide-react";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const BENEFITS = [
   {
     icon: <Sparkles className="w-6 h-6 text-pink-400" />,
-    text: "Exclusive auction tips & strategies"
+    text: "Exclusive auction tips & strategies",
   },
   {
     icon: <Bell className="w-6 h-6 text-orange-400" />,
-    text: "Early access to rare listings"
+    text: "Early access to rare listings",
   },
   {
     icon: <Star className="w-6 h-6 text-yellow-400" />,
-    text: "VIP-only flash sales & events"
+    text: "VIP-only flash sales & events",
   },
   {
     icon: <Mail className="w-6 h-6 text-blue-400" />,
-    text: "No spam. Unsubscribe anytime."
+    text: "No spam. Unsubscribe anytime.",
   },
 ];
 
@@ -26,30 +28,46 @@ export function NewsletterSection() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  // subscribe to newsletter
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg("");
     setIsLoading(true);
 
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setErrorMsg("Please enter a valid email address.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const res = await fetch("/api/newsletter", {
+      // https://asyncawait-auction-project.onrender.com/api/admin/newsletter
+      // http://localhost:8000/api/admin/newsletter
+      const res = await fetch("https://asyncawait-auction-project.onrender.com/api/admin/newsletter", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ email }),
       });
 
       if (res.ok) {
         setSubmitted(true);
         setEmail("");
+        toast.success("You're subscribed! 🎉");
       } else {
-        console.error("Failed to subscribe:", await res.text());
+        const text = await res.text();
+        setErrorMsg("Something went wrong. Please try again.");
+        console.error("Failed to subscribe:", text);
       }
     } catch (error) {
       console.error("Error subscribing:", error);
+      setErrorMsg("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <section className="py-24 relative overflow-hidden bg-[#0a0a18]">
@@ -70,7 +88,8 @@ export function NewsletterSection() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1 }}
           >
-            Get exclusive tips, early access to rare auctions, and VIP-only deals—straight to your inbox. 100% free, always valuable.
+            Get exclusive tips, early access to rare auctions, and VIP-only
+            deals—straight to your inbox. 100% free, always valuable.
           </motion.p>
           <div className="flex flex-wrap gap-3 mb-10">
             {BENEFITS.map((b, i) => (
@@ -87,6 +106,7 @@ export function NewsletterSection() {
             ))}
           </div>
         </div>
+
         {/* Right: Glassy email form */}
         <motion.div
           className="flex-1 flex items-center justify-center"
@@ -97,6 +117,7 @@ export function NewsletterSection() {
           <form
             onSubmit={handleSubmit}
             className="w-full max-w-md bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/10 shadow-2xl flex flex-col gap-6"
+            aria-label="Newsletter subscription form"
           >
             {submitted ? (
               <motion.div
@@ -105,11 +126,14 @@ export function NewsletterSection() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                🎉 You&apos;re in! Check your inbox soon.
+                🎉 You're in! Check your inbox soon.
               </motion.div>
             ) : (
               <>
-                <label htmlFor="newsletter-email" className="text-white/80 text-lg font-semibold mb-2 flex items-center gap-2">
+                <label
+                  htmlFor="newsletter-email"
+                  className="text-white/80 text-lg font-semibold mb-2 flex items-center gap-2"
+                >
                   <Mail className="w-6 h-6 text-blue-400" />
                   Your Email
                 </label>
@@ -118,15 +142,18 @@ export function NewsletterSection() {
                   type="email"
                   required
                   autoComplete="email"
+                  aria-label="Your email"
+                  aria-required="true"
                   placeholder="you@email.com"
                   className="w-full px-5 py-3 rounded-xl bg-white/20 border border-white/20 text-white text-lg placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                   disabled={isLoading}
                 />
                 <button
                   type="submit"
                   disabled={isLoading || !email}
+                  aria-label="Subscribe to newsletter"
                   className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-pink-500 hover:from-blue-600 hover:to-pink-600 text-white font-bold text-lg py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-blue-500/25 mt-2"
                 >
                   {isLoading ? (
@@ -137,12 +164,18 @@ export function NewsletterSection() {
                     </>
                   )}
                 </button>
-                <div className="text-xs text-white/60 mt-2 text-center">No spam. Unsubscribe anytime.</div>
+                {errorMsg && (
+                  <p className="text-red-400 text-sm text-center">{errorMsg}</p>
+                )}
+                <div className="text-xs text-white/60 mt-2 text-center">
+                  No spam. Unsubscribe anytime.
+                </div>
               </>
             )}
           </form>
         </motion.div>
       </div>
+
       {/* Animated blobs */}
       <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-orange-500/20 rounded-full filter blur-[120px] animate-pulse-slow z-0" />
       <div className="absolute bottom-[10%] left-[5%] w-[300px] h-[300px] bg-purple-500/10 rounded-full filter blur-[80px] animate-float z-0" />
@@ -150,4 +183,4 @@ export function NewsletterSection() {
       <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none z-0" />
     </section>
   );
-} 
+}
