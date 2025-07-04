@@ -31,17 +31,17 @@ const menuItems: AdminMenuItem[] = [
     title: "Auctions",
     items: [
       { title: "All Auctions", url: "/admin/auctions" },
-      { title: "Create Auction", url: "/admin/auctions/create" },
+      // { title: "Create Auction", url: "/admin/auctions/create" },
     ],
     icon: <Box size={20} />,
   },
-  {
-    title: "Categories",
-    items: [
-      { title: "All Categories", url: "/admin/categories" },
-    ],
-    icon: <FolderTree size={20} />,
-  },
+  // {
+  //   title: "Categories",
+  //   items: [
+  //     { title: "All Categories", url: "/admin/categories" },
+  //   ],
+  //   icon: <FolderTree size={20} />,
+  // },
   {
     title: "Users",
     items: [{ title: "All Users", url: "/admin/users" }],
@@ -51,7 +51,7 @@ const menuItems: AdminMenuItem[] = [
     title: "Bids",
     items: [
       { title: "All Bids", url: "/admin/bids" },
-      { title: "Ongoing Bids", url: "/admin/bids?status=ongoing" },
+      // { title: "Ongoing Bids", url: "/admin/bids?status=ongoing" },
     ],
     icon: <Box size={20} />,
   },
