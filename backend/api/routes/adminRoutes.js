@@ -1,7 +1,9 @@
 import supabase from '../../config/supabaseClient.js';
 import express from 'express'
+import dotenv from 'dotenv'
 
 
+dotenv.config();
 const adminRouter = express.Router();
 
 // Stats
@@ -90,6 +92,34 @@ adminRouter.delete('/deleteuser', async (req, res) => {
   }
 });
 
+// Newsletter
+adminRouter.post('/newsletter', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) return res.status(400).json({ error: "Email is required" });
+
+  try {
+    const response = await fetch("https://api.buttondown.email/v1/subscribers", {
+      method: "POST",
+      headers: {
+        Authorization: `Token ${process.env.BUTTONDOWN_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Buttondown error:", errorText);
+      return res.status(500).json({ error: "Subscription failed", detail: errorText });
+    }
+
+    return res.status(200).json({ message: "Subscribed successfully!" });
+  } catch (err) {
+    console.error("Subscription error:", err);
+    return res.status(500).json({ error: "Subscription failed" });
+  }
+});
 
 
 // -------------------------------------- AUCTIONS -------------------------------------------------
