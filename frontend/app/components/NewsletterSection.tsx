@@ -27,13 +27,28 @@ export function NewsletterSection() {
   const [submitted, setSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  // subscribe to newsletter
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
-      setSubmitted(true);
+
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+
+      if (res.ok) {
+        setSubmitted(true);
+        setEmail("");
+      } else {
+        console.error("Failed to subscribe:", await res.text());
+      }
+    } catch (error) {
+      console.error("Error subscribing:", error);
+    } finally {
       setIsLoading(false);
-    }, 1200);
+    }
   }
 
   return (
@@ -90,7 +105,7 @@ export function NewsletterSection() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                🎉 You're in! Check your inbox soon.
+                🎉 You&apos;re in! Check your inbox soon.
               </motion.div>
             ) : (
               <>
