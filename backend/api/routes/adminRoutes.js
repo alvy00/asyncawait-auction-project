@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 
 
 dotenv.config();
+//console.log("BUTTONDOWN_API_KEY:", process.env.BUTTONDOWN_API_KEY);
 const adminRouter = express.Router();
 
 // Stats
@@ -102,7 +103,7 @@ adminRouter.post('/newsletter', async (req, res) => {
     const response = await fetch("https://api.buttondown.email/v1/subscribers", {
       method: "POST",
       headers: {
-        Authorization: `Token ${process.env.BUTTONDOWN_API_KEY}`,
+        Authorization: `Token 90bf6252-fe17-4259-9d27-fd0dcf82496d`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({email_address: email }),
