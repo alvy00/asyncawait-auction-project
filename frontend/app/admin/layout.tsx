@@ -18,9 +18,9 @@ export default function AdminLayout({
         <AnimatedBackground/>
         <AppSidebar />
         <div className="flex-1 overflow-auto bg-transparent">
-          <SidebarInset className="bg-transparent">
+          <SidebarInset className="bg-transparent pt-0 px-0 pb-0">
             <Navbar />
-            <section className="p-4 bg-transparent">
+            <section className="bg-transparent pt-0 px-0 pb-0">
               {children}
             </section>
           </SidebarInset>

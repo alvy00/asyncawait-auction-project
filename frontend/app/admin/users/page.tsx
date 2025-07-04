@@ -1,29 +1,70 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { FaPlus, FaSearch, FaFilter, FaEllipsisV, FaEye, FaEdit, FaTrash, FaLock, FaUnlock, FaUserPlus } from "react-icons/fa";
+import {
+  FaSearch,
+  FaFilter,
+  FaEye,
+  FaTrash,
+  FaLock,
+  FaUnlock,
+  FaUserPlus,
+  FaRegCopy,
+} from "react-icons/fa";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { User } from "../../../lib/interfaces";
 import { useUser } from "../../../lib/user-context";
 
-// Sample user data
-const SAMPLE_USERS = [
-  { id: "#1001", joinDate: "Dec 15, 2023", name: "Ajay Ahmad", email: "ajay.ahmad@example.com", role: "admin", auctions: 12, bids: 45, status: "active", verified: true },
-  { id: "#1002", joinDate: "Dec 16, 2023", name: "Manvir Singh", email: "manvir.singh@example.com", role: "user", auctions: 8, bids: 32, status: "active", verified: true },
-  { id: "#1003", joinDate: "Dec 17, 2023", name: "Shahriar Islam", email: "shahriar.islam@example.com", role: "user", auctions: 5, bids: 27, status: "active", verified: true },
-  { id: "#1004", joinDate: "Dec 18, 2023", name: "Sohaan Khan", email: "sohaan.khan@example.com", role: "moderator", auctions: 0, bids: 19, status: "active", verified: true },
-  { id: "#1005", joinDate: "Dec 19, 2023", name: "Amitav Hasan", email: "amitav.hasan@example.com", role: "user", auctions: 15, bids: 8, status: "suspended", verified: true },
-  { id: "#1006", joinDate: "Dec 20, 2023", name: "Mustafa Khan", email: "mustafa.khan@example.com", role: "user", auctions: 3, bids: 12, status: "active", verified: false },
-  { id: "#1007", joinDate: "Dec 21, 2023", name: "Rahul Dev", email: "rahul.dev@example.com", role: "user", auctions: 7, bids: 23, status: "inactive", verified: true },
-  { id: "#1008", joinDate: "Dec 22, 2023", name: "Priya Sharma", email: "priya.sharma@example.com", role: "user", auctions: 9, bids: 31, status: "active", verified: true },
-  { id: "#1009", joinDate: "Dec 23, 2023", name: "Michael Chen", email: "michael.chen@example.com", role: "user", auctions: 4, bids: 16, status: "suspended", verified: true },
-  { id: "#1010", joinDate: "Dec 24, 2023", name: "Sarah Wilson", email: "sarah.wilson@example.com", role: "user", auctions: 6, bids: 28, status: "active", verified: false },
-];
+type FilterOption = {
+  label: string;
+  value: string;
+};
+
+const FilterSelect = ({
+  icon,
+  value,
+  onChange,
+  options,
+}: {
+  icon: React.ReactNode;
+  value: string;
+  onChange: (val: string) => void;
+  options: FilterOption[];
+}) => (
+  <div className="relative min-w-[150px]">
+    <div className="flex items-center bg-white/5 border border-white/10 rounded-lg overflow-hidden">
+      {icon}
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="bg-transparent border-none text-white py-2 pl-2 pr-8 w-full focus:outline-none focus:ring-0 appearance-none cursor-pointer"
+      >
+        {options.map(({ label, value }) => (
+          <option key={value} value={value} className="bg-[#0d1d33]">
+            {label}
+          </option>
+        ))}
+      </select>
+      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+        <svg
+          className="fill-current h-4 w-4"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+        >
+          <path
+            fillRule="evenodd"
+            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </div>
+    </div>
+  </div>
+);
 
 const UsersPage = () => {
   const { user } = useUser();
@@ -34,121 +75,123 @@ const UsersPage = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
   const [verificationFilter, setVerificationFilter] = useState("all");
-  const router = useRouter();
 
+  // Copy user ID to clipboard with toast
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success("User ID copied to clipboard");
+  };
 
-  // fetch all users (not setting the user currently)
+  // Fetch users
   useEffect(() => {
     const fetchAllUsers = async () => {
       try {
-        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/admin/users', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
+        const res = await fetch(
+          "https://asyncawait-auction-project.onrender.com/api/admin/users",
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          }
+        );
         if (!res.ok) {
-          console.error('Error fetching users');
+          console.error("Error fetching users");
           return;
         }
-
         const data = await res.json();
         setUsers(data);
-        //console.log(data);
       } catch (e) {
-        console.error('Fetch failed:', e);
+        console.error("Fetch failed:", e);
       }
     };
 
     fetchAllUsers();
   }, []);
 
-
-  // Simulate loading effect
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
+    const timer = setTimeout(() => setLoading(false), 1000);
     return () => clearTimeout(timer);
   }, []);
-  
-  // Filter users based on search term and filters
+
+  // Filter users
   useEffect(() => {
-    const filteredUsers = users.filter(user => {
-      const matchesSearch = 
+    const filtered = users.filter((user) => {
+      const matchesSearch =
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.user_id.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesStatus = statusFilter === "all" || user.status === statusFilter;
+
+      const matchesStatus =
+        statusFilter === "all" || user.status === statusFilter;
       const matchesRole = roleFilter === "all" || user.role === roleFilter;
-      const matchesVerification = 
-        verificationFilter === "all" || 
-        (verificationFilter === "verified" && user.verified) || 
+      const matchesVerification =
+        verificationFilter === "all" ||
+        (verificationFilter === "verified" && user.verified) ||
         (verificationFilter === "unverified" && !user.verified);
-      
-      return matchesSearch && matchesStatus && matchesRole && matchesVerification;
+
+      return (
+        matchesSearch && matchesStatus && matchesRole && matchesVerification
+      );
     });
 
-    setFilteredUsers(filteredUsers);
-  }, [users, searchTerm, statusFilter, roleFilter, verificationFilter])
+    setFilteredUsers(filtered);
+  }, [users, searchTerm, statusFilter, roleFilter, verificationFilter]);
 
-
-  const handleStatusChange = (id: string, newStatus: string) => {
-    const updatedUsers = users.map(user => 
-      user.id === id ? { ...user, status: newStatus } : user
-    );
-    setUsers(updatedUsers);
-    toast.success(`User ${id} status changed to ${newStatus}`);
-  };
-
-  // delete user
-  const handleDeleteUser = async (user_id) => {
+  // Delete user handler
+  const handleDeleteUser = async (user_id: string) => {
     const confirmed = window.confirm("Are you sure you want to delete this user?");
     if (!confirmed) return;
-    
+
     try {
-      const res = await fetch('https://asyncawait-auction-project.onrender.com/api/admin/deleteuser', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ user_id }),
-      });
+      const res = await fetch(
+        "https://asyncawait-auction-project.onrender.com/api/admin/deleteuser",
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id }),
+        }
+      );
 
       if (!res.ok) {
         const errorData = await res.json();
-        toast.error(`Failed to delete user: ${errorData.message || 'Unknown error'}`);
+        toast.error(`Failed to delete user: ${errorData.message || "Unknown error"}`);
         return;
       }
 
-      setUsers(prev => prev.filter(user => user.user_id !== user_id));
-      setFilteredUsers(prev => prev.filter(user => user.user_id !== user_id));
-
-      toast.success('User deleted successfully');
+      setUsers((prev) => prev.filter((user) => user.user_id !== user_id));
+      setFilteredUsers((prev) => prev.filter((user) => user.user_id !== user_id));
+      toast.success("User deleted successfully");
     } catch (e) {
       console.error(e);
-      toast.error('Something went wrong while deleting the user');
+      toast.error("Something went wrong while deleting the user");
     }
   };
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  // Lock/unlock toggle stub (you need to implement backend call)
+  const handleToggleLock = (user_id: string, currentlySuspended: boolean) => {
+    // Optimistic UI update:
+    const updatedUsers = users.map((u) =>
+      u.user_id === user_id ? { ...u, is_suspended: !currentlySuspended } : u
+    );
+    setUsers(updatedUsers);
+    toast.success(
+      `User ${user_id} ${currentlySuspended ? "unlocked" : "locked"} successfully`
+    );
+    // TODO: Implement actual backend update
+  };
+
+  if (loading) return <LoadingSpinner />;
 
   return (
-    <div className=" text-white p-4 md:p-6 rounded-xl">
+    <div className="text-white p-4 md:p-6 rounded-xl max-w-full">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        {/* Header Section */}
+        {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <h1 className="text-2xl md:text-3xl font-bold">Manage Users</h1>
-          
-          <Link href="/admin/users/create">
+          <Link href="/admin/users/create" passHref>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -160,352 +203,252 @@ const UsersPage = () => {
           </Link>
         </div>
 
-        {/* User Stats Overview */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
-            className="bg-[#0d1d33]/60 backdrop-blur-sm rounded-xl p-4 border border-white/5 shadow-xl"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">Total Users</p>
-                <h3 className="text-2xl font-bold mt-1">{users.length}</h3>
-              </div>
-              <div className="bg-blue-500/20 p-3 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              </div>
-            </div>
-            <div className="mt-2 text-sm text-green-400 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-              </svg>
-              <span>12% increase</span>
-            </div>
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.2 }}
-            className="bg-[#0d1d33]/60 backdrop-blur-sm rounded-xl p-4 border border-white/5 shadow-xl"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">Active Users</p>
-                <h3 className="text-2xl font-bold mt-1">{users.filter(user => user.is_suspended === false).length}</h3>
-              </div>
-              <div className="bg-green-500/20 p-3 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-            </div>
-            <div className="mt-2 text-sm text-green-400 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-              </svg>
-              <span>8% increase</span>
-            </div>
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.3 }}
-            className="bg-[#0d1d33]/60 backdrop-blur-sm rounded-xl p-4 border border-white/5 shadow-xl"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">Suspended Users</p>
-                <h3 className="text-2xl font-bold mt-1">{users.filter(user => user.is_suspended === true).length}</h3>
-              </div>
-              <div className="bg-red-500/20 p-3 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-            </div>
-            <div className="mt-2 text-sm text-red-400 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
-              <span>2% decrease</span>
-            </div>
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.4 }}
-            className="bg-[#0d1d33]/60 backdrop-blur-sm rounded-xl p-4 border border-white/5 shadow-xl"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">Verified Users</p>
-                <h3 className="text-2xl font-bold mt-1">{users.length}</h3>
-              </div>
-              <div className="bg-purple-500/20 p-3 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-            </div>
-            <div className="mt-2 text-sm text-green-400 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-              </svg>
-              <span>15% increase</span>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Filters and Search Section */}
+        {/* Filters and Search */}
         <div className="bg-[#0d1d33]/60 backdrop-blur-sm rounded-xl p-4 mb-6 border border-white/5 shadow-xl">
           <div className="flex flex-col md:flex-row gap-4">
             {/* Search */}
-            <div className="relative flex-grow">
+            <div className="relative flex-grow min-w-0">
               <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search users..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-300"
+                className="w-full bg-white/5 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-300 truncate"
               />
             </div>
 
             {/* Status Filter */}
-            <div className="relative min-w-[150px]">
-              <div className="flex items-center bg-white/5 border border-white/10 rounded-lg overflow-hidden">
-                <FaFilter className="ml-3 text-gray-400" />
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="bg-transparent border-none text-white py-2 pl-2 pr-8 w-full focus:outline-none focus:ring-0 appearance-none cursor-pointer"
-                >
-                  <option value="all" className="bg-[#0d1d33]">All Status</option>
-                  <option value="active" className="bg-[#0d1d33]">Active</option>
-                  <option value="inactive" className="bg-[#0d1d33]">Inactive</option>
-                  <option value="suspended" className="bg-[#0d1d33]">Suspended</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                  <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </div>
-            </div>
+            <FilterSelect
+              icon={<FaFilter className="ml-3 text-gray-400" />}
+              value={statusFilter}
+              onChange={setStatusFilter}
+              options={[
+                { label: "All Status", value: "all" },
+                { label: "Active", value: "active" },
+                { label: "Inactive", value: "inactive" },
+                { label: "Suspended", value: "suspended" },
+              ]}
+            />
 
             {/* Role Filter */}
-            <div className="relative min-w-[150px]">
-              <div className="flex items-center bg-white/5 border border-white/10 rounded-lg overflow-hidden">
-                <FaFilter className="ml-3 text-gray-400" />
-                <select
-                  value={roleFilter}
-                  onChange={(e) => setRoleFilter(e.target.value)}
-                  className="bg-transparent border-none text-white py-2 pl-2 pr-8 w-full focus:outline-none focus:ring-0 appearance-none cursor-pointer"
-                >
-                  <option value="all" className="bg-[#0d1d33]">All Roles</option>
-                  <option value="admin" className="bg-[#0d1d33]">Admin</option>
-                  <option value="moderator" className="bg-[#0d1d33]">Moderator</option>
-                  <option value="user" className="bg-[#0d1d33]">User</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                  <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </div>
-            </div>
+            <FilterSelect
+              icon={<FaFilter className="ml-3 text-gray-400" />}
+              value={roleFilter}
+              onChange={setRoleFilter}
+              options={[
+                { label: "All Roles", value: "all" },
+                { label: "Admin", value: "admin" },
+                { label: "Moderator", value: "moderator" },
+                { label: "User", value: "user" },
+              ]}
+            />
 
             {/* Verification Filter */}
-            <div className="relative min-w-[150px]">
-              <div className="flex items-center bg-white/5 border border-white/10 rounded-lg overflow-hidden">
-                <FaFilter className="ml-3 text-gray-400" />
-                <select
-                  value={verificationFilter}
-                  onChange={(e) => setVerificationFilter(e.target.value)}
-                  className="bg-transparent border-none text-white py-2 pl-2 pr-8 w-full focus:outline-none focus:ring-0 appearance-none cursor-pointer"
-                >
-                  <option value="all" className="bg-[#0d1d33]">All Verification</option>
-                  <option value="verified" className="bg-[#0d1d33]">Verified</option>
-                  <option value="unverified" className="bg-[#0d1d33]">Unverified</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                  <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </div>
-            </div>
+            <FilterSelect
+              icon={<FaFilter className="ml-3 text-gray-400" />}
+              value={verificationFilter}
+              onChange={setVerificationFilter}
+              options={[
+                { label: "All Verification", value: "all" },
+                { label: "Verified", value: "verified" },
+                { label: "Unverified", value: "unverified" },
+              ]}
+            />
           </div>
         </div>
 
         {/* Users Table */}
-        <div className="bg-[#0d1d33]/60 backdrop-blur-sm rounded-xl border border-white/5 shadow-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[800px]">
-              <thead>
-                <tr className="border-b border-white/10 bg-white/5">
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">ID</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Join Date</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Name</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Email</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Role</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Auctions</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Bids</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Verified</th>
-                  <th className="py-3 px-4 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
+        <div className="bg-[#0d1d33]/60 backdrop-blur-sm rounded-xl border border-white/5 shadow-xl overflow-auto">
+          <table className="w-full table-auto min-w-[700px] md:min-w-full">
+            <thead>
+              <tr className="border-b border-white/10 bg-white/5">
+                <th className="py-3 px-3 text-left text-xs md:text-sm font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                  ID
+                </th>
+                <th className="py-3 px-3 text-left text-xs md:text-sm font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                  Join Date
+                </th>
+                <th className="py-3 px-3 text-left text-xs md:text-sm font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                  Name
+                </th>
+                <th className="py-3 px-3 text-left text-xs md:text-sm font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                  Email
+                </th>
+                <th className="py-3 px-3 text-left text-xs md:text-sm font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                  Role
+                </th>
+                <th className="py-3 px-3 text-left text-xs md:text-sm font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                  Auctions
+                </th>
+                <th className="py-3 px-3 text-left text-xs md:text-sm font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                  Bids
+                </th>
+                <th className="py-3 px-3 text-left text-xs md:text-sm font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                  Status
+                </th>
+                <th className="py-3 px-3 text-left text-xs md:text-sm font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                  Verified
+                </th>
+                <th className="py-3 px-3 text-right text-xs md:text-sm font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
               {filteredUsers.length > 0 ? (
-                filteredUsers.map((user, index) => (
-                  <motion.tr 
-                    key={index}
+                filteredUsers.map((user) => (
+                  <motion.tr
+                    key={user.user_id}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.3 }}
                     className="hover:bg-white/5 transition-colors duration-150"
                   >
-                    <td className="py-3 px-4 whitespace-nowrap">
-                      <span className="group relative text-xs font-medium text-purple-400 px-2 py-1 rounded-md bg-purple-500/20 w-fit">
-                        {/* Default truncated ID */}
-                        <span className="group-hover:hidden">
-                          {user.user_id.slice(0, 6)}...{user.user_id.slice(-4)}
-                        </span>
-
-                        {/* Full ID shown on hover */}
-                        <span className="hidden group-hover:inline">
-                          {user.user_id}
-                        </span>
+                    <td className="py-3 px-3 whitespace-nowrap text-xs font-mono text-purple-400 flex items-center gap-2">
+                      <span className="bg-purple-500/20 text-purple-400 px-2 py-1 rounded text-xs font-mono truncate">
+                        {user.user_id.slice(0, 6)}...{user.user_id.slice(-4)}
                       </span>
+                      <button
+                        onClick={() => copyToClipboard(user.user_id)}
+                        title="Copy full ID"
+                        aria-label="Copy user ID"
+                        type="button"
+                        className="text-purple-400 hover:text-purple-600 transition-colors cursor-pointer"
+                      >
+                        <FaRegCopy />
+                      </button>
                     </td>
-                    <td className="py-3 px-4 whitespace-nowrap text-sm text-gray-300">{new Date(user.join_date).toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'})}</td>
-                    <td className="py-3 px-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center">
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-medium mr-2">
-                          {user.name && user.name.charAt(0)}
+                    <td className="py-3 px-3 whitespace-nowrap text-xs md:text-sm text-gray-300 max-w-[100px] truncate">
+                      {new Date(user.join_date).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </td>
+                    <td className="py-3 px-3 whitespace-nowrap text-sm font-medium max-w-[150px] truncate">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold uppercase">
+                          {user.name?.charAt(0) || "?"}
                         </div>
-                        <span>{user.name || "Unknown"}</span>
+                        <span className="truncate">{user.name || "Unknown"}</span>
                       </div>
                     </td>
-                    <td className="py-3 px-4 whitespace-nowrap text-sm text-gray-300">{user.email}</td>
-                    <td className="py-3 px-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 rounded-md text-xs font-medium ${
-                        user.is_admin ? 'bg-red-500/20 text-red-400' : 
-                        'bg-blue-500/20 text-blue-400'
-                      }`}>
+                    <td className="py-3 px-3 whitespace-nowrap text-xs md:text-sm text-gray-300 max-w-[180px] truncate">
+                      {user.email}
+                    </td>
+                    <td className="py-3 px-3 whitespace-nowrap text-xs md:text-sm max-w-[90px] truncate">
+                      <span
+                        className={`px-2 py-1 rounded-md text-xs font-medium inline-block truncate ${
+                          user.is_admin
+                            ? "bg-red-600/20 text-red-600"
+                            : "bg-blue-600/20 text-blue-600"
+                        }`}
+                      >
                         {user.is_admin ? "Admin" : "User"}
                       </span>
                     </td>
-                    <td className="py-3 px-4 whitespace-nowrap text-sm">{user.total_auctions}</td>
-                    <td className="py-3 px-4 whitespace-nowrap text-sm">{user.total_bids}</td>
-                    <td className="py-3 px-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 rounded-md text-xs font-medium ${
-                        !user.is_suspended ? 'bg-green-500/20 text-green-400' :
-                        'bg-red-500/20 text-red-400'
-                      }`}>
+                    <td className="py-3 px-3 whitespace-nowrap text-xs md:text-sm max-w-[60px] truncate">
+                      {user.total_auctions}
+                    </td>
+                    <td className="py-3 px-3 whitespace-nowrap text-xs md:text-sm max-w-[60px] truncate">
+                      {user.total_bids}
+                    </td>
+                    <td className="py-3 px-3 whitespace-nowrap text-xs md:text-sm max-w-[80px] truncate">
+                      <span
+                        className={`px-2 py-1 rounded-md text-xs font-medium inline-block ${
+                          !user.is_suspended
+                            ? "bg-green-600/20 text-green-600"
+                            : "bg-red-600/20 text-red-600"
+                        }`}
+                      >
                         {!user.is_suspended ? "Active" : "Suspended"}
                       </span>
                     </td>
-                    <td className="py-3 px-4 whitespace-nowrap text-sm">
-
-                      {/*-------------- CHANGE THIS IN FUTURE -----------------*/}
-                      {true ? (
-                        <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded-md text-xs font-medium flex items-center w-fit">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    <td className="py-3 px-3 whitespace-nowrap text-xs md:text-sm max-w-[90px] truncate">
+                      {user.verified ? (
+                        <span className="bg-green-600/20 text-green-600 px-2 py-1 rounded-md text-xs font-medium flex items-center w-fit">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-3 w-3 mr-1"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 13l4 4L19 7"
+                            />
                           </svg>
                           Verified
                         </span>
                       ) : (
-                        <span className="bg-red-500/20 text-red-400 px-2 py-1 rounded-md text-xs font-medium flex items-center w-fit">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <span className="bg-red-600/20 text-red-600 px-2 py-1 rounded-md text-xs font-medium flex items-center w-fit">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-3 w-3 mr-1"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 18L18 6M6 6l12 12"
+                            />
                           </svg>
-                          Unverified
+                          Not Verified
                         </span>
                       )}
                     </td>
-                    <td className="py-3 px-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end space-x-2">
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          className="bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 p-2 rounded-lg transition-colors duration-200"
-                          title="View Details"
-                        >
-                          <FaEye size={14} />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          className="bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 p-2 rounded-lg transition-colors duration-200"
-                          title="Edit User"
-                        >
-                          <FaEdit size={14} />
-                        </motion.button>
-                        {user.status === 'active' ? (
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            className="bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 p-2 rounded-lg transition-colors duration-200"
-                            title="Suspend User"
-                            onClick={() => handleStatusChange(user.id, 'suspended')}
-                          >
-                            <FaLock size={14} />
-                          </motion.button>
-                        ) : user.status === 'suspended' ? (
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            className="bg-green-500/10 hover:bg-green-500/20 text-green-400 p-2 rounded-lg transition-colors duration-200"
-                            title="Activate User"
-                            onClick={() => handleStatusChange(user.id, 'active')}
-                          >
-                            <FaUnlock size={14} />
-                          </motion.button>
-                        ) : (
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            className="bg-green-500/10 hover:bg-green-500/20 text-green-400 p-2 rounded-lg transition-colors duration-200"
-                            title="Activate User"
-                            onClick={() => handleStatusChange(user.id, 'active')}
-                          >
-                            <FaUnlock size={14} />
-                          </motion.button>
-                        )}
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          className="bg-red-500/10 hover:bg-red-500/20 text-red-400 p-2 rounded-lg transition-colors duration-200"
-                          title="Delete User"
-                          onClick={() => handleDeleteUser(user.user_id)}
-                        >
-                          <FaTrash size={14} />
-                        </motion.button>
-                      </div>
+
+                    {/* Actions */}
+                    <td className="py-3 px-3 whitespace-nowrap text-right text-sm flex justify-end gap-2">
+                      <Link
+                        href={`/admin/users/${user.user_id}`}
+                        title="View User"
+                        className="bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 p-2 rounded-lg cursor-pointer"
+                      >
+                        <FaEye />
+                      </Link>
+
+                      <button
+                        title={user.is_suspended ? "Unlock User" : "Lock User"}
+                        onClick={() => handleToggleLock(user.user_id, user.is_suspended)}
+                        className={`p-2 rounded-lg cursor-pointer transition-colors duration-200 ${
+                          user.is_suspended
+                            ? "bg-green-500/10 hover:bg-green-500/20 text-green-400"
+                            : "bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400"
+                        }`}
+                      >
+                        {user.is_suspended ? <FaUnlock /> : <FaLock />}
+                      </button>
+
+                      <button
+                        title="Delete User"
+                        onClick={() => handleDeleteUser(user.user_id)}
+                        className="bg-red-500/10 hover:bg-red-500/20 text-red-400 p-2 rounded-lg cursor-pointer"
+                      >
+                        <FaTrash />
+                      </button>
                     </td>
                   </motion.tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={10} className="py-4 text-center text-gray-400">
-                    No users found matching your filters.
+                  <td
+                    colSpan={10}
+                    className="py-6 text-center text-gray-400 text-sm italic"
+                  >
+                    No users found matching the criteria.
                   </td>
                 </tr>
               )}
-
-              </tbody>
-            </table>
-          </div>
+            </tbody>
+          </table>
         </div>
       </motion.div>
     </div>
