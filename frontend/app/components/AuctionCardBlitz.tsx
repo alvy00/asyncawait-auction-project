@@ -412,7 +412,6 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
       <AuctionDetailsModal
         open={detailsOpen}
         onClose={() => {
-          console.log("Closing modal");
           setDetailsOpen(false);
         }}
         auction={auction}
