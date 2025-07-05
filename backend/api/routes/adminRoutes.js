@@ -1,6 +1,7 @@
 import supabase from '../../config/supabaseClient.js';
 import express from 'express'
 import dotenv from 'dotenv'
+import axios from 'axios'
 
 
 dotenv.config();
@@ -191,6 +192,28 @@ adminRouter.post('/newsletter', async (req, res) => {
   }
 });
 
+// Chatbot
+adminRouter.post('/chatbot', async (req, res) => {
+  const userMessage = req.body.message;
+
+  try {
+    const response = await fetch("https://asyncawait-auction-project.onrender.com/api/admin/webhook", {
+      queryResult: {
+        queryText: userMessage,
+        intent: { displayName: "" },
+        parameters: {},
+      },
+    });
+
+    const fulfillmentText = response.data.fulfillmentText || "Sorry, I don't have an answer.";
+
+    return res.json({ reply: fulfillmentText });
+  } catch (error) {
+    console.error("Chatbot error:", error);
+    return res.json({ reply: "Oops! Something went wrong." });
+  }
+});
+
 // DialogFlow webhook
 adminRouter.post('/webhook', async (req, res) => {
 
@@ -277,27 +300,7 @@ adminRouter.post('/webhook', async (req, res) => {
   }
 })
 
-// Chatbot
-adminRouter.post('/chatbot', async (req, res) => {
-  const userMessage = req.body.message;
 
-  try {
-    const response = await axios.post("https://asyncawait-auction-project.onrender.com/api/admin/webhook", {
-      queryResult: {
-        queryText: userMessage,
-        intent: { displayName: "" },
-        parameters: {},
-      },
-    });
-
-    const fulfillmentText = response.data.fulfillmentText || "Sorry, I don't have an answer.";
-
-    return res.json({ reply: fulfillmentText });
-  } catch (error) {
-    console.error("Chatbot error:", error);
-    return res.json({ reply: "Oops! Something went wrong." });
-  }
-});
 
 
 export default adminRouter;
