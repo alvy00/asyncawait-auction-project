@@ -1,10 +1,8 @@
-"use client"
-import React, { useState, useEffect, useRef } from "react";
+"use client";
 
-export default function Chatbot() {
-  const [messages, setMessages] = useState([
-    { from: "bot", text: "Hi! Ask me anything about auctions." },
-  ]);
+import React, { useEffect, useRef, useState } from "react";
+
+export default function Chatbot({ messages, setMessages, onBotReply }) {
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
 
@@ -24,16 +22,28 @@ export default function Chatbot() {
     setInput("");
 
     try {
-      const res = await fetch("https://asyncawait-auction-project.onrender.com/api/admin/chatbot", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage }),
-      });
+      const res = await fetch(
+        "https://asyncawait-auction-project.onrender.com/api/admin/chatbot",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: userMessage }),
+        }
+      );
 
       const data = await res.json();
-      setMessages((msgs) => [...msgs, { from: "bot", text: data.reply }]);
+      const reply = data.reply || "Sorry, I don't have an answer.";
+
+      if (onBotReply) onBotReply();
+
+      setTimeout(() => {
+        setMessages((msgs) => [...msgs, { from: "bot", text: reply }]);
+      }, 800);
     } catch {
-      setMessages((msgs) => [...msgs, { from: "bot", text: "Sorry, there was an error." }]);
+      setMessages((msgs) => [
+        ...msgs,
+        { from: "bot", text: "Sorry, there was an error." },
+      ]);
     }
   };
 
@@ -47,31 +57,18 @@ export default function Chatbot() {
   return (
     <div
       style={{
-        width: 360,
-        height: 520,
+        width: 380,
+        height: 540,
         display: "flex",
         flexDirection: "column",
         borderRadius: 12,
-        backgroundColor: "#1e293b", // dark slate blue-gray
+        backgroundColor: "#1e293b",
         boxShadow: "0 6px 15px rgba(0,0,0,0.3)",
         color: "#f1f5f9",
         fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
         overflow: "hidden",
       }}
     >
-      <header
-        style={{
-          padding: "16px 20px",
-          backgroundColor: "#334155",
-          fontWeight: "600",
-          fontSize: 20,
-          borderBottom: "1px solid #475569",
-          userSelect: "none",
-        }}
-      >
-        AuctAsync Chat
-      </header>
-
       <div
         style={{
           flex: 1,
@@ -100,9 +97,10 @@ export default function Chatbot() {
                 whiteSpace: "pre-wrap",
                 wordBreak: "break-word",
                 fontSize: 15,
-                boxShadow: msg.from === "user"
-                  ? "0 2px 6px rgba(59, 130, 246, 0.5)"
-                  : "0 2px 6px rgba(71, 85, 105, 0.5)",
+                boxShadow:
+                  msg.from === "user"
+                    ? "0 2px 6px rgba(59, 130, 246, 0.5)"
+                    : "0 2px 6px rgba(71, 85, 105, 0.5)",
               }}
             >
               {msg.text}
@@ -155,7 +153,7 @@ export default function Chatbot() {
             color: "#e0e7ff",
             fontWeight: "600",
             cursor: "pointer",
-            boxShadow: "0 2px 6px rgba(59, 130, 246, 0.7)",
+            boxShadow: "0 2px 6px rgba(30, 44, 66, 0.7)",
             transition: "background-color 0.3s",
           }}
           onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#2563eb")}
