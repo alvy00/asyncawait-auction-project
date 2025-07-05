@@ -6,7 +6,7 @@ import { AuthProvider } from "../lib/auth-context";
 import { AnimatedBackground } from "./components/AnimatedBackground";
 import { Analytics } from '@vercel/analytics/next';
 import { UserProvider } from "../lib/user-context";
-import head from "next/head";
+import ChatbotToggle from "./components/ChatbotToggle";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -44,12 +44,10 @@ export default function RootLayout({
         <UserProvider>
         <AuthProvider>
           <Toaster position='top-center'/>
-          <main className="pt-10">
             {children}
-          </main>
         </AuthProvider>
         </UserProvider>
-        
+        <ChatbotToggle />
         <Analytics />
       </body>
     </html>

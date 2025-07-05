@@ -126,7 +126,7 @@ export function NewsletterSection() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                🎉 You're in! Check your inbox soon.
+                🎉 You&apos;re in! Check your inbox soon.
               </motion.div>
             ) : (
               <>

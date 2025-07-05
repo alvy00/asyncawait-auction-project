@@ -70,7 +70,7 @@ const LeaderboardsPage = () => {
     .slice(0, 50);
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6">
+    <div className="min-h-screen py-12 px-4 mt-10 sm:px-6">
       {/* Background Blur Elements */}
       <div className="fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute top-1/4 right-1/4 w-[300px] h-[300px] bg-orange-500/10 rounded-full filter blur-[80px] animate-pulse"></div>

@@ -385,7 +385,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                 >
                   <span>Login to bid</span>
                 </Button>
-              ) : (
+              ) : ( !isEnded &&
                 <div className={`relative w-full h-full ${shake ? "animate-shake" : ""}`}>
                   <div
                     className={`absolute inset-0 w-full h-full flex items-center justify-center transition-all duration-500 ease-in-out z-10 ${
