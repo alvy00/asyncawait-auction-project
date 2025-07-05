@@ -1,88 +1,187 @@
-"use client"
-import React, { useState } from "react";
+"use client";
+
+import React, { useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaMessage } from "react-icons/fa6";
 import Chatbot from "./Chatbot";
 
 export default function ChatbotToggle() {
   const [open, setOpen] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [unread, setUnread] = useState(false);
+
+  const [messages, setMessages] = useState([
+    { from: "bot", text: "Hi! How can I help you today?" },
+  ]);
+
+  const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleBotMessage = () => {
+    if (!open) setUnread(true);
+
+    setTyping(true);
+    if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
+    typingTimerRef.current = setTimeout(() => {
+      setTyping(false);
+    }, 1500);
+  };
+
+  const handleChatOpen = () => {
+    setOpen(true);
+    setUnread(false);
+  };
+
+  const handleChatClose = () => {
+    setOpen(false);
+  };
 
   return (
     <>
-      {open && (
-        <div
-          style={{
-            position: "fixed",
-            bottom: 80,
-            right: 20,
-            width: 360,
-            height: 520,
-            boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
-            borderRadius: 12,
-            backgroundColor: "#1a202c", // dark blue-gray (AuctAsync style)
-            zIndex: 9999,
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-          }}
-        >
-          <div
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            key="chatbot"
+            initial={{ opacity: 0, scale: 0.8, y: 100 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 100 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
             style={{
-              padding: "10px 15px",
-              backgroundColor: "#2d3748", // slightly lighter header
-              color: "#edf2f7",
-              fontWeight: "600",
-              fontSize: "18px",
+              position: "fixed",
+              bottom: 80,
+              right: 20,
+              width: 380,
+              height: 540,
+              boxShadow: "0 6px 15px rgba(0,0,0,0.3)",
+              borderRadius: 12,
+              backgroundColor: "#1e293b",
+              zIndex: 9999,
               display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
+              flexDirection: "column",
+              overflow: "hidden",
             }}
           >
-            AuctAsync Chat
-            <button
-              onClick={() => setOpen(false)}
+            <div
               style={{
-                background: "transparent",
-                border: "none",
-                color: "#edf2f7",
-                fontSize: "22px",
-                cursor: "pointer",
-                lineHeight: 1,
+                padding: "14px 20px",
+                backgroundColor: "#334155",
+                fontWeight: "600",
+                fontSize: 20,
+                borderBottom: "1px solid #475569",
+                color: "#f1f5f9",
+                userSelect: "none",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
               }}
-              aria-label="Close chat"
             >
-              ×
-            </button>
-          </div>
+              <span>AuctAsync Chat</span>
+              <button
+                onClick={handleChatClose}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "#cbd5e1",
+                  fontSize: 24,
+                  cursor: "pointer",
+                  userSelect: "none",
+                }}
+                aria-label="Close chat"
+                title="Close chat"
+              >
+                ×
+              </button>
+            </div>
 
-          <div style={{ flex: 1 }}>
-            <Chatbot />
-          </div>
-        </div>
-      )}
+            <Chatbot
+              messages={messages}
+              setMessages={setMessages}
+              onBotReply={handleBotMessage}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <button
-        onClick={() => setOpen(true)}
-        style={{
-          position: "fixed",
-          bottom: 20,
-          right: 20,
-          width: 56,
-          height: 56,
-          borderRadius: "50%",
-          backgroundColor: "#3182ce", // AuctAsync blue
-          color: "white",
-          fontSize: 28,
-          border: "none",
-          cursor: "pointer",
-          boxShadow: "0 3px 6px rgba(0,0,0,0.16)",
-          zIndex: 9999,
-          display: open ? "none" : "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-        aria-label="Open chat"
-      >
-        💬
-      </button>
+      <AnimatePresence>
+        {!open && (
+          <>
+            {typing && (
+              <motion.div
+                key="typingIndicator"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                style={{
+                  position: "fixed",
+                  bottom: 80,
+                  right: 30,
+                  backgroundColor: "#334155",
+                  color: "#e2e8f0",
+                  padding: "6px 12px",
+                  borderRadius: 8,
+                  fontSize: 14,
+                  zIndex: 9999,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                  pointerEvents: "none",
+                  userSelect: "none",
+                }}
+              >
+                <strong>Typing...</strong>
+              </motion.div>
+            )}
+
+            <motion.button
+              key="chatToggleBtn"
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5 }}
+              transition={{ duration: 0.25 }}
+              onClick={handleChatOpen}
+              style={{
+                position: "fixed",
+                bottom: 30,
+                right: 30,
+                width: 56,
+                height: 56,
+                borderRadius: "50%",
+                backgroundColor: "rgba(218, 155, 20, 0.16)",
+                color: "white",
+                fontSize: 28,
+                border: "none",
+                cursor: "pointer",
+                boxShadow: "0 3px 6px rgba(0,0,0,0.16)",
+                zIndex: 9999,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                userSelect: "none",
+              }}
+              aria-label="Open chat"
+            >
+              <FaMessage />
+              {unread && (
+                <motion.div
+                  key="badge"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  exit={{ scale: 0 }}
+                  transition={{ duration: 0.2 }}
+                  style={{
+                    position: "absolute",
+                    top: -2,
+                    right: -2,
+                    width: 12,
+                    height: 12,
+                    backgroundColor: "#f87171",
+                    borderRadius: "50%",
+                    boxShadow: "0 0 0 2px white",
+                  }}
+                />
+              )}
+            </motion.button>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }
