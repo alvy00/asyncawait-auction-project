@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Label } from "../../components/ui/label";
 import Image from "next/image";
 import { FaUpload } from "react-icons/fa";
@@ -20,22 +21,15 @@ const uploadToImgDB = (file: File): Promise<string | null> => {
     reader.onloadend = async () => {
       try {
         if (!reader.result) {
-          console.error("FileReader result is null");
           reject(null);
           return;
         }
 
-        const resultStr = reader.result as string;
-        console.log(`FileReader result (first 100 chars): ${resultStr.slice(0, 100)}`);
-
-        const base64 = resultStr.split(",")[1];
+        const base64 = (reader.result as string).split(",")[1];
         if (!base64) {
-          console.error("Base64 string is empty or missing after split");
           reject(null);
           return;
         }
-
-        console.log(`Base64 string length: ${base64.length}`);
 
         const formData = new FormData();
         formData.append("key", apiKey);
@@ -47,36 +41,27 @@ const uploadToImgDB = (file: File): Promise<string | null> => {
         });
 
         const data = await res.json();
-        console.log("ImgBB API response:", data);
 
         if (res.ok && data?.data?.url) {
           resolve(data.data.url);
         } else {
-          console.error("ImgBB API returned error:", data);
           reject(null);
         }
       } catch (error) {
-        console.error("Error in reader.onloadend handler:", error);
         reject(null);
       }
     };
 
-    reader.onerror = () => {
-      console.error("FileReader failed to read file");
-      reject(null);
-    };
-
+    reader.onerror = () => reject(null);
     reader.readAsDataURL(file);
   });
 };
-
 
 export const DropzoneUploader: React.FC<DropzoneUploaderProps> = ({
   imageUrls,
   setImageUrls,
 }) => {
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-
   const [isUploading, setIsUploading] = useState(false);
 
   const onDrop = useCallback(
@@ -123,6 +108,7 @@ export const DropzoneUploader: React.FC<DropzoneUploaderProps> = ({
     <motion.div className="space-y-4">
       <Label className="text-lg font-medium text-white/90">Images</Label>
 
+      {/* Upload box */}
       <div
         {...getRootProps()}
         className={`border border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-white/70 bg-white/5 transition
@@ -140,21 +126,25 @@ export const DropzoneUploader: React.FC<DropzoneUploaderProps> = ({
           : "Drag & drop or click to upload images"}
       </div>
 
-      <AnimatePresence>
+      {/* grid style preview */}
+      <motion.div
+        layout
+        className="grid grid-cols-2 md:grid-cols-3 gap-4 w-full"
+      >
         {imageUrls.map((url, index) => (
           <motion.div
             key={index}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, height: 0 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.2 }}
-            className="relative group w-full h-40 rounded-xl overflow-hidden border border-white/10 bg-white/5"
+            className="relative group rounded-xl overflow-hidden border border-white/10 bg-white/10 shadow-md aspect-square"
           >
             <Image
               src={url}
               alt={`Uploaded ${index}`}
               fill
-              className="object-cover"
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, 33vw"
             />
             <button
@@ -162,13 +152,13 @@ export const DropzoneUploader: React.FC<DropzoneUploaderProps> = ({
               onClick={() =>
                 setImageUrls((prev) => prev.filter((_, i) => i !== index))
               }
-              className="absolute top-2 right-2 z-10 bg-black/60 text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition"
+              className="absolute top-2 right-2 z-10 bg-black/60 text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-500 transition-opacity duration-200 cursor-pointer"
             >
-              Remove
+              ✕
             </button>
           </motion.div>
         ))}
-      </AnimatePresence>
+      </motion.div>
     </motion.div>
   );
 };

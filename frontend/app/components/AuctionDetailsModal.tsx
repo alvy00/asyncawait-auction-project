@@ -79,6 +79,7 @@ export default function AuctionDetailsModal({
   return (
     <Dialog open={open} onOpenChange={isOpen => !isOpen && onClose()}>
       <DialogContent className="max-w-xl w-full max-h-[90vh] p-0 bg-transparent border-none shadow-none flex items-center justify-center">
+        <DialogTitle></DialogTitle>
         <motion.div
           initial={{ opacity: 0, y: 40, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}

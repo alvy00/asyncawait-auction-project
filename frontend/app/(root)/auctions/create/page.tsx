@@ -193,7 +193,7 @@ export default function AuctionCreationForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A111B] py-12 px-4 sm:px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#0A111B] py-12 px-4 sm:px-6 relative overflow-hidden mt-10">
       {/* Animated background elements */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         {/* Orange/red gradient bubble - top right */}
