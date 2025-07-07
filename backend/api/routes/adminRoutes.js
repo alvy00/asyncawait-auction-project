@@ -247,9 +247,8 @@ adminRouter.post('/chatbot', async (req, res) => {
     - Users cannot bid on ended or won auctions.
     - Users can only bid if logged in and not suspended.
 
-    Your job is to help users understand how the platform works. Do not hallucinate answers. Respond concisely, in friendly tone, and use bullet points if needed.
+    Your job is to help users understand how the platform works. Do not hallucinate answers. Respond concisely, in friendly tone, short informative answers, and use bullet points if needed.
   `;
-
   const AUCTASYNC_ROADMAP = `
     # AuctAsync Feature Roadmap
 
@@ -266,9 +265,8 @@ adminRouter.post('/chatbot', async (req, res) => {
     - **ProfilePage**: User’s wallet, wins, stats, deposit/withdraw history
     - **CreateAuctionPage**: Form to create auctions (image, rules, end time)
 
-    Use this knowledge to help users understand what pages do what, how auctions work, and where actions happen.
+    Use this knowledge to help users understand what pages do what, how auctions work, short informative answers, and where actions happen.
   `;
-
 
   try {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -283,8 +281,7 @@ adminRouter.post('/chatbot', async (req, res) => {
           { role: 'system', content: BASE_SYSTEM_PROMPT},
           { role: 'system', content: AUCTASYNC_ROADMAP },
           ...messages.filter(m => m.role !== 'system')
-        ],
-        max_tokens: 100 
+        ]
       }),
     });
 
@@ -297,6 +294,7 @@ adminRouter.post('/chatbot', async (req, res) => {
 
     const reply = data.choices[0].message.content;
     return res.json({ reply });
+
   } catch (error) {
     console.error('Chatbot error:', error);
     return res.status(500).json({ reply: "Sorry, I couldn't get a response." });
