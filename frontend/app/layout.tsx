@@ -7,6 +7,7 @@ import { AnimatedBackground } from "./components/AnimatedBackground";
 import { Analytics } from '@vercel/analytics/next';
 import { UserProvider } from "../lib/user-context";
 import ChatbotToggle from "./components/ChatbotToggle";
+import Chatbot from "./components/Chatbot";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -47,7 +48,8 @@ export default function RootLayout({
             {children}
         </AuthProvider>
         </UserProvider>
-        <ChatbotToggle />
+        <Chatbot />
+        {/* <ChatbotToggle /> */}
         <Analytics />
       </body>
     </html>
