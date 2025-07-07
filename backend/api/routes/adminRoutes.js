@@ -196,24 +196,30 @@ adminRouter.post('/chatbot', async (req, res) => {
   const { messages } = req.body;
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: 'llama3-8b-8192',
         messages,
       }),
     });
 
     const data = await response.json();
 
-    return res.json({ reply: data.choices[0].message.content });
+    if (!response.ok || !data.choices?.[0]) {
+      console.error('Groq error:', data);
+      return res.status(500).json({ reply: 'Groq API error. Please try again.' });
+    }
+
+    const reply = data.choices[0].message.content;
+    return res.json({ reply });
   } catch (error) {
     console.error('Chatbot error:', error);
-    return res.status(500).json({ reply: 'Oops! Something went wrong.' });
+    return res.status(500).json({ reply: "Sorry, I couldn't get a response." });
   }
 });
 
