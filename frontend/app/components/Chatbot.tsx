@@ -25,6 +25,8 @@ export default function FloatingChatbot() {
     setLoading(true);
 
     try {
+      // https://asyncawait-auction-project.onrender.com/api/admin/chatbot
+      // http://localhost:8000/api/admin/chatbot
       const res = await fetch('https://asyncawait-auction-project.onrender.com/api/admin/chatbot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
