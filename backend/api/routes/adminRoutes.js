@@ -1,7 +1,6 @@
 import supabase from '../../config/supabaseClient.js';
 import express from 'express'
 import dotenv from 'dotenv'
-import { NextRequest, NextResponse } from 'next/server';
 
 
 dotenv.config();
