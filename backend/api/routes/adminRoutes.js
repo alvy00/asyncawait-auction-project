@@ -1,7 +1,7 @@
 import supabase from '../../config/supabaseClient.js';
 import express from 'express'
 import dotenv from 'dotenv'
-import axios from 'axios'
+import { NextRequest, NextResponse } from 'next/server';
 
 
 dotenv.config();
@@ -194,23 +194,27 @@ adminRouter.post('/newsletter', async (req, res) => {
 
 // Chatbot
 adminRouter.post('/chatbot', async (req, res) => {
-  const userMessage = req.body.message;
+  const { messages } = req.body;
 
   try {
-    const response = await fetch("https://asyncawait-auction-project.onrender.com/api/admin/webhook", {
-      queryResult: {
-        queryText: userMessage,
-        intent: { displayName: "" },
-        parameters: {},
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
+      body: JSON.stringify({
+        model: 'gpt-3.5-turbo',
+        messages,
+      }),
     });
 
-    const fulfillmentText = response.data.fulfillmentText || "Sorry, I don't have an answer.";
+    const data = await response.json();
 
-    return res.json({ reply: fulfillmentText });
+    return res.json({ reply: data.choices[0].message.content });
   } catch (error) {
-    console.error("Chatbot error:", error);
-    return res.json({ reply: "Oops! Something went wrong." });
+    console.error('Chatbot error:', error);
+    return res.status(500).json({ reply: 'Oops! Something went wrong.' });
   }
 });
 

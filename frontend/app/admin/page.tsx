@@ -114,7 +114,7 @@ const AdminDashboard = () => {
     }
   };
 
-  if (loading) {
+  if (loading || !user) {
     return <LoadingSpinner />;
   }
 

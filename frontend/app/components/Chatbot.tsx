@@ -1,168 +1,134 @@
-"use client";
+'use client';
 
-import React, { useEffect, useRef, useState } from "react";
+import { useState, useRef, useEffect } from 'react';
 
-export default function Chatbot({ messages, setMessages, onBotReply }) {
-  const [input, setInput] = useState("");
-  const messagesEndRef = useRef(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+export default function FloatingChatbot() {
+  const [open, setOpen] = useState(false);
+  const [messages, setMessages] = useState([
+    { role: 'system', content: 'You are an assistant for an auction website.' },
+  ]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (open) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, open]);
 
-  const sendMessage = async () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
-
-    setMessages((msgs) => [...msgs, { from: "user", text: input }]);
-    const userMessage = input;
-    setInput("");
+    const newMessages = [...messages, { role: 'user', content: input }];
+    setMessages(newMessages);
+    setInput('');
+    setLoading(true);
 
     try {
-      const res = await fetch(
-        "https://asyncawait-auction-project.onrender.com/api/admin/chatbot",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: userMessage }),
-        }
-      );
+      const res = await fetch('https://asyncawait-auction-project.onrender.com/api/admin/chatbot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: newMessages }),
+      });
+
+      if (!res.ok) throw new Error('Network error');
 
       const data = await res.json();
-      const reply = data.reply || "Sorry, I don't have an answer.";
-
-      if (onBotReply) onBotReply();
-
-      setTimeout(() => {
-        setMessages((msgs) => [...msgs, { from: "bot", text: reply }]);
-      }, 800);
+      setMessages([...newMessages, { role: 'assistant', content: data.reply }]);
     } catch {
-      setMessages((msgs) => [
-        ...msgs,
-        { from: "bot", text: "Sorry, there was an error." },
-      ]);
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
+      setMessages([...newMessages, { role: 'assistant', content: "Sorry, I couldn't get a response." }]);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div
-      style={{
-        width: 380,
-        height: 540,
-        display: "flex",
-        flexDirection: "column",
-        borderRadius: 12,
-        backgroundColor: "#1e293b",
-        boxShadow: "0 6px 15px rgba(0,0,0,0.3)",
-        color: "#f1f5f9",
-        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: "16px 20px",
-          scrollbarWidth: "thin",
-          scrollbarColor: "#64748b transparent",
-        }}
+    <>
+      {/* Floating button */}
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-blue-600 text-white shadow-lg flex items-center justify-center hover:bg-blue-700 focus:outline-none"
+        aria-label={open ? 'Close chat' : 'Open chat'}
       >
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            style={{
-              display: "flex",
-              justifyContent: msg.from === "user" ? "flex-end" : "flex-start",
-              marginBottom: 12,
-            }}
+        {open ? (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-7 w-7"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            <div
-              style={{
-                maxWidth: "75%",
-                backgroundColor: msg.from === "user" ? "#3b82f6" : "#475569",
-                color: msg.from === "user" ? "#e0e7ff" : "#cbd5e1",
-                padding: "10px 16px",
-                borderRadius: 20,
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-word",
-                fontSize: 15,
-                boxShadow:
-                  msg.from === "user"
-                    ? "0 2px 6px rgba(59, 130, 246, 0.5)"
-                    : "0 2px 6px rgba(71, 85, 105, 0.5)",
-              }}
-            >
-              {msg.text}
-            </div>
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        ) : (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-7 w-7"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.971 9.971 0 01-4-1l-5 1 1-5a9.971 9.971 0 01-1-4c0-4.97 3.582-9 8-9s9 4.03 9 9z" />
+          </svg>
+        )}
+      </button>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          sendMessage();
-        }}
-        style={{
-          padding: "12px 20px",
-          borderTop: "1px solid #475569",
-          backgroundColor: "#334155",
-          display: "flex",
-          gap: 12,
-        }}
-      >
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Type your question..."
-          rows={1}
-          style={{
-            flex: 1,
-            resize: "none",
-            borderRadius: 20,
-            border: "none",
-            padding: "10px 16px",
-            fontSize: 15,
-            fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-            backgroundColor: "#475569",
-            color: "#f1f5f9",
-            outline: "none",
-            boxShadow: "inset 0 0 4px rgba(0,0,0,0.5)",
-          }}
-        />
-        <button
-          type="submit"
-          style={{
-            backgroundColor: "#3b82f6",
-            border: "none",
-            borderRadius: 20,
-            padding: "0 18px",
-            color: "#e0e7ff",
-            fontWeight: "600",
-            cursor: "pointer",
-            boxShadow: "0 2px 6px rgba(30, 44, 66, 0.7)",
-            transition: "background-color 0.3s",
-          }}
-          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#2563eb")}
-          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#3b82f6")}
-          aria-label="Send message"
-        >
-          Send
-        </button>
-      </form>
-    </div>
+      {/* Chat window */}
+      {open && (
+        <div className="fixed bottom-20 right-6 z-50 w-80 max-h-[500px] bg-white rounded-lg shadow-lg flex flex-col">
+          <header className="bg-blue-600 text-white px-4 py-2 rounded-t-lg font-semibold flex justify-between items-center">
+            Auction Assistant
+            <button onClick={() => setOpen(false)} aria-label="Close chat" className="text-white hover:text-gray-300">
+              ✕
+            </button>
+          </header>
+
+          <main className="flex-1 overflow-y-auto p-3 space-y-2 bg-gray-50">
+            {messages
+              .filter(m => m.role !== 'system')
+              .map((msg, i) => (
+                <div
+                  key={i}
+                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <span
+                    className={`inline-block px-3 py-1.5 rounded max-w-[75%] whitespace-pre-wrap ${
+                      msg.role === 'user' ? 'bg-blue-100 text-blue-900' : 'bg-gray-200 text-gray-900'
+                    }`}
+                  >
+                    {msg.content}
+                  </span>
+                </div>
+              ))}
+            <div ref={messagesEndRef} />
+            {loading && <div className="text-gray-500 italic">Typing...</div>}
+          </main>
+
+          <form
+            onSubmit={e => {
+              e.preventDefault();
+              if (!loading) handleSend();
+            }}
+            className="flex border-t border-gray-300 p-2"
+          >
+            <input
+              type="text"
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              placeholder="Ask about auctions..."
+              className="flex-1 p-2 border rounded disabled:bg-gray-100"
+              disabled={loading}
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="ml-2 bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
+            >
+              Send
+            </button>
+          </form>
+        </div>
+      )}
+    </>
   );
 }
