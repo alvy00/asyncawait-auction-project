@@ -284,7 +284,7 @@ const LiveAuctionsPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.25 }}
               >
-                {auction.auction_type === "regular" && (
+                {auction.auction_type === "classic" && (
                   <AuctionCard
                     key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
                     auction={auction}
@@ -293,13 +293,25 @@ const LiveAuctionsPage = () => {
                   />
                 )}
                 {auction.auction_type === "blitz" && (
-                  <AuctionCardBlitz auction={auction} auctionCreator={auction.creator} />
+                  <AuctionCardBlitz 
+                    key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
+                    auction={auction} 
+                    auctionCreator={auction.creator} 
+                  />
                 )}
                 {auction.auction_type === "dutch" && (
-                  <AuctionCardDutch auction={auction} auctionCreator={auction.creator} />
+                  <AuctionCardDutch 
+                    key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
+                    auction={auction} 
+                    auctionCreator={auction.creator} 
+                  />
                 )}
                 {auction.auction_type === "reverse" && (
-                  <AuctionCardReverse auction={auction} auctionCreator={auction.creator} />
+                  <AuctionCardReverse 
+                    key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
+                    auction={auction} 
+                    auctionCreator={auction.creator} 
+                  />
                 )}
               </motion.div>
             ))}

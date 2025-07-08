@@ -7,6 +7,79 @@ import { CheckCircle, Zap, Timer, TrendingDown, TrendingUp, Award, Gavel } from 
 
 const AUCTION_TYPES = [
   {
+    key: "classic",
+    label: "Classic Auction",
+    icon: (
+      <Gavel className="w-16 h-16 text-green-400 drop-shadow-lg" />
+    ),
+    accent: "from-[#0f2d21] via-[#1b4332] to-[#2d6a4f]", 
+    gradientText: "bg-gradient-to-r from-green-300 to-green-500 bg-clip-text text-transparent",
+    description: (
+      <>
+        <span className="font-semibold text-green-400">Classic Auction</span> is the traditional ascending-bid auction. <span className="text-green-300 font-bold">Highest bid wins</span> when the timer ends. Bidders compete openly, raising the price until no one is willing to bid higher.
+      </>
+    ),
+    steps: [
+      { icon: <Gavel className="w-6 h-6 text-green-400" />, text: "Auction opens at a starting price." },
+      { icon: <TrendingUp className="w-6 h-6 text-green-400" />, text: "Bidders place higher and higher bids." },
+      { icon: <Timer className="w-6 h-6 text-green-400" />, text: "Auction ends at a set time." },
+      { icon: <CheckCircle className="w-6 h-6 text-green-400" />, text: "Highest bid at the end wins." },
+    ],
+    features: [
+      { icon: <TrendingUp className="w-5 h-5 text-green-400" />, label: "Open Competition" },
+      { icon: <Timer className="w-5 h-5 text-green-400" />, label: "Fair & Transparent" },
+      { icon: <Award className="w-5 h-5 text-green-400" />, label: "Most Popular Format" },
+    ],
+    cta: { label: "See Classic Auctions", href: "/auctions/live?type=classic" },
+    animation: (
+      <motion.div
+        className="flex gap-2 items-center text-green-400 font-mono text-2xl"
+        animate={{ x: [0, 10, 0], color: ["#6ee7b7", "#059669", "#6ee7b7"] }}
+        transition={{ repeat: Infinity, duration: 2 }}
+      >
+        <span>$40</span>
+        <TrendingUp className="w-6 h-6" />
+        <span className="font-bold">$320</span>
+      </motion.div>
+    ),
+  },
+  {
+    key: "blitz",
+    label: "Blitz Auction",
+    icon: (
+      <Timer className="w-16 h-16 text-orange-400 drop-shadow-lg" />
+    ),
+    accent: "from-[#4a0d0d] via-[#801111] to-[#a42c2c]",
+    gradientText: "bg-gradient-to-r from-orange-400 via-yellow-400 to-orange-600 bg-clip-text text-transparent",
+    description: (
+      <>
+        <span className="font-semibold text-orange-400">Blitz Auction</span> is a high-energy, short-timer event. <span className="text-orange-300 font-bold">Bid fast, win big</span>—last-second bids may extend the timer.
+      </>
+    ),
+    steps: [
+      { icon: <Timer className="w-6 h-6 text-orange-400" />, text: "Auction opens for 10–30 minutes only." },
+      { icon: <Zap className="w-6 h-6 text-orange-400" />, text: "Bidders place rapid, real-time bids." },
+      { icon: <Timer className="w-6 h-6 text-orange-400" />, text: "Last-second bids can extend the timer." },
+      { icon: <Award className="w-6 h-6 text-orange-400" />, text: "Highest bid at the buzzer wins." },
+    ],
+    features: [
+      { icon: <Zap className="w-5 h-5 text-orange-400" />, label: "Adrenaline" },
+      { icon: <Timer className="w-5 h-5 text-orange-400" />, label: "No Waiting" },
+      { icon: <Award className="w-5 h-5 text-orange-400" />, label: "Perfect for Flash Sales" },
+    ],
+    cta: { label: "See Blitz Auctions", href: "/auctions/live?type=blitz" },
+    animation: (
+      <motion.div
+        className="flex items-center gap-2 text-orange-400 font-mono text-2xl"
+        animate={{ scale: [1, 1.15, 1], color: ["#f59e42", "#ef4444", "#f59e42"] }}
+        transition={{ repeat: Infinity, duration: 1.5 }}
+      >
+        <span>00:10</span>
+        <span className="font-bold">$320</span>
+      </motion.div>
+    ),
+  },
+  {
     key: "dutch",
     label: "Dutch Auction",
     icon: (
@@ -52,7 +125,7 @@ const AUCTION_TYPES = [
     gradientText: "bg-gradient-to-r from-purple-300 to-purple-500 bg-clip-text text-transparent",
     description: (
       <>
-        <span className="font-semibold text-purple-400">Reverse Auction</span> flips the script: sellers compete to offer the lowest price for a buyer's request. <span className="text-purple-300 font-bold">Best value wins</span>.
+        <span className="font-semibold text-purple-400">Reverse Auction</span> flips the script: sellers compete to offer the lowest price for a buyer&apos;s request. <span className="text-purple-300 font-bold">Best value wins</span>.
       </>
     ),
     steps: [
@@ -78,83 +151,10 @@ const AUCTION_TYPES = [
       </motion.div>
     ),
   },
-  {
-    key: "blitz",
-    label: "Blitz Auction",
-    icon: (
-      <Timer className="w-16 h-16 text-orange-400 drop-shadow-lg" />
-    ),
-    accent: "from-[#4a0d0d] via-[#801111] to-[#a42c2c]",
-    gradientText: "bg-gradient-to-r from-orange-400 via-yellow-400 to-orange-600 bg-clip-text text-transparent",
-    description: (
-      <>
-        <span className="font-semibold text-orange-400">Blitz Auction</span> is a high-energy, short-timer event. <span className="text-orange-300 font-bold">Bid fast, win big</span>—last-second bids may extend the timer.
-      </>
-    ),
-    steps: [
-      { icon: <Timer className="w-6 h-6 text-orange-400" />, text: "Auction opens for 10–30 minutes only." },
-      { icon: <Zap className="w-6 h-6 text-orange-400" />, text: "Bidders place rapid, real-time bids." },
-      { icon: <Timer className="w-6 h-6 text-orange-400" />, text: "Last-second bids can extend the timer." },
-      { icon: <Award className="w-6 h-6 text-orange-400" />, text: "Highest bid at the buzzer wins." },
-    ],
-    features: [
-      { icon: <Zap className="w-5 h-5 text-orange-400" />, label: "Adrenaline" },
-      { icon: <Timer className="w-5 h-5 text-orange-400" />, label: "No Waiting" },
-      { icon: <Award className="w-5 h-5 text-orange-400" />, label: "Perfect for Flash Sales" },
-    ],
-    cta: { label: "See Blitz Auctions", href: "/auctions/live?type=blitz" },
-    animation: (
-      <motion.div
-        className="flex items-center gap-2 text-orange-400 font-mono text-2xl"
-        animate={{ scale: [1, 1.15, 1], color: ["#f59e42", "#ef4444", "#f59e42"] }}
-        transition={{ repeat: Infinity, duration: 1.5 }}
-      >
-        <span>00:10</span>
-        <span className="font-bold">$320</span>
-      </motion.div>
-    ),
-  },
-  {
-    key: "classic",
-    label: "Classic Auction",
-    icon: (
-      <Gavel className="w-16 h-16 text-green-400 drop-shadow-lg" />
-    ),
-    accent: "from-[#0f2d21] via-[#1b4332] to-[#2d6a4f]", 
-    gradientText: "bg-gradient-to-r from-green-300 to-green-500 bg-clip-text text-transparent",
-    description: (
-      <>
-        <span className="font-semibold text-green-400">Classic Auction</span> is the traditional ascending-bid auction. <span className="text-green-300 font-bold">Highest bid wins</span> when the timer ends. Bidders compete openly, raising the price until no one is willing to bid higher.
-      </>
-    ),
-    steps: [
-      { icon: <Gavel className="w-6 h-6 text-green-400" />, text: "Auction opens at a starting price." },
-      { icon: <TrendingUp className="w-6 h-6 text-green-400" />, text: "Bidders place higher and higher bids." },
-      { icon: <Timer className="w-6 h-6 text-green-400" />, text: "Auction ends at a set time." },
-      { icon: <CheckCircle className="w-6 h-6 text-green-400" />, text: "Highest bid at the end wins." },
-    ],
-    features: [
-      { icon: <TrendingUp className="w-5 h-5 text-green-400" />, label: "Open Competition" },
-      { icon: <Timer className="w-5 h-5 text-green-400" />, label: "Fair & Transparent" },
-      { icon: <Award className="w-5 h-5 text-green-400" />, label: "Most Popular Format" },
-    ],
-    cta: { label: "See Classic Auctions", href: "/auctions/live?type=classic" },
-    animation: (
-      <motion.div
-        className="flex gap-2 items-center text-green-400 font-mono text-2xl"
-        animate={{ x: [0, 10, 0], color: ["#6ee7b7", "#059669", "#6ee7b7"] }}
-        transition={{ repeat: Infinity, duration: 2 }}
-      >
-        <span>$40</span>
-        <TrendingUp className="w-6 h-6" />
-        <span className="font-bold">$320</span>
-      </motion.div>
-    ),
-  },
 ];
 
 export function AuctionTypesSection() {
-  const [active, setActive] = useState("dutch");
+  const [active, setActive] = useState("classic");
   const activeType = AUCTION_TYPES.find((t) => t.key === active)!;
 
   return (
