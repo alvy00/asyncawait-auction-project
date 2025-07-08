@@ -62,18 +62,18 @@ const menuItems: AdminMenuItem[] = [
     ],
     icon: <Percent className="h-5 w-5" />,
   },
-  {
-    title: "Reports & Analytics",
-    items: [
-      { title: "Overall Analytics", url: "/admin/analytics" },
-    ],
-    icon: <Layers size={20} />,
-  },
-  {
-    title: "Site Settings",
-    items: [{ title: "Edit Site", url: "/admin/site" }],
-    icon: <Send size={20} />,
-  },
+  // {
+  //   title: "Reports & Analytics",
+  //   items: [
+  //     { title: "Overall Analytics", url: "/admin/analytics" },
+  //   ],
+  //   icon: <Layers size={20} />,
+  // },
+  // {
+  //   title: "Site Settings",
+  //   items: [{ title: "Edit Site", url: "/admin/site" }],
+  //   icon: <Send size={20} />,
+  // },
   {
     title: "Content Management",
     items: [
@@ -110,8 +110,8 @@ export default function SidebarMenu() {
               : "text-gray-300 hover:bg-white/5 hover:text-white"
           )}
         >
-          <Link className="flex gap-2 items-center w-full" href="/dashboard/admin">
-            <LayoutDashboard size={18} className={pathname === "/dashboard/admin" ? "text-orange-400" : ""} />
+          <Link className="flex gap-2 items-center w-full" href="/admin">
+            <LayoutDashboard size={18} className={pathname === "/admin" ? "text-orange-400" : ""} />
             <span>Overview</span>
           </Link>
         </motion.li>
