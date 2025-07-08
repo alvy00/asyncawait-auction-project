@@ -11,6 +11,7 @@ import { WhyChooseUsSection } from '../components/WhyChooseUsSection';
 import { CTASection } from '../components/CTASection';
 import { ConversionSection } from '../components/ConversionSection';
 import { NewsletterSection } from '../components/NewsletterSection';
+import { MarketingShowcase } from '../components/MarketingShowcase';
 
 
 export default function Home() {
@@ -65,6 +66,7 @@ export default function Home() {
         <CategoryShowcase />
         <AuctionTypesSection />
         <LiveAuctionsSection />
+        <MarketingShowcase />
         <WhyChooseUsSection />
         <ConversionSection />
         {/* <CategorySection /> */}
