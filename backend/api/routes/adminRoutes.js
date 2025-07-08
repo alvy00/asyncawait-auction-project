@@ -250,22 +250,22 @@ adminRouter.post('/chatbot', async (req, res) => {
     Your job is to help users understand how the platform works. Do not hallucinate answers. Respond concisely, in friendly tone, short informative answers, and use bullet points if needed.
   `;
   const AUCTASYNC_ROADMAP = `
-    # AuctAsync Feature Roadmap
+  # AuctAsync Feature Roadmap
 
-    ## Overview
-    AuctAsync is a real-time auction platform supporting classic, dutch, reverse, and blitz auctions. Users bids, win items, and track performance.
+  ## Overview
+  AuctAsync is a real-time auction platform supporting classic, dutch, reverse, and blitz auctions. Users bid, win items, and track performance.
 
-    ## Pages & Features
-    - **Login Page**: Allows users to securely sign in using their email and password.
-    - **Signup Page**: New users can register by providing a valid email, username, and password.
-    - **HomePage**: Entry point, navigation to live auctions or login
-    - **LiveAuctionsPage**: Real-time cards with bid buttons, avatars, and timer
-    - **PastAuctionsPage**: View ended auctions, who won, final bid
-    - **FavoritesPage**: User's saved auctions via localStorage
-    - **ProfilePage**: User’s wallet, wins, stats, deposit/withdraw history
-    - **CreateAuctionPage**: Form to create auctions (image, rules, end time)
+  ## Pages & Features
+  - **Login Page**: Allows users to securely sign in using their email and password. [Login](https://auctasync.vercel.app/login)
+  - **Signup Page**: New users can register by providing a valid email, username, and password. [Signup](https://auctasync.vercel.app/signup)
+  - **HomePage**: Entry point, navigation to live auctions or login. [Home](https://auctasync.vercel.app/)
+  - **LiveAuctionsPage**: Real-time cards with bid buttons, avatars, and timer. [Live Auctions](https://auctasync.vercel.app/auctions/live)
+  - **PastAuctionsPage**: View ended auctions, who won, final bid. [Past Auctions](https://auctasync.vercel.app/auctions/past)
+  - **FavoritesPage**: User's saved auctions via localStorage. [Favorites](https://auctasync.vercel.app/favorites)
+  - **ProfilePage**: User’s wallet, wins, stats, deposit/withdraw history. [Profile](https://auctasync.vercel.app/dashboard)
+  - **CreateAuctionPage**: Form to create auctions (image, rules, end time). [Create Auction](https://auctasync.vercel.app/auctions/create)
 
-    Use this knowledge to help users understand what pages do what, how auctions work, short informative answers, and where actions happen.
+  Use this knowledge to help users understand what pages do what, how auctions work, short informative answers, and where actions happen.
   `;
 
   try {

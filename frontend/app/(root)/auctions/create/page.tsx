@@ -15,10 +15,11 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { useUser } from "../../../../lib/user-context";
 
 const auctionTypes = [
-  { value: 'regular', label: 'Regular', description: 'Standard auction, highest bid wins.' },
-  { value: 'blitz', label: 'Blitz', description: 'Short time, fast bidding.' },
+  { value: 'classic', label: 'Classic', description: 'Standard auction, highest bid wins.' },
+  { value: 'blitz', label: 'Blitz', description: 'Short time, rapid bidding.' },
   { value: 'dutch', label: 'Dutch', description: 'Price starts high and decreases over time.' },
   { value: 'reverse', label: 'Reverse', description: 'Lowest bid wins instead of highest.' },
 ];
@@ -35,6 +36,7 @@ const LoadingSpinner = () => (
 
 
 export default function AuctionCreationForm() {
+  const { user } = useUser();
   const [startTime, setStartTime] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -192,6 +194,11 @@ export default function AuctionCreationForm() {
     return <LoadingSpinner />;
   }
 
+  // if(!user) {
+  //   toast.error("Please login first to create auctions");
+  //   router.push('/login');
+  // }
+  
   return (
     <div className="min-h-screen bg-[#0A111B] py-12 px-4 sm:px-6 relative overflow-hidden mt-10">
       {/* Animated background elements */}
