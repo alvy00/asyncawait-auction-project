@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaComments, FaTimesCircle } from 'react-icons/fa';
+import { BsRobot } from 'react-icons/bs';
 
 export default function FloatingChatbot() {
   const [open, setOpen] = useState(false);
@@ -66,15 +66,16 @@ export default function FloatingChatbot() {
       {/* Floating button */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gray-600 text-white shadow-lg flex items-center justify-center
-                   hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-400 transition cursor-pointer"
+        className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-gradient-to-br from-cyan-600 via-blue-700 to-purple-700 border-4 border-cyan-300/30 shadow-2xl flex items-center justify-center hover:scale-105 transition-all focus:outline-none focus:ring-2 focus:ring-cyan-400 animate-pulse"
         aria-label={open ? 'Close chat' : 'Open chat'}
       >
-        {open ? (
-          <FaTimesCircle className="w-7 h-7 transition-transform duration-150 hover:scale-110" />
-        ) : (
-          <FaComments className="w-7 h-7 transition-transform duration-150 hover:scale-110" />
-        )}
+        <motion.span
+          animate={{ rotate: [0, 10, -10, 0] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+          className="text-3xl text-white drop-shadow-lg"
+        >
+          {open ? '×' : <BsRobot />}
+        </motion.span>
       </button>
 
       {/* Animated Chat window */}
@@ -83,78 +84,90 @@ export default function FloatingChatbot() {
           <motion.div
             key="chat-window"
             ref={chatWindowRef}
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 40 }}
-            transition={{ duration: 0.25 }}
-            className="fixed bottom-20 right-6 z-50 w-80 max-h-[600px] min-h-[500px] bg-gray-900 rounded-lg shadow-2xl flex flex-col border border-gray-700"
+            initial={{ opacity: 0, y: 40, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 40, scale: 0.97 }}
+            transition={{ duration: 0.28 }}
+            className="fixed bottom-20 right-6 z-50 w-[95vw] max-w-[390px] min-h-[500px] max-h-[600px] flex flex-col rounded-3xl shadow-2xl border border-cyan-400/10 bg-gradient-to-br from-[#101928]/90 via-[#1e293b]/90 to-[#232946]/90 backdrop-blur-xl overflow-hidden"
+            style={{ boxShadow: '0 8px 40px 0 rgba(0, 255, 255, 0.10), 0 2px 16px 0 rgba(0,0,0,0.25)' }}
           >
-            <header className="bg-primary-600 text-white px-5 py-3 rounded-t-lg font-semibold flex justify-between items-center select-none">
-              AuctasyncBOT
+            {/* Header */}
+            <div className="relative z-20 flex items-center justify-between px-5 py-3 bg-gradient-to-r from-[#0a192f] via-[#1e293b] to-[#232946] border-b border-cyan-400/10 shadow-sm">
+              <div className="flex items-center gap-3">
+                <motion.div
+                  className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400/80 to-blue-600/80 flex items-center justify-center shadow-lg border-2 border-cyan-300/40"
+                  initial={{ scale: 0.9 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 200 }}
+                >
+                  <BsRobot className="text-white text-xl" />
+                </motion.div>
+                <span className="font-bold text-lg text-cyan-100 tracking-wide drop-shadow">AuctAsync Chat</span>
+              </div>
               <button
                 onClick={() => setOpen(false)}
                 aria-label="Close chat"
-                className="text-white hover:text-primary-300 focus:outline-none focus:ring-2 focus:ring-white rounded transition
-                           cursor-pointer transform hover:scale-105 active:scale-95"
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-cyan-900/30 text-cyan-100 text-2xl font-bold transition focus:outline-none focus:ring-2 focus:ring-cyan-400"
               >
-                ✕
+                ×
               </button>
-            </header>
-
-            <main className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-800 scrollbar-thin scrollbar-thumb-primary-600 scrollbar-track-gray-700">
-              {messages
-                .filter(m => m.role !== 'system')
-                .map((msg, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-[75%] px-5 py-3 rounded-2xl leading-relaxed whitespace-pre-wrap break-words
-                        ${
-                          msg.role === 'user'
-                            ? 'bg-primary-700 text-white shadow-md'
-                            : 'bg-gray-700 text-gray-200 shadow-sm'
-                        }
-                      `}
+            </div>
+            {/* Chat body */}
+            <div className="relative flex-1 flex flex-col z-10 h-0 min-h-0">
+              {/* Soft inner shadow */}
+              <div className="absolute inset-0 pointer-events-none rounded-3xl shadow-[inset_0_8px_32px_0_rgba(34,211,238,0.08)] z-10" />
+              <main className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-cyan-700/60 scrollbar-track-transparent">
+                {messages
+                  .filter(m => m.role !== 'system')
+                  .map((msg, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
-                      {msg.content}
-                    </div>
-                  </motion.div>
-                ))}
-              <div ref={messagesEndRef} />
-              {loading && <div className="text-gray-400 italic select-none">Typing...</div>}
-            </main>
-
-            <form
-              onSubmit={e => {
-                e.preventDefault();
-                if (!loading) handleSend();
-              }}
-              className="flex border-t border-gray-700 p-3 bg-gray-900"
-            >
-              <input
-                type="text"
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                placeholder="Ask about auctions..."
-                className="flex-1 p-3 bg-gray-800 border border-gray-700 rounded-2xl text-gray-200 placeholder-gray-500
-                           focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition"
-                disabled={loading}
-                autoComplete="off"
-              />
-              <button
-                type="submit"
-                disabled={loading}
-                className="ml-3 bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-2xl
-                           disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer transform hover:scale-105 active:scale-95"
+                      <div
+                        className={`max-w-[75%] px-5 py-3 rounded-2xl leading-relaxed whitespace-pre-wrap break-words shadow-md
+                          ${
+                            msg.role === 'user'
+                              ? 'bg-gradient-to-br from-cyan-700/80 to-cyan-900/80 text-cyan-100'
+                              : 'bg-gradient-to-br from-[#232946]/80 to-[#101928]/80 text-white/90 border border-cyan-900/20'
+                          }
+                        `}
+                      >
+                        {msg.content}
+                      </div>
+                    </motion.div>
+                  ))}
+                <div ref={messagesEndRef} />
+                {loading && <div className="text-cyan-300 italic select-none">Typing...</div>}
+              </main>
+              <form
+                onSubmit={e => {
+                  e.preventDefault();
+                  if (!loading) handleSend();
+                }}
+                className="flex border-t border-cyan-700/30 p-3 bg-[#101928]/80 backdrop-blur-md"
               >
-                Send
-              </button>
-            </form>
+                <input
+                  type="text"
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  placeholder="Ask about auctions..."
+                  className="flex-1 p-3 bg-[#181f2a] border border-cyan-900/30 rounded-2xl text-cyan-100 placeholder-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition disabled:opacity-60"
+                  disabled={loading}
+                  autoComplete="off"
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="ml-3 bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-500 hover:to-blue-600 text-white px-6 py-2 rounded-2xl font-semibold shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer transform hover:scale-105 active:scale-95"
+                >
+                  Send
+                </button>
+              </form>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
