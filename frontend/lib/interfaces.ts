@@ -35,6 +35,7 @@ export interface Auction {
   created_at: string;
   start_time: string;
   end_time: string;
+  participants: string;
   status?: string;
   images?: string[];
   condition: "new" | "used" | "refurbished";

@@ -282,17 +282,17 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
               {currentStatus === "upcoming" ? (
                 <div className="bg-gradient-to-r from-green-700 to-green-500 text-white text-xs font-semibold px-4 py-1 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
                   <FaClock className="text-white" />
-                  <span>REGULAR | UPCOMING</span>
+                  <span>CLASSIC | UPCOMING</span>
                 </div>
               ) : currentStatus === "live" ? (
                 <div className="bg-gradient-to-r from-green-700 to-green-500 text-white text-xs font-semibold px-4 py-1 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
                   <FaBolt className="text-white animate-pulse" />
-                  <span>REGULAR | LIVE</span>
+                  <span>CLASSIC | LIVE</span>
                 </div>
               ) : (
                 <div className="bg-gray-600 text-white text-xs font-medium px-4 py-1 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
                   <FaFlagCheckered className="text-white" />
-                  <span>REGULAR | ENDED</span>
+                  <span>CLASSIC | ENDED</span>
                 </div>
               )}
 
@@ -314,8 +314,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
             initialFavorited={isFavourited}
             isHovered={isHovered}
           />
-
-
+          
         </div>
 
         {/* Content */}
