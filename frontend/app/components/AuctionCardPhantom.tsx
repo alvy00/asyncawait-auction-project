@@ -86,10 +86,10 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
         amount: formData.get("amount"),
       };
 
-      // 
+      // http://localhost:8000/api/auctions/bidhidden
       // https://asyncawait-auction-project.onrender.com/api/auctions/bidhidden
       const res = await fetch(
-        "http://localhost:8000/api/auctions/bidhidden",
+        "https://asyncawait-auction-project.onrender.com/api/auctions/bidhidden",
         {
           method: "POST",
           headers: {

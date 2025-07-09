@@ -9,7 +9,7 @@ const auctionRouter = express.Router();
 
 // -------------------------------------- AUCTIONS -------------------------------------------------
 
-// Get all auctions
+// Get All Auctions
 auctionRouter.get('/', async (req, res) => {
     try {
         const currentTime = new Date();
@@ -35,6 +35,31 @@ auctionRouter.get('/', async (req, res) => {
         console.console('Error fetching auctions:', e);
         res.status(500).json({ message: 'Internal server error' });
     }
+});
+
+// Get FEATURED Auctions
+auctionRouter.get('/featured', async (req, res) => {
+  try {
+    const now = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from('auctions')
+      .select('*')
+      .gte('end_time', now)
+      .order('total_bids', { ascending: false })
+      .order('starting_price', { ascending: false })
+      .limit(5);
+
+    if (error) {
+      return res.status(400).json({ message: "Error fetching featured auctions" });
+    }
+
+    return res.status(200).json(data);
+
+  } catch (e) {
+    console.log("Something went wrong!", e);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 });
 
 // Create Auction
@@ -165,7 +190,7 @@ auctionRouter.post('/updatestatus', async (req, res) => {
   }
 });
 
-// Get Auction Details by ID
+// Fetch Auction Details by ID
 auctionRouter.post('/aucdetails', async (req, res) => {
   const { auction_id } = req.body;
 
@@ -288,7 +313,7 @@ auctionRouter.post('/favauctions', async (req, res) => {
 
 // -------------------------------------- BIDS -------------------------------------------------
 
-// Place Bid (Dutch)
+// Place Exact Bid (Dutch)
 auctionRouter.post('/bidcurrent', async (req, res) => {
   try {
     const { auction_id, amount } = req.body;
@@ -491,7 +516,7 @@ auctionRouter.post('/bidlow', async (req, res) => {
   }
 });
 
-// Place Hidden Bid
+// Place Hidden Bid (Phantom)
 auctionRouter.post('/bidhidden', async (req, res) => {
   try {
     const { auction_id, amount } = req.body;
@@ -542,7 +567,6 @@ auctionRouter.post('/bidhidden', async (req, res) => {
     return res.status(500).json({ message: 'Something went wrong!' });
   }
 });
-
 
 // Get User Bid History
 auctionRouter.post('/bidhistory', async (req, res) => {
