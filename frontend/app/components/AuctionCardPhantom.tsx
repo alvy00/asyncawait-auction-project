@@ -86,8 +86,10 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
         amount: formData.get("amount"),
       };
 
+      // 
+      // https://asyncawait-auction-project.onrender.com/api/auctions/bidhidden
       const res = await fetch(
-        "https://asyncawait-auction-project.onrender.com/api/auctions/bidhidden",
+        "http://localhost:8000/api/auctions/bidhidden",
         {
           method: "POST",
           headers: {
@@ -114,6 +116,7 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
     } catch (err) {
       console.error("Bid submission error:", err);
       toast.error("Something went wrong. Please try again.");
+
     } finally {
       setSubmittingBid(false);
     }
