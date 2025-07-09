@@ -89,7 +89,7 @@ const AUCTION_TYPES = [
     gradientText: "bg-gradient-to-r from-cyan-300 to-cyan-500 bg-clip-text text-transparent",
     description: (
       <>
-        <span className="font-semibold text-cyan-400">Dutch Auction</span> starts high and drops the price until someone accepts. <span className="text-cyan-300 font-bold">First come, first served</span>—no waiting, no bidding wars.
+        <span className="font-semibold text-cyan-400">Dutch Auction</span> starts high and drops the price until someone accepts the price. <span className="text-cyan-300 font-bold">First come, first served</span>—no waiting, no bidding wars.
       </>
     ),
     steps: [

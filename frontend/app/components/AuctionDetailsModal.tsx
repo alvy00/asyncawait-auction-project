@@ -87,6 +87,7 @@ export default function AuctionDetailsModal({
           transition={{ duration: 0.35, ease: 'easeOut' }}
           className="w-full flex flex-col items-center"
         >
+
           {/* Hero Image with overlayed name and badge */}
           <div className="relative w-full aspect-[16/7] bg-black/30 rounded-t-3xl overflow-hidden">
             <AnimatePresence mode="wait">
@@ -109,6 +110,8 @@ export default function AuctionDetailsModal({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-purple-900/20 to-transparent" />
               </motion.div>
             </AnimatePresence>
+
+
             {/* Overlayed name and badge (top left) */}
             <div className="absolute top-0 left-0 p-6 flex flex-col gap-2 z-10">
               <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight text-white drop-shadow-lg" style={{ textShadow: '0 2px 16px rgba(0,0,0,0.45)' }}>{auction.item_name}</h2>
@@ -116,6 +119,8 @@ export default function AuctionDetailsModal({
                 {auction.auction_type?.toUpperCase() || "STANDARD"}
               </span>
             </div>
+
+
             {/* Image navigation */}
             {images.length > 1 && (
               <>
@@ -146,21 +151,39 @@ export default function AuctionDetailsModal({
               </>
             )}
           </div>
+
+
           {/* Details Section below image, compact and scrollable if needed */}
           <div className="w-full bg-white/20 backdrop-blur-2xl px-6 md:px-10 py-6 md:py-8 flex flex-col gap-5 md:gap-7 text-white rounded-b-3xl max-h-[60vh] overflow-y-auto custom-scrollbar">
             {/* Current Bid - emphasized and moved up */}
             <div className="flex flex-col items-center justify-center mb-2">
-              <span className="text-lg font-semibold text-white/80">Current Bid</span>
-              <span className="text-3xl md:text-4xl font-extrabold text-green-400 drop-shadow-sm mt-1 flex items-center gap-2">
-                <FaGavel className="inline-block text-green-300" />
-                {auction.highest_bid ? `$${auction.highest_bid.toFixed(2)}` : 'No Bids'}
-              </span>
+              {auction.auction_type === "phantom" ? (
+                <>
+                  <span className="text-lg font-semibold text-white/80">Total Bids</span>
+                  <span className="text-3xl md:text-4xl font-extrabold text-green-400 drop-shadow-sm mt-1 flex items-center gap-2">
+                    <FaGavel className="inline-block text-green-300" />
+                    {auction.total_bids ? auction.total_bids : 'No Bids'}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="text-lg font-semibold text-white/80">Current Bid</span>
+                  <span className="text-3xl md:text-4xl font-extrabold text-green-400 drop-shadow-sm mt-1 flex items-center gap-2">
+                    <FaGavel className="inline-block text-green-300" />
+                    {auction.highest_bid ? `$${auction.highest_bid.toFixed(2)}` : 'No Bids'}
+                  </span>
+                </>
+              )}
             </div>
+
+
             {/* Description */}
             <div className="text-base md:text-lg font-medium leading-relaxed tracking-wide text-white/95 mb-2 text-center">
               {auction.description}
             </div>
             <div className="w-full h-px bg-white/15 mb-2" />
+
+
             {/* Meta Info Row */}
             <div className="flex flex-row flex-wrap items-center justify-center gap-x-6 gap-y-3 w-full mb-2">
               {details.map((d, i) => (
@@ -172,6 +195,8 @@ export default function AuctionDetailsModal({
               ))}
             </div>
             <div className="w-full h-px bg-white/10 mb-2" />
+
+
             {/* Dates Row: Only Start and End */}
             <div className="flex flex-row flex-wrap items-center justify-center gap-x-8 gap-y-2 w-full mb-2">
               <div className="flex items-center gap-2">
@@ -187,36 +212,41 @@ export default function AuctionDetailsModal({
               </div>
             </div>
             <div className="w-full h-px bg-white/15 mb-2" />
+
+
             {/* Top Bidders Row */}
-            <div className="w-full mt-2 md:mt-4 px-0 md:px-0 relative">
-              <h4 className="text-white/90 font-semibold text-lg md:text-xl mb-3 tracking-wide drop-shadow-sm text-center">
-                Top Bidders
-              </h4>
-              {topBidders.length === 0 ? (
-                <div className="text-center text-white/60 italic py-6">No bidders yet.</div>
-              ) : (
-                <div className="flex gap-6 overflow-x-auto pb-2 justify-center custom-scrollbar">
-                  {topBidders.map((bidder, i) => (
-                    <Tooltip key={i}>
-                      <TooltipTrigger asChild>
-                        <div className="flex flex-col items-center gap-2 cursor-pointer select-none min-w-[64px]">
-                          <Avatar className="ring-2 ring-white/60 hover:ring-blue-400 transition-shadow w-16 h-16 md:w-20 md:h-20 shadow-lg">
-                            <AvatarImage src={bidder.avatar} alt={bidder.name} />
-                            <AvatarFallback>{bidder.name.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          <span className="text-xs md:text-base text-white/90 font-semibold drop-shadow-sm truncate max-w-[70px] text-center">{bidder.name}</span>
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="text-xs font-mono animate-fade-in">
-                        ${bidder.amount.toFixed(2)}
-                      </TooltipContent>
-                    </Tooltip>
-                  ))}
-                </div>
-              )}
-            </div>
+            {auction.auction_type !== "phantom" && 
+              <div className="w-full mt-2 md:mt-4 px-0 md:px-0 relative">
+                <h4 className="text-white/90 font-semibold text-lg md:text-xl mb-3 tracking-wide drop-shadow-sm text-center">
+                  Top Bidders
+                </h4>
+                {topBidders.length === 0 ? (
+                  <div className="text-center text-white/60 italic py-6">No bidders yet.</div>
+                ) : (
+                  <div className="flex gap-6 overflow-x-auto pb-2 justify-center custom-scrollbar">
+                    {topBidders.map((bidder, i) => (
+                      <Tooltip key={i}>
+                        <TooltipTrigger asChild>
+                          <div className="flex flex-col items-center gap-2 cursor-pointer select-none min-w-[64px]">
+                            <Avatar className="ring-2 ring-white/60 hover:ring-blue-400 transition-shadow w-16 h-16 md:w-20 md:h-20 shadow-lg">
+                              <AvatarImage src={bidder.avatar} alt={bidder.name} />
+                              <AvatarFallback>{bidder.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <span className="text-xs md:text-base text-white/90 font-semibold drop-shadow-sm truncate max-w-[70px] text-center">{bidder.name}</span>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="text-xs font-mono animate-fade-in">
+                          ${bidder.amount.toFixed(2)}
+                        </TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </div>
+                )}
+              </div>
+            }
           </div>
         </motion.div>
+
         {/* Custom Scrollbar Styling */}
         <style>{`
           .custom-scrollbar {

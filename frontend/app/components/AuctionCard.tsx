@@ -347,7 +347,8 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}`
-                : `$${auction.starting_price.toFixed(2)}`}
+                : `$${auction.starting_price.toFixed(2)}`
+              }
               {highestBid && winner && (
                 <div className="text-sm font-normal text-white/80 mt-1">by {winner}</div>
               )}

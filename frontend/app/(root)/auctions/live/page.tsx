@@ -9,6 +9,7 @@ import AuctionCardReverse from "../../../components/AuctionCardReverse";
 import { Auction, User } from "../../../../lib/interfaces";
 import { FaSpinner, FaSearch } from "react-icons/fa";
 import { motion } from "framer-motion";
+import AuctionCardPhantom from "../../../components/AuctionCardPhantom";
 
 const LiveAuctionsPage = () => {
   const [user, setUser] = useState<User>();
@@ -308,6 +309,13 @@ const LiveAuctionsPage = () => {
                 )}
                 {auction.auction_type === "reverse" && (
                   <AuctionCardReverse 
+                    key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
+                    auction={auction} 
+                    auctionCreator={auction.creator} 
+                  />
+                )}
+                {auction.auction_type === "phantom" && (
+                  <AuctionCardPhantom 
                     key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
                     auction={auction} 
                     auctionCreator={auction.creator} 
