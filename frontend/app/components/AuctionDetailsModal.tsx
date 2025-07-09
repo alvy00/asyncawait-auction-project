@@ -60,6 +60,23 @@ const Countdown = ({ endTime }: { endTime: string }) => {
   );
 };
 
+const getAuctionTypeGradient = (type?: string) => {
+  switch (type?.toLowerCase()) {
+    case "classic":
+      return "from-green-400 via-green-600 to-green-700 ring-green-500";
+    case "blitz":
+      return "from-orange-400 via-red-500 to-orange-600 ring-orange-500";
+    case "dutch":
+      return "from-cyan-400 via-cyan-600 to-cyan-700 ring-cyan-500";
+    case "reverse":
+      return "from-purple-700 via-purple-900 to-purple-800 ring-purple-700";
+    case "phantom":
+      return "from-yellow-600 via-yellow-700 to-yellow-800 ring-yellow-600";
+    default:
+      return "from-cyan-400 via-blue-400 to-purple-500 ring-blue-400";
+  }
+}
+
 export default function AuctionDetailsModal({
   open,
   onClose,
@@ -78,18 +95,17 @@ export default function AuctionDetailsModal({
 
   return (
     <Dialog open={open} onOpenChange={isOpen => !isOpen && onClose()}>
-      <DialogContent className="max-w-xl w-full max-h-[90vh] p-0 bg-transparent border-none shadow-none flex items-center justify-center">
+      <DialogContent className="max-w-[1200px] w-full max-h-[90vh] p-0 bg-transparent border-none shadow-none flex flex-row items-stretch justify-center gap-6">
         <DialogTitle></DialogTitle>
         <motion.div
           initial={{ opacity: 0, y: 40, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 40, scale: 0.98 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}
-          className="w-full flex flex-col items-center"
+          className="flex w-full max-h-[90vh]"
         >
-
-          {/* Hero Image with overlayed name and badge */}
-          <div className="relative w-full aspect-[16/7] bg-black/30 rounded-t-3xl overflow-hidden">
+          {/* Left side: Image carousel */}
+          <div className="relative w-[60%] rounded-l-3xl overflow-hidden bg-black/30">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentImageIndex}
@@ -103,7 +119,7 @@ export default function AuctionDetailsModal({
                   src={images[currentImageIndex] || "/fallback.jpg"}
                   alt="Auction Image"
                   fill
-                  className="object-cover w-full h-full rounded-t-3xl"
+                  className="object-cover w-full h-full rounded-l-3xl"
                   sizes="(max-width: 768px) 100vw, 900px"
                   priority
                 />
@@ -111,15 +127,21 @@ export default function AuctionDetailsModal({
               </motion.div>
             </AnimatePresence>
 
-
             {/* Overlayed name and badge (top left) */}
             <div className="absolute top-0 left-0 p-6 flex flex-col gap-2 z-10">
-              <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight text-white drop-shadow-lg" style={{ textShadow: '0 2px 16px rgba(0,0,0,0.45)' }}>{auction.item_name}</h2>
-              <span className="inline-block text-xs md:text-base font-semibold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 text-white px-4 py-1 rounded-full shadow-md border border-white/30 ring-2 ring-blue-400/30 animate-pulse w-fit">
-                {auction.auction_type?.toUpperCase() || "STANDARD"}
+              <h2
+                className="text-2xl md:text-4xl font-extrabold tracking-tight text-white drop-shadow-lg"
+                style={{ textShadow: '0 2px 16px rgba(0,0,0,0.45)' }}
+              >
+                {auction.item_name}
+              </h2>
+              <span
+                className={`inline-block text-xs md:text-base font-semibold bg-gradient-to-r text-white px-4 py-1 rounded-full shadow-md border border-white/30 ring-2 animate-pulse w-fit
+                ${getAuctionTypeGradient(auction.auction_type)}`}
+              >
+                {auction.auction_type?.toUpperCase()}
               </span>
             </div>
-
 
             {/* Image navigation */}
             {images.length > 1 && (
@@ -152,9 +174,8 @@ export default function AuctionDetailsModal({
             )}
           </div>
 
-
-          {/* Details Section below image, compact and scrollable if needed */}
-          <div className="w-full bg-white/20 backdrop-blur-2xl px-6 md:px-10 py-6 md:py-8 flex flex-col gap-5 md:gap-7 text-white rounded-b-3xl max-h-[60vh] overflow-y-auto custom-scrollbar">
+          {/* Right side: Details */}
+          <div className="w-[40%] bg-white/20 backdrop-blur-2xl px-6 md:px-10 py-6 md:py-8 flex flex-col gap-5 md:gap-7 text-white rounded-r-3xl max-h-[90vh] overflow-y-auto custom-scrollbar">
             {/* Current Bid - emphasized and moved up */}
             <div className="flex flex-col items-center justify-center mb-2">
               {auction.auction_type === "phantom" ? (
@@ -176,13 +197,11 @@ export default function AuctionDetailsModal({
               )}
             </div>
 
-
             {/* Description */}
             <div className="text-base md:text-lg font-medium leading-relaxed tracking-wide text-white/95 mb-2 text-center">
               {auction.description}
             </div>
             <div className="w-full h-px bg-white/15 mb-2" />
-
 
             {/* Meta Info Row */}
             <div className="flex flex-row flex-wrap items-center justify-center gap-x-6 gap-y-3 w-full mb-2">
@@ -196,7 +215,6 @@ export default function AuctionDetailsModal({
             </div>
             <div className="w-full h-px bg-white/10 mb-2" />
 
-
             {/* Dates Row: Only Start and End */}
             <div className="flex flex-row flex-wrap items-center justify-center gap-x-8 gap-y-2 w-full mb-2">
               <div className="flex items-center gap-2">
@@ -204,7 +222,7 @@ export default function AuctionDetailsModal({
                 <span className="font-semibold text-white/80">Starts:</span>
                 <span className="text-white/80">{new Date(auction.start_time).toLocaleString()}</span>
               </div>
-              <span className="h-6 w-px bg-white/20 mx-3 hidden sm:inline-block" />
+              <span className="h-6 w-px bg-white/20 mx-3 hidden" />
               <div className="flex items-center gap-2">
                 <FaCalendarAlt className="text-lg md:text-xl" />
                 <span className="font-semibold text-white/80">Ends:</span>
@@ -212,7 +230,6 @@ export default function AuctionDetailsModal({
               </div>
             </div>
             <div className="w-full h-px bg-white/15 mb-2" />
-
 
             {/* Top Bidders Row */}
             {auction.auction_type !== "phantom" && 
@@ -242,8 +259,10 @@ export default function AuctionDetailsModal({
                     ))}
                   </div>
                 )}
+                <div className="w-full h-px bg-white/15 mb-2" />
               </div>
             }
+
           </div>
         </motion.div>
 
