@@ -3,12 +3,12 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { Button } from "../../../components/ui/button";
-import { CheckCircle, Zap, Timer, TrendingDown, TrendingUp, Award, Gavel } from "lucide-react";
+import { CheckCircle, Zap, Timer, TrendingDown, TrendingUp, Award, Gavel, EyeOff, PenTool, Trophy, Clock, Target, ShieldCheck } from "lucide-react";
 
 const AUCTION_TYPES = [
   {
     key: "classic",
-    label: "Classic Auction",
+    label: "Classic",
     icon: (
       <Gavel className="w-16 h-16 text-green-400 drop-shadow-lg" />
     ),
@@ -45,7 +45,7 @@ const AUCTION_TYPES = [
   },
   {
     key: "blitz",
-    label: "Blitz Auction",
+    label: "Blitz",
     icon: (
       <Timer className="w-16 h-16 text-orange-400 drop-shadow-lg" />
     ),
@@ -81,7 +81,7 @@ const AUCTION_TYPES = [
   },
   {
     key: "dutch",
-    label: "Dutch Auction",
+    label: "Dutch",
     icon: (
       <Zap className="w-16 h-16 text-cyan-400 drop-shadow-lg" />
     ),
@@ -89,7 +89,7 @@ const AUCTION_TYPES = [
     gradientText: "bg-gradient-to-r from-cyan-300 to-cyan-500 bg-clip-text text-transparent",
     description: (
       <>
-        <span className="font-semibold text-cyan-400">Dutch Auction</span> starts high and drops the price until someone accepts. <span className="text-cyan-300 font-bold">First come, first served</span>—no waiting, no bidding wars.
+        <span className="font-semibold text-cyan-400">Dutch Auction</span> starts high and drops the price until someone accepts the price. <span className="text-cyan-300 font-bold">First come, first served</span>—no waiting, no bidding wars.
       </>
     ),
     steps: [
@@ -117,7 +117,7 @@ const AUCTION_TYPES = [
   },
   {
     key: "reverse",
-    label: "Reverse Auction",
+    label: "Reverse",
     icon: (
       <TrendingDown className="w-16 h-16 text-purple-400 drop-shadow-lg" />
     ),
@@ -151,6 +151,43 @@ const AUCTION_TYPES = [
       </motion.div>
     ),
   },
+  {
+    key: "phantom",
+    label: "Phantom",
+    icon: (
+      <EyeOff className="w-16 h-16 text-yellow-600 drop-shadow-lg" />
+    ),
+    accent: "from-orange-800 to-yellow-900",
+    gradientText: "bg-gradient-to-r from-yellow-300 to-yellow-400 bg-clip-text text-transparent",
+    description: (
+      <>
+        <span className="font-semibold text-yellow-600">Phantom Auction</span> is a secretive bidding arena where bids are invisible and tactics reign. <span className="text-yellow-500 font-bold">No one sees the top bid — only the boldest win.</span>
+      </>
+    ),
+    steps: [
+      { icon: <EyeOff className="w-6 h-6 text-yellow-600" />, text: "Bidders enter a concealed auction." },
+      { icon: <PenTool className="w-6 h-6 text-yellow-600" />, text: "Place hidden bids without knowing others' offers." },
+      { icon: <Clock className="w-6 h-6 text-yellow-600" />, text: "Wait until time runs out." },
+      { icon: <Trophy className="w-6 h-6 text-yellow-600" />, text: "The top bid is revealed. One winner emerges." },
+    ],
+    features: [
+      { icon: <EyeOff className="w-5 h-5 text-yellow-600" />, label: "Hidden Bids" },
+      { icon: <Target className="w-5 h-5 text-yellow-600" />, label: "Tactical Play" },
+      { icon: <ShieldCheck className="w-5 h-5 text-yellow-600" />, label: "Fair & Secure" },
+    ],
+    cta: { label: "Explore Phantom Auctions", href: "/auctions/live?type=phantom" },
+    animation: (
+      <motion.div
+        className="flex gap-2 items-center text-yellow-600 font-mono text-2xl"
+        animate={{ opacity: [0.2, 1, 0.2] }}
+        transition={{ repeat: Infinity, duration: 2 }}
+      >
+        <span className="italic">???</span>
+        <span className="font-bold">Top Bid Hidden</span>
+      </motion.div>
+    ),
+  }
+
 ];
 
 export function AuctionTypesSection() {

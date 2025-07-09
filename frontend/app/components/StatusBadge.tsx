@@ -111,8 +111,29 @@ const StatusBadge = ({ type, status, auctionId }) => {
       default:
         return null;
     }
-  } else {
-    return null;
+  } else if (type === "phantom") {
+    switch (normalizedStatus) {
+      case "live":
+        bgClasses = "bg-gradient-to-r from-yellow-800 to-yellow-600";
+        text = "PHANTOM | LIVE";
+        Icon = FaBolt;
+        tooltipText = "Place hidden bids!";
+        break;
+      case "upcoming":
+        bgClasses = "bg-gradient-to-r from-yellow-500 to-yellow-400";
+        text = "PHANTOM | UPCOMING";
+        Icon = FaHourglassHalf;
+        tooltipText = "Auction starts soon";
+        break;
+      case "ended":
+        bgClasses = "bg-gradient-to-r from-gray-700 to-gray-600";
+        text = "PHANTOM | ENDED";
+        Icon = FaStopwatch;
+        tooltipText = "Auction has ended";
+        break;
+      default:
+        return null;
+    }
   }
 
   return (

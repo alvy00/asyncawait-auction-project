@@ -491,6 +491,59 @@ auctionRouter.post('/bidlow', async (req, res) => {
   }
 });
 
+// Place Hidden Bid
+auctionRouter.post('/bidhidden', async (req, res) => {
+  try {
+    const { auction_id, amount } = req.body;
+    const user = await getUser(req);
+
+    if (!user) {
+      console.error('Unauthorized user');
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { data: auction, error: auctionErr } = await supabase
+      .from('auctions')
+      .select('*')
+      .eq('auction_id', auction_id)
+      .single();
+
+    if (auctionErr) {
+      console.error('Auction not found:', auctionErr);
+      return res.status(400).json({ message: 'Auction not found!', data: auction });
+    }
+
+    if (new Date() > new Date(auction.end_time)) {
+      console.error('Auction has ended');
+      return res.status(400).json({ message: 'Auction has ended :(' });
+    }
+
+    if (isNaN(amount) || amount <= 0) {
+      console.error('Invalid bid amount:', amount);
+      return res.status(400).json({ message: 'Please enter a valid bid amount' });
+    }
+
+    const { data: bid, error: bidErr } = await supabase.rpc('place_bid_trans_hidden', {
+      p_auction_id: auction_id,
+      p_user_id: user.id,
+      p_bid_amount: amount,
+    });
+
+    if (bidErr) {
+      console.error('Error placing hidden bid:', bidErr);
+      return res.status(400).json({ message: 'Bid could not be placed!', error: bidErr, data: bid });
+    }
+
+    console.log('Hidden bid placed successfully:', bid);
+    return res.status(200).json({ message: 'Bid placed!' });
+
+  } catch (e) {
+    console.error('Error in place hidden bid route:', e);
+    return res.status(500).json({ message: 'Something went wrong!' });
+  }
+});
+
+
 // Get User Bid History
 auctionRouter.post('/bidhistory', async (req, res) => {
   const { user_id } = req.body;
