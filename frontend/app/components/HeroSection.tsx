@@ -184,12 +184,18 @@ export const HeroSection = () => {
           {/* Right content - Card deck with optimized mobile animation */}
           <div className="lg:col-span-5">
             <div className="relative mx-auto max-w-[280px] xs:max-w-[320px] sm:max-w-[340px] md:max-w-[380px] lg:max-w-full h-[400px] sm:h-[450px] md:h-[500px] flex items-center justify-center bg-black/30 rounded-xl border border-white/20">
-              {/* Show loading */}
-              {loading && (
-                <div className="text-white text-center px-4">
-                  <div className="animate-pulse text-lg">Loading featured auctions...</div>
+              {/* Show skeleton loading */}
+              {loading && 
+                <div className="w-full rounded-xl border border-white/10 bg-white/5 p-4 animate-pulse space-y-4 backdrop-blur-sm shadow-inner">
+                  <div className="h-95 bg-gray-700/30 rounded-md"></div>
+                  <div className="h-4 bg-gray-600/30 rounded w-3/4"></div>
+                  <div className="h-3 bg-gray-500/20 rounded w-1/2"></div>
+                  <div className="flex items-center justify-between mt-3">
+                    <div className="h-4 w-20 bg-gray-500/30 rounded"></div>
+                    <div className="h-4 w-10 bg-gray-500/20 rounded"></div>
+                  </div>
                 </div>
-              )}
+              }
 
               {/* Show no auctions message */}
               {!loading && !featuredAuctions?.length && (

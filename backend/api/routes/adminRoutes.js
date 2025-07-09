@@ -172,7 +172,7 @@ adminRouter.post('/newsletter', async (req, res) => {
     const response = await fetch("https://api.buttondown.email/v1/subscribers", {
       method: "POST",
       headers: {
-        Authorization: `Token 90bf6252-fe17-4259-9d27-fd0dcf82496d`,
+        Authorization: `Token ${process.env.BUTTONDOWN_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({email_address: email }),
