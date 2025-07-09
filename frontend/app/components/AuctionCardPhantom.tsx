@@ -18,15 +18,14 @@ interface AuctionCardProps {
 
 const FIREY_ORANGE = "#FF4500"; // Firey Orange (OrangeRed)
 
-const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator }) => {
+const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreator }) => {
   const controls = useAnimation();
   const [winner, setWinner] = useState(null);
   const [isBidding, setIsBidding] = useState(false);
   const [submittingBid, setSubmittingBid] = useState(false);
-  const [bidAmount, setBidAmount] = useState(
-    auction.highest_bid ? auction.highest_bid + 1 : auction.starting_price
-  );
+  const [bidAmount, setBidAmount] = useState(auction.starting_price);
   const [highestBid, setHighestBid] = useState(auction.highest_bid);
+  const [totalBids, setTotalBids] = useState(auction.total_bids);
   const [user, setUser] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
   const [refresh, setRefresh] = useState(false);
@@ -34,7 +33,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
   const [shake, setShake] = useState(false);
 
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : "/fallback.jpg";
-  const token =typeof window !== "undefined"? localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken") : null;
+  const token = typeof window !== "undefined"? localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken") : null;
 
   // fetch user
   useEffect(() => {
@@ -87,8 +86,10 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
         amount: formData.get("amount"),
       };
 
+      // 
+      // https://asyncawait-auction-project.onrender.com/api/auctions/bidhidden
       const res = await fetch(
-        "https://asyncawait-auction-project.onrender.com/api/auctions/bid",
+        "http://localhost:8000/api/auctions/bidhidden",
         {
           method: "POST",
           headers: {
@@ -108,11 +109,14 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
 
       toast.success(`Bid of $${bidAmount} placed successfully!`);
       setHighestBid(Number(bidAmount));
+      setTotalBids(prev => prev+1);
       setIsBidding(false);
       setRefresh(prev => !prev);
+
     } catch (err) {
       console.error("Bid submission error:", err);
       toast.error("Something went wrong. Please try again.");
+
     } finally {
       setSubmittingBid(false);
     }
@@ -243,12 +247,12 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
       animate={{ opacity: 1, y: 0 }}
       whileHover={{
         scale: 1.02,
-        boxShadow: "0 0 5px 1px rgba(255, 69, 0, 0.45)",
+        boxShadow: "0 0 6px 2px rgba(240, 200, 0, 0.5)",
         transition: { duration: 0.35, ease: "easeOut" },
       }}
       className={`relative w-full h-[500px] group rounded-lg overflow-hidden 
-        bg-gradient-to-br from-[#4a0d0d] via-[#801111] to-[#a42c2c]
-        border border-white/20 text-white select-none`}
+        bg-gradient-to-br from-[#3f3700] via-[#7a6d00] to-[#d4b400]
+        border border-yellow-700/40 text-white select-none`}
     >
 
       {/* Image container */}
@@ -264,56 +268,46 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
       </div>
 
       {/* Status and Favorite Badge */}
-      <StatusBadge type={"blitz"} status={auction.status} auctionId={auction.auction_id}/>
+      <StatusBadge type={"phantom"} status={auction.status} auctionId={auction.auction_id}/>
       <FavoriteBadge userId={user?.user_id} auctionId={auction.auction_id} initialFavorited={auction.isFavorite} isHovered={isHovered} />
       
       {/* Content area */}
       <div className="p-5 flex flex-col justify-between h-[45%] bg-gradient-to-t from-black/80 to-transparent">
         <div onClick={() => setDetailsOpen(true)}>
           <h3
-            className="text-2xl font-bold tracking-wide uppercase mb-2 text-orange-100 drop-shadow-sm cursor-pointer"
+            className="text-2xl font-bold tracking-wide uppercase mb-2 text-yellow-100 drop-shadow-sm cursor-pointer"
           >
             #{auction.item_name}
           </h3>
           <div className="mt-2 text-lg">
-            {/* Bidding starts / Current Bid Label */}
+            {/* Bidding starts Label */}
             <div className={`text-gray-400 text-xs mb-1 font-medium`}>
-            {!highestBid ? (
-              <span className="text-gray-300 flex items-center gap-1">
-                <FaBullhorn className="text-yellow-400" />
-                Start the Bidding war at:
-              </span>
-            ) : (
-              <span className="text-gray-300">Current Highest bid:</span>
-              
-            )}
+                <span className="text-gray-300 flex items-center gap-1">
+                  <FaBullhorn className="text-yellow-400" />
+                  Bidding starts at:
+                </span>
             </div>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-purple-500 font-extrabold text-3xl">
-              {highestBid
-                ? `$${highestBid.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`
-                : `$${auction.starting_price.toFixed(2)}`
-              }
+
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500 font-extrabold text-3xl">
+                ${auction.starting_price.toFixed(2)}
             </span>
-            
           </div>
 
-          {/* Higest bid and name */}
+          {/* Higest bid and name(nothing here rn) */}
           <div
             className="mt-1 text-sm flex items-center gap-2 select-none
             text-yellow-300 font-semibold tracking-wide
             transition-all duration-300 ease-in-out"
           >
-            <div className="text-gray-200">by</div>
-            <div className="transition-all duration-200">
-              {winner || "—"}
-            </div>
+           {totalBids ? (`
+                ${totalBids} Bids Already!!
+            `) : (
+                ""
+           )} 
           </div>
 
           {/* Countdown */}
-          <div className="mt-3 flex items-center gap-2 text-sm font-semibold text-orange-400">
+          <div className="mt-3 flex items-center gap-2 text-sm font-semibold text-yellow-400">
             <span className="text-white bg-white/5 backdrop-blur-sm px-3 py-1 rounded-md border border-white/10 font-mono tracking-wide">
               <Countdown endTime={auction.end_time} />
             </span>
@@ -358,9 +352,9 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
                         setIsBidding(true);
                         setShake(true);
                       }}
-                      className="w-full h-full flex items-center justify-center rounded-md border border-orange-700 bg-orange-800 hover:bg-orange-700 font-medium text-white backdrop-blur-sm transition-all duration-300 ease-in-out cursor-pointer"
+                      className="w-full h-full flex items-center justify-center rounded-md border border-yellow-700 bg-yellow-800 hover:bg-yellow-700 font-medium text-white backdrop-blur-sm transition-all duration-300 ease-in-out cursor-pointer"
                     >
-                      Place Higher Bid
+                      Place Hidden Bid
                     </button>
                   </div>
 
@@ -377,18 +371,14 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
                       name="amount"
                       value={bidAmount}
                       onChange={(e) => setBidAmount(Number(e.target.value))}
-                      min={
-                        auction.starting_price === auction.highest_bid
-                          ? auction.starting_price
-                          : Math.max(auction.starting_price, auction.highest_bid) + 1
-                      }
+                      min={auction.starting_price}
                       placeholder="Your bid"
-                      className="w-2/3 max-w-[100px] p-2 rounded-lg border bg-gray-800 text-white border-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-400 transition"
+                      className="w-2/3 max-w-[100px] p-2 rounded-lg border bg-gray-800 text-white border-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder-gray-400 transition"
                     />
                     <button
                       type="submit"
                       disabled={submittingBid}
-                      className={`px-3 py-2 bg-orange-800 text-white font-semibold rounded-lg border border-orange-700 shadow hover:bg-orange-700 hover:border-orange-500 transition-all duration-300 ease-in-out cursor-pointer ${
+                      className={`px-3 py-2 bg-yellow-700 text-black font-semibold rounded-lg border border-yellow-600 shadow hover:bg-yellow-600 transition-all duration-300 ease-in-out cursor-pointer ${
                         submittingBid ? "opacity-50 cursor-not-allowed" : ""
                       }`}
                     >
@@ -440,7 +430,8 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
         `}
       </style>
     </motion.div>
+
   );
 };
 
-export default AuctionCardBlitz;
+export default AuctionCardPhantom;

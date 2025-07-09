@@ -22,6 +22,7 @@ const auctionTypes = [
   { value: 'blitz', label: 'Blitz', description: 'Short time, rapid bidding.' },
   { value: 'dutch', label: 'Dutch', description: 'Price starts high and decreases over time.' },
   { value: 'reverse', label: 'Reverse', description: 'Lowest bid wins instead of highest.' },
+  { value: 'phantom', label: 'Phantom', description: 'Bids remain hidden until the auction ends, then the winner is revealed.' }
 ];
 
 const LoadingSpinner = () => (
