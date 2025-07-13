@@ -5,7 +5,7 @@ import { FaArrowDown, FaBolt, FaHourglassHalf, FaStopwatch, FaTag } from "react-
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { Button } from "../../components/ui/button";
-import { Auction } from "../../lib/interfaces";
+import { Auction, User } from "../../lib/interfaces";
 import { Countdown } from "./Countdown";
 import StatusBadge from "./StatusBadge";
 import FavoriteBadge from "./FavouriteBadge";
@@ -14,15 +14,15 @@ import AuctionDetailsModal from "./AuctionDetailsModal";
 interface AuctionCardProps {
   auction: Auction;
   auctionCreator: string;
+  user: User;
 }
 
-const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction, auctionCreator }) => {
+const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction, auctionCreator, user }) => {
   const controls = useAnimation();
   const [auction, setAuction] = useState(initialAuction);
   const [isBidding, setIsBidding] = useState(false);
   const [submittingBid, setSubmittingBid] = useState(false);
   const [currentPrice, setCurrentPrice] = useState(initialAuction.starting_price);
-  const [user, setUser] = useState(null);
   const [shake, setShake] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -35,31 +35,31 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
       : null;
 
   // fetch user
-  useEffect(() => {
-    const getUser = async () => {
-      const token =
-        localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
-      if (!token) return;
+  // useEffect(() => {
+  //   const getUser = async () => {
+  //     const token =
+  //       localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
+  //     if (!token) return;
 
-      try {
-        const res = await fetch("https://asyncawait-auction-project.onrender.com/api/getuser", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+  //     try {
+  //       const res = await fetch("https://asyncawait-auction-project.onrender.com/api/getuser", {
+  //         method: "GET",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       });
 
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data);
-        }
-      } catch (e) {
-        console.error("Error fetching user:", e);
-      }
-    };
-    getUser();
-  }, []);
+  //       if (res.ok) {
+  //         const data = await res.json();
+  //         setUser(data);
+  //       }
+  //     } catch (e) {
+  //       console.error("Error fetching user:", e);
+  //     }
+  //   };
+  //   getUser();
+  // }, []);
 
   // handle bid
   const submitBid = async () => {
@@ -253,18 +253,19 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
             </Button>
           ) : (
             <>
-              <motion.button
-                onClick={handleAcceptClick}
-                whileTap={{ scale: 0.95 }}
-                disabled={showConfirmModal}
-                className={`px-6 py-3 rounded-md border font-bold text-white backdrop-blur-sm transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-cyan-400
-                  ${showConfirmModal
-                    ? "bg-cyan-400 cursor-not-allowed opacity-60"
-                    : "bg-cyan-600 hover:bg-cyan-500 border-cyan-400 cursor-pointer"}`}
-              >
-                Accept Price
-              </motion.button>
-
+              {auction?.user_id !== user?.user_id &&
+                <motion.button
+                  onClick={handleAcceptClick}
+                  whileTap={{ scale: 0.95 }}
+                  disabled={showConfirmModal}
+                  className={`px-6 py-3 rounded-md border font-bold text-white backdrop-blur-sm transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-cyan-400
+                    ${showConfirmModal
+                      ? "bg-cyan-400 cursor-not-allowed opacity-60"
+                      : "bg-cyan-600 hover:bg-cyan-500 border-cyan-400 cursor-pointer"}`}
+                >
+                  Accept Price
+                </motion.button>
+              }
               {showConfirmModal && (
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}

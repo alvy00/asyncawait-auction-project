@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { FaArrowDown, FaClock, FaBan, FaBullhorn, FaGavel } from "react-icons/fa";
-import { Auction } from "../../lib/interfaces";
+import { Auction, User } from "../../lib/interfaces";
 import { Button } from "../../components/ui/button";
 import Image from "next/image";
 import { Countdown } from "./Countdown";
@@ -14,11 +14,12 @@ import AuctionDetailsModal from "./AuctionDetailsModal";
 interface AuctionCardProps {
   auction: Auction;
   auctionCreator: string;
+  user: User;
 }
 
 const FIREY_PURPLE = "rgba(191, 85, 236, "; // vibrant purple (rgba base)
 
-const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreator }) => {
+const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreator, user }) => {
   const controls = useAnimation();
   const [isBidding, setIsBidding] = useState(false);
   const [winner, setWinner] = useState(null);
@@ -27,7 +28,6 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
     auction.highest_bid ? auction.highest_bid - 2 : auction.starting_price
   );
   const [highestBid, setHighestBid] = useState(auction.highest_bid);
-  const [user, setUser] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -38,42 +38,42 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
   const token = typeof window !== "undefined"? localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken") : null;
   
   // fetch user
-  useEffect(() => {
-    const getUser = async () => {
-      const token =
-        localStorage.getItem("sessionToken") ||
-        sessionStorage.getItem("sessionToken");
-      if (!token) {
-        console.warn("No token found");
-        return;
-      }
+  // useEffect(() => {
+  //   const getUser = async () => {
+  //     const token =
+  //       localStorage.getItem("sessionToken") ||
+  //       sessionStorage.getItem("sessionToken");
+  //     if (!token) {
+  //       console.warn("No token found");
+  //       return;
+  //     }
 
-      try {
-        const res = await fetch(
-          "https://asyncawait-auction-project.onrender.com/api/getuser",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+  //     try {
+  //       const res = await fetch(
+  //         "https://asyncawait-auction-project.onrender.com/api/getuser",
+  //         {
+  //           method: "GET",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         }
+  //       );
 
-        if (!res.ok) {
-          const err = await res.json();
-          console.error("Failed to fetch user:", err.message);
-          return;
-        }
+  //       if (!res.ok) {
+  //         const err = await res.json();
+  //         console.error("Failed to fetch user:", err.message);
+  //         return;
+  //       }
 
-        const data = await res.json();
-        setUser(data);
-      } catch (e) {
-        console.error("Error fetching user:", e);
-      }
-    };
-    getUser();
-  }, []);
+  //       const data = await res.json();
+  //       setUser(data);
+  //     } catch (e) {
+  //       console.error("Error fetching user:", e);
+  //     }
+  //   };
+  //   getUser();
+  // }, []);
 
   // submit bid
   const handleBidSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -377,6 +377,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
                         : "opacity-100 scale-100 pointer-events-auto"
                     }`}
                   >
+                  {auction?.user_id !== user?.user_id ? (
                     <button
                       onClick={() => {
                         setIsBidding(true);
@@ -388,6 +389,11 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
                     >
                       Place Lower Bid
                     </button>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center rounded-md border border-gray-500 bg-gray-800 text-gray-300 font-medium cursor-not-allowed shadow-inner text-sm">
+                      You created this auction
+                    </div>
+                  )}
                   </div>
 
                   {/* Bid Form (slide/scale/blur animated transition) */}
