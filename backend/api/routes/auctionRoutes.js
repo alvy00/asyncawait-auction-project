@@ -609,7 +609,7 @@ auctionRouter.post('/topbids', async (req, res) => {
     const { data, error } = await supabase
       .from('bids')
       .select(`
-        amount,
+        bid_amount,
         created_at,
         users(name)
       `)
