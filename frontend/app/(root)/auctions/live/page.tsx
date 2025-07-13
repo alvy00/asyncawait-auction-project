@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import AuctionCard from "../../../components/AuctionCard";
 import AuctionCardBlitz from "../../../components/AuctionCardBlitz";
 import AuctionCardDutch from "../../../components/AuctionCardDutch";
@@ -11,6 +12,7 @@ import { FaSpinner, FaSearch } from "react-icons/fa";
 import { motion } from "framer-motion";
 import AuctionCardPhantom from "../../../components/AuctionCardPhantom";
 import { useUser } from "../../../../lib/user-context";
+import toast from "react-hot-toast";
 
 const LiveAuctionsPage = () => {
   const { user } = useUser();
@@ -18,7 +20,8 @@ const LiveAuctionsPage = () => {
   const [favAuctionIDs, setFavAuctionIDs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFavsLoading, setIsFavsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
   const [activeFilter, setActiveFilter] = useState("all");
 
   const categories = ["all", "electronics", "art", "vehicles", "fashion", "other"];
@@ -157,6 +160,7 @@ const LiveAuctionsPage = () => {
         isFavorite: favAuctionIDs.includes(auction.auction_id),
       }));
   }, [auctions, searchTerm, activeFilter, favAuctionIDs]);
+
 
   const isAnyLoading = isLoading || isFavsLoading;
 
