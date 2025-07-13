@@ -212,7 +212,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
               <FaArrowDown className="text-cyan-500" />
               Price dropped to:
             </span>
-            <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-cyan-500 text-3xl">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-blue-500 font-extrabold text-3xl">
               ${currentPrice.toFixed(2)}{" "}
               <span className="text-base text-green-500 font-semibold">
                 ({Math.round(((auction.starting_price - currentPrice) / auction.starting_price) * 100)}%)
