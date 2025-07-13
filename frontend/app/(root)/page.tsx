@@ -63,15 +63,15 @@ export default function Home() {
       <main className="relative overflow-hidden text-white">
         {/* <AnimatedBackground /> */}
         <HeroSection />
-        <CategoryShowcase />
+        {/* <CategoryShowcase /> */}
         <AuctionTypesSection />
         <LiveAuctionsSection />
         <MarketingShowcase />
         <WhyChooseUsSection />
-        <ConversionSection />
+        {/* <ConversionSection /> */}
         {/* <CategorySection /> */}
         <NewsletterSection />
-        <CTASection />
+        {/* <CTASection /> */}
         <TestimonialsSection />
       </main>
     </>

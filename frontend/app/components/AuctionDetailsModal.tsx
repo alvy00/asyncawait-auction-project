@@ -1,31 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "../../components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../components/ui/dialog";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Auction } from "../../lib/interfaces";
 import Image from "next/image";
-import {
-  FaTag,
-  FaBoxes,
-  FaDollarSign,
-  FaGavel,
-  FaCalendarAlt,
-  FaRegClock,
-  FaArrowRight,
-  FaArrowLeft,
-} from "react-icons/fa";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "../../components/ui/avatar";
+import { FaTag, FaBoxes, FaDollarSign, FaGavel, FaCalendarAlt, FaRegClock, FaArrowRight, FaArrowLeft } from "react-icons/fa";
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { Tooltip, TooltipTrigger, TooltipContent } from "../../components/ui/tooltip";
 
 interface AuctionDetailsModalProps {
@@ -34,6 +16,7 @@ interface AuctionDetailsModalProps {
   auction: Auction | null;
 }
 
+// clock
 const Countdown = ({ endTime }: { endTime: string }) => {
   const [timeLeft, setTimeLeft] = useState("");
 
@@ -60,6 +43,7 @@ const Countdown = ({ endTime }: { endTime: string }) => {
   );
 };
 
+// badge
 const getAuctionTypeGradient = (type?: string) => {
   switch (type?.toLowerCase()) {
     case "classic":
@@ -77,15 +61,36 @@ const getAuctionTypeGradient = (type?: string) => {
   }
 }
 
-export default function AuctionDetailsModal({
-  open,
-  onClose,
-  auction,
-}: AuctionDetailsModalProps) {
+export default function AuctionDetailsModal({ open, onClose, auction }: AuctionDetailsModalProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  if (!auction) return null;
+  const [ topBids, setTopBids] = useState([]);
   const images = auction.images || [];
-  const topBidders = auction.top_bidders || [];
+
+  // get top bids
+  useEffect(() => {
+    const getTopBids = async () => {
+      try {
+        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/topbids', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ auction_id: auction.auction_id }),
+        });
+
+        const data = await res.json();
+        setTopBids(data);
+      } catch (e) {
+        console.error('Failed to fetch top bids:', e);
+      }
+    };
+
+    if (auction?.auction_id) {
+      getTopBids();
+    }
+  }, [auction?.auction_id]);
+
+  if (!auction) return null;
 
   const details = [
     { icon: <FaTag />, label: 'Category', value: auction.category },
@@ -201,19 +206,19 @@ export default function AuctionDetailsModal({
             <div className="text-base md:text-lg font-medium leading-relaxed tracking-wide text-white/95 mb-2 text-center">
               {auction.description}
             </div>
-            <div className="w-full h-px bg-white/15 mb-2" />
+            <hr className="border-t border-white/15 mb-2" />
 
             {/* Meta Info Row */}
             <div className="flex flex-row flex-wrap items-center justify-center gap-x-6 gap-y-3 w-full mb-2">
               {details.map((d, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <span className="text-xl md:text-2xl">{d.icon}</span>
-                  <span className="text-sm md:text-base font-medium text-white/80">{d.value}</span>
+                  <span className="text-sm md:text-base font-medium text-white/80">{d.value.toUpperCase()}</span>
                   {i < details.length - 1 && <span className="h-6 w-px bg-white/20 mx-3 hidden sm:inline-block" />}
                 </div>
               ))}
             </div>
-            <div className="w-full h-px bg-white/10 mb-2" />
+            <hr className="border-t border-white/15 mb-2" />
 
             {/* Dates Row: Only Start and End */}
             <div className="flex flex-row flex-wrap items-center justify-center gap-x-8 gap-y-2 w-full mb-2">
@@ -229,19 +234,19 @@ export default function AuctionDetailsModal({
                 <span className="text-white/80">{new Date(auction.end_time).toLocaleString()}</span>
               </div>
             </div>
-            <div className="w-full h-px bg-white/15 mb-2" />
+            <hr className="border-t border-white/15 mb-2" />
 
             {/* Top Bidders Row */}
             {auction.auction_type !== "phantom" && 
               <div className="w-full mt-2 md:mt-4 px-0 md:px-0 relative">
                 <h4 className="text-white/90 font-semibold text-lg md:text-xl mb-3 tracking-wide drop-shadow-sm text-center">
-                  Top Bidders
+                  Top Bids
                 </h4>
-                {topBidders.length === 0 ? (
-                  <div className="text-center text-white/60 italic py-6">No bidders yet.</div>
+                {topBids.length === 0 ? (
+                  <div className="text-center text-white/60 italic py-6">No bids yet.</div>
                 ) : (
                   <div className="flex gap-6 overflow-x-auto pb-2 justify-center custom-scrollbar">
-                    {topBidders.map((bidder, i) => (
+                    {topBids.map((bidder, i) => (
                       <Tooltip key={i}>
                         <TooltipTrigger asChild>
                           <div className="flex flex-col items-center gap-2 cursor-pointer select-none min-w-[64px]">
@@ -259,7 +264,7 @@ export default function AuctionDetailsModal({
                     ))}
                   </div>
                 )}
-                <div className="w-full h-px bg-white/15 mb-2" />
+                <hr className="border-t border-white/15 mb-2" />
               </div>
             }
 

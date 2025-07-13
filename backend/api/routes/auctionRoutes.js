@@ -14,10 +14,8 @@ auctionRouter.get('/', async (req, res) => {
     try {
         const currentTime = new Date();
 
-        // fetch all auctions
-        const { data, error } = await supabase.from('auctions')
-                                              .select('*')
-                                              .order('created_at', {ascending: false});
+
+        const { data, error } = await supabase.from('auctions').select('*').order('created_at', {ascending: false});
 
         // Update status
         await supabase
@@ -48,7 +46,7 @@ auctionRouter.get('/featured', async (req, res) => {
       .gte('end_time', now)
       .order('total_bids', { ascending: false })
       .order('starting_price', { ascending: false })
-      .limit(5);
+      .limit(6);
 
     if (error) {
       return res.status(400).json({ message: "Error fetching featured auctions" });
@@ -596,6 +594,45 @@ auctionRouter.post('/bidhistory', async (req, res) => {
   }));
 
   return res.status(200).json(formatted);
+});
+
+
+// Get Top Bids
+auctionRouter.post('/topbids', async (req, res) => {
+  const { auction_id } = req.body;
+
+  if (!auction_id) {
+    return res.status(400).json({ message: "Auction id required!" });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('bids')
+      .select(`
+        amount,
+        created_at,
+        users(name)
+      `)
+      .eq('auction_id', auction_id)
+      .order('amount', { ascending: false })
+      .limit(5);
+
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Supabase query failed", error });
+    }
+
+    const topBids = data.map(bid => ({
+      amount: bid.amount,
+      name: bid.users?.name || "Unknown",
+      created_at: bid.created_at,
+    }));
+
+    return res.status(200).json(topBids);
+  } catch (e) {
+    console.error('Unexpected error:', e);
+    return res.status(500).json({ message: "Server error" });
+  }
 });
 
 

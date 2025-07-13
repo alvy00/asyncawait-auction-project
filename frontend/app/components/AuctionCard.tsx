@@ -341,7 +341,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
 
           {/* Price + Countdown */}
           <div className="flex items-center justify-between mb-4">
-            <div onClick={() => setDetailsOpen(true)} className="text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-orange-500 font-bold text-3xl">
+            <div onClick={() => setDetailsOpen(true)} className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 to-green-500 font-bold text-3xl">
               {highestBid
                 ? `$${highestBid.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
