@@ -11,6 +11,7 @@ import { FaSpinner, FaSearch } from "react-icons/fa";
 import { motion } from "framer-motion";
 import AuctionCardPhantom from "../../../components/AuctionCardPhantom";
 import { useUser } from "../../../../lib/user-context";
+import toast from "react-hot-toast";
 
 const LiveAuctionsPage = () => {
   const { user } = useUser();
@@ -157,6 +158,7 @@ const LiveAuctionsPage = () => {
         isFavorite: favAuctionIDs.includes(auction.auction_id),
       }));
   }, [auctions, searchTerm, activeFilter, favAuctionIDs]);
+
 
   const isAnyLoading = isLoading || isFavsLoading;
 

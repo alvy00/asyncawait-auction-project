@@ -268,7 +268,7 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
       </div>
 
       {/* Status and Favorite Badge */}
-      <StatusBadge type={"phantom"} status={auction.status} auctionId={auction.auction_id}/>
+      <StatusBadge type={"phantom"} status={auction.status} auctionId={auction.auction_id} participantCount={auction.participants}/>
       <FavoriteBadge userId={user?.user_id} auctionId={auction.auction_id} initialFavorited={auction.isFavorite} isHovered={isHovered} />
       
       {/* Content area */}

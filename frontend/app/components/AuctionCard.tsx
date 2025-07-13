@@ -11,6 +11,7 @@ import { Countdown } from "./Countdown";
 import AuctionDetailsModal from "./AuctionDetailsModal";
 import { FaBolt, FaBullhorn, FaClock, FaFlagCheckered, FaGavel } from "react-icons/fa";
 import FavoriteBadge from "./FavouriteBadge";
+import StatusBadge from "./StatusBadge";
 
 const FALLBACK_IMAGE = "/fallback.jpg";
 
@@ -275,38 +276,8 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
           />
           <div onClick={() => setDetailsOpen(true)} className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60"></div>
 
-          {/* Status badge with scoped tooltip */}
-          <div className="absolute top-4 left-4 z-10 cursor-pointer">
-            <div className="relative group/status">
-              {currentStatus === "upcoming" ? (
-                <div className="bg-gradient-to-r from-green-700 to-green-500 text-white text-xs font-semibold px-4 py-1 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
-                  <FaClock className="text-white" />
-                  <span>CLASSIC | UPCOMING</span>
-                </div>
-              ) : currentStatus === "live" ? (
-                <div className="bg-gradient-to-r from-green-700 to-green-500 text-white text-xs font-semibold px-4 py-1 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
-                  <FaBolt className="text-white animate-pulse" />
-                  <span>CLASSIC | LIVE</span>
-                </div>
-              ) : (
-                <div className="bg-gray-600 text-white text-xs font-medium px-4 py-1 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
-                  <FaFlagCheckered className="text-white" />
-                  <span>CLASSIC | ENDED</span>
-                </div>
-              )}
-
-              {/* Tooltip shown only when hovering status */}
-              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 text-[11px] text-emerald-100 bg-emerald-900/80 rounded-md shadow-xl opacity-0 group-hover/status:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-20 backdrop-blur-sm">
-                <span className="block text-center tracking-wide">The highest bidder wins</span>
-
-                {/* Soft-glow arrow */}
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 bg-emerald-900/80 shadow-md" />
-              </div>
-
-            </div>
-          </div>
-
-          {/* Favorite button - Updated to show on group hover */}
+          {/* Status badge & Favorite button - Updated to show on group hover */}
+          <StatusBadge type={"classic"} status={auction.status} auctionId={auction.auction_id} participantCount={auction.participants}/>
           <FavoriteBadge
             userId={user?.user_id}
             auctionId={auction.auction_id}

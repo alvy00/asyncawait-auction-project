@@ -190,7 +190,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
       </div>
       
       {/* Status and Favorite Badge */}
-      <StatusBadge type={"dutch"} status={auction.status} auctionId={auction.auction_id}/>
+      <StatusBadge type={"dutch"} status={auction.status} auctionId={auction.auction_id} participantCount={auction.participants}/>
       <FavoriteBadge userId={user?.user_id} auctionId={auction.auction_id} initialFavorited={auction.isFavorite} isHovered={isHovered} />
       
       {/* Info section */}
