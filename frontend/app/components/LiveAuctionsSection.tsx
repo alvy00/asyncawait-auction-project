@@ -10,13 +10,14 @@ import AuctionCardBlitz from './AuctionCardBlitz';
 import AuctionCardDutch from './AuctionCardDutch';
 import AuctionCardReverse from './AuctionCardReverse';
 import AuctionCardPhantom from './AuctionCardPhantom';
+import { useUser } from '../../lib/user-context';
 
 const maxVisibleItems = 3;
 
 const LiveAuctionsSection = () => {
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [user, setUser] = useState();
+  const { user } = useUser();
   const [isLoading, setIsLoading] = useState(true);
 
   // fetch featured auctions
@@ -43,53 +44,53 @@ const LiveAuctionsSection = () => {
   }, []);
 
   // fetch user
-  useEffect(() => {
-    let isMounted = true;
-    setIsLoading(true);
+  // useEffect(() => {
+  //   let isMounted = true;
+  //   setIsLoading(true);
 
-    const getUser = async () => {
-      const token = localStorage.getItem('sessionToken') || sessionStorage.getItem('sessionToken');
+  //   const getUser = async () => {
+  //     const token = localStorage.getItem('sessionToken') || sessionStorage.getItem('sessionToken');
 
-      if (!token) {
-        console.warn('No token found');
-        setIsLoading(false);
-        return;
-      }
+  //     if (!token) {
+  //       console.warn('No token found');
+  //       setIsLoading(false);
+  //       return;
+  //     }
 
-      try {
-        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getuser', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+  //     try {
+  //       const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getuser', {
+  //         method: 'GET',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           'Authorization': `Bearer ${token}`,
+  //         },
+  //       });
 
-        const data = await res.json();
+  //       const data = await res.json();
 
-        if (!res.ok) {
-          console.error('Failed to fetch user:', data?.message || res.statusText);
-          return;
-        }
+  //       if (!res.ok) {
+  //         console.error('Failed to fetch user:', data?.message || res.statusText);
+  //         return;
+  //       }
 
-        if (isMounted) {
-          setUser(data);
-        }
-      } catch (e) {
-        console.error('Error fetching user:', e);
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
+  //       if (isMounted) {
+  //         setUser(data);
+  //       }
+  //     } catch (e) {
+  //       console.error('Error fetching user:', e);
+  //     } finally {
+  //       if (isMounted) {
+  //         setIsLoading(false);
+  //       }
+  //     }
+  //   };
 
-    getUser();
+  //   getUser();
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  //   return () => {
+  //     isMounted = false;
+  //   };
+  // }, []);
 
   const totalSlides = Math.ceil(auctions.length / maxVisibleItems);
   const goToPrevSlide = () => setCurrentSlide((prev) => (prev === 0 ? totalSlides - 1 : prev - 1));

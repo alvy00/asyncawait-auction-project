@@ -347,7 +347,7 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
                         : "opacity-100 scale-100 pointer-events-auto"
                     }`}
                   >
-                    {auction?.user_id !== user?.user_id &&
+                    {auction?.user_id !== user?.user_id ? (
                       <button
                         onClick={() => {
                           setIsBidding(true);
@@ -357,6 +357,12 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
                       >
                         Place Hidden Bid
                       </button>
+                    ):(
+                      <div className="w-full h-full flex items-center justify-center rounded-md border border-gray-500 bg-gray-800 text-gray-300 font-medium cursor-not-allowed shadow-inner text-sm">
+                        You created this auction
+                      </div>
+                    )
+                      
                     }
                   </div>
 

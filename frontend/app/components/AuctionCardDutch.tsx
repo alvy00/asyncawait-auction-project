@@ -253,18 +253,24 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
             </Button>
           ) : (
             <>
-              {auction?.user_id !== user?.user_id &&
-                <motion.button
-                  onClick={handleAcceptClick}
-                  whileTap={{ scale: 0.95 }}
-                  disabled={showConfirmModal}
-                  className={`px-6 py-3 rounded-md border font-bold text-white backdrop-blur-sm transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-cyan-400
-                    ${showConfirmModal
-                      ? "bg-cyan-400 cursor-not-allowed opacity-60"
-                      : "bg-cyan-600 hover:bg-cyan-500 border-cyan-400 cursor-pointer"}`}
-                >
-                  Accept Price
-                </motion.button>
+              {auction?.user_id !== user?.user_id ?
+                (
+                  <motion.button
+                    onClick={handleAcceptClick}
+                    whileTap={{ scale: 0.95 }}
+                    disabled={showConfirmModal}
+                    className={`px-6 py-3 rounded-md border font-bold text-white backdrop-blur-sm transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-cyan-400
+                      ${showConfirmModal
+                        ? "bg-cyan-400 cursor-not-allowed opacity-60"
+                        : "bg-cyan-600 hover:bg-cyan-500 border-cyan-400 cursor-pointer"}`}
+                  >
+                    Accept Price
+                  </motion.button>
+                ):(
+                    <div className="w-full h-full px-2 py-2.5 flex items-center justify-center rounded-md border border-gray-500 bg-gray-800 text-gray-300 font-medium cursor-not-allowed shadow-inner text-sm">
+                      You created this auction
+                    </div>
+                )
               }
               {showConfirmModal && (
                 <motion.div
