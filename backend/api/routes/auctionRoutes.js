@@ -614,7 +614,7 @@ auctionRouter.post('/topbids', async (req, res) => {
         users(name)
       `)
       .eq('auction_id', auction_id)
-      .order('amount', { ascending: false })
+      .order('bid_amount', { ascending: false })
       .limit(5);
 
     if (error) {
@@ -623,7 +623,7 @@ auctionRouter.post('/topbids', async (req, res) => {
     }
 
     const topBids = data.map(bid => ({
-      amount: bid.amount,
+      amount: bid.bid_amount,
       name: bid.users?.name || "Unknown",
       created_at: bid.created_at,
     }));

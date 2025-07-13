@@ -229,7 +229,6 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
   }, [auction.start_time, auction.end_time, refresh, auction.auction_id]);
 
 
-
   // shake effect
   useEffect(() => {
     if (shake) {
@@ -383,7 +382,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                   disabled
                   className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-gray-800 border border-gray-700 text-gray-400 opacity-60 cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30"
                 >
-                  <span>Login to bid</span>
+                  {auction.user_id === user.user_id ? (<span>Edit</span>):(<span>Login to bid</span>)}
                 </Button>
               ) : ( !isEnded &&
                 <div className={`relative w-full h-full ${shake ? "animate-shake" : ""}`}>
