@@ -2,7 +2,6 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { useSearchParams } from "next/navigation";
 import AuctionCard from "../../../components/AuctionCard";
 import AuctionCardBlitz from "../../../components/AuctionCardBlitz";
 import AuctionCardDutch from "../../../components/AuctionCardDutch";
@@ -20,8 +19,7 @@ const LiveAuctionsPage = () => {
   const [favAuctionIDs, setFavAuctionIDs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFavsLoading, setIsFavsLoading] = useState(true);
-  const searchParams = useSearchParams();
-  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
+  const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
 
   const categories = ["all", "electronics", "art", "vehicles", "fashion", "other"];
