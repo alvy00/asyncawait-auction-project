@@ -80,6 +80,7 @@ export default function AuctionDetailsModal({ open, onClose, auction }: AuctionD
 
         const data = await res.json();
         setTopBids(data);
+        //console.log(data)
       } catch (e) {
         console.error('Failed to fetch top bids:', e);
       }
@@ -246,7 +247,7 @@ export default function AuctionDetailsModal({ open, onClose, auction }: AuctionD
                   <div className="text-center text-white/60 italic py-6">No bids yet.</div>
                 ) : (
                   <div className="flex gap-6 overflow-x-auto pb-2 justify-center custom-scrollbar">
-                    {topBids.map((bidder, i) => (
+                    {topBids?.map((bidder, i) => (
                       <Tooltip key={i}>
                         <TooltipTrigger asChild>
                           <div className="flex flex-col items-center gap-2 cursor-pointer select-none min-w-[64px]">
