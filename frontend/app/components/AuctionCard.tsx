@@ -18,9 +18,10 @@ interface AuctionCardProps {
   auction: Auction;
   auctionCreator: string;
   isFavourited: boolean;
+  user: User;
 }
 
-const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFavourited })  => {
+const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFavourited, user })  => {
   const [winner, setWinner] = useState(null);
   const [isEnded, setIsEnded] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
@@ -29,7 +30,6 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
   const [bidAmount, setBidAmount] = useState(0);
   const [highestBid, setHighestBid] = useState(auction.highest_bid);
   const [isHovered, setIsHovered] = useState(false);
-  const [user, setUser] = useState<User>(null);
   const [currentStatus, setCurrentStatus] = useState<"upcoming" | "live" | "ended">(() => {
     const now = new Date();
     if (now < new Date(auction.start_time)) return "upcoming";
@@ -45,37 +45,37 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
   const token = typeof window !== "undefined" ? localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken") : null;
 
   // fetch user
-  useEffect(() => {
-    const getUser = async () => {
-      const token = localStorage.getItem('sessionToken') || sessionStorage.getItem('sessionToken');
-      if (!token) {
-        console.warn('No token found');
-        return;
-      }
+  // useEffect(() => {
+  //   const getUser = async () => {
+  //     const token = localStorage.getItem('sessionToken') || sessionStorage.getItem('sessionToken');
+  //     if (!token) {
+  //       console.warn('No token found');
+  //       return;
+  //     }
 
-      try {
-        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getuser', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+  //     try {
+  //       const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getuser', {
+  //         method: 'GET',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           'Authorization': `Bearer ${token}`,
+  //         },
+  //       });
 
-        if (!res.ok) {
-          const err = await res.json();
-          console.error('Failed to fetch user:', err.message);
-          return;
-        }
+  //       if (!res.ok) {
+  //         const err = await res.json();
+  //         console.error('Failed to fetch user:', err.message);
+  //         return;
+  //       }
 
-        const data = await res.json();
-        setUser(data);
-      } catch (e) {
-        console.error('Error fetching user:', e);
-      }
-    };
-    getUser();
-  }, []);
+  //       const data = await res.json();
+  //       setUser(data);
+  //     } catch (e) {
+  //       console.error('Error fetching user:', e);
+  //     }
+  //   };
+  //   getUser();
+  // }, []);
 
   // get highest bidder
   useEffect(() => {
@@ -382,26 +382,27 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                   disabled
                   className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-gray-800 border border-gray-700 text-gray-400 opacity-60 cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30"
                 >
-                  {auction.user_id === user.user_id ? (<span>Edit</span>):(<span>Login to bid</span>)}
+                  <span>Login to bid</span>
                 </Button>
-              ) : ( !isEnded &&
+              ) : ( !isEnded && auction?.user_id !== user?.user_id &&
                 <div className={`relative w-full h-full ${shake ? "animate-shake" : ""}`}>
                   <div
                     className={`absolute inset-0 w-full h-full flex items-center justify-center transition-all duration-500 ease-in-out z-10 ${
                       isBidding ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100"
                     }`}
-                  >
-                    <button
-                      onClick={() => {
+                  > 
+                      <button
+                        onClick={() => {
                         setIsBidding(true);
                         setShake(true);
                         setTimeout(() => setShake(false), 600);
-                      }}
-                      type="button"
-                      className="w-full h-full flex items-center justify-center rounded-md border border-emerald-700 bg-emerald-800 hover:bg-emerald-700 font-medium text-white backdrop-blur-sm transition-all duration-300 ease-in-out cursor-pointer"
-                    >
-                      Place Bid
-                    </button>
+                        }}
+                        type="button"
+                        className="w-full h-full flex items-center justify-center rounded-md border border-emerald-700 bg-emerald-800 hover:bg-emerald-700 font-medium text-white backdrop-blur-sm transition-all duration-300 ease-in-out cursor-pointer"
+                      >
+                        Place Bid
+                      </button>
+
                   </div>
 
                   {/* Bid form */}
