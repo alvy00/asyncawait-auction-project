@@ -1,15 +1,10 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import {
-  FaArrowDown,
-  FaBan,
-  FaBolt,
-  FaClock,
-  FaHourglassHalf,
-  FaStopwatch,
-} from "react-icons/fa";
+import { FaArrowDown, FaBan, FaBolt, FaClock, FaFlagCheckered, FaHourglassHalf, FaStopwatch, FaUsers} from "react-icons/fa";
 
-const StatusBadge = ({ type, status, auctionId }) => {
+const StatusBadge = ({ type, status, auctionId, participantCount }) => {
+
+  // update status
   useEffect(() => {
     if (status.toLowerCase() === "ended") {
       const updateStatusEnd = async () => {
@@ -39,10 +34,32 @@ const StatusBadge = ({ type, status, auctionId }) => {
   let text = "";
   let Icon = null;
   let tooltipText = "";
-
   const normalizedStatus = status.toLowerCase();
 
-  if (type === "dutch") {
+  if (type === "classic") {
+  switch (normalizedStatus) {
+    case "live":
+      bgClasses = "bg-gradient-to-r from-green-700 to-green-500";
+      text = "CLASSIC | LIVE";
+      Icon = FaBolt;
+      tooltipText = "The highest bidder wins";
+      break;
+    case "upcoming":
+      bgClasses = "bg-gradient-to-r from-green-700 to-green-500";
+      text = "CLASSIC | UPCOMING";
+      Icon = FaClock;
+      tooltipText = "Auction starts soon";
+      break;
+    case "ended":
+      bgClasses = "bg-gray-600";
+      text = "CLASSIC | ENDED";
+      Icon = FaFlagCheckered;
+      tooltipText = "Auction has ended";
+      break;
+    default:
+      return null;
+  }
+  }else if (type === "dutch") {
     switch (normalizedStatus) {
       case "live":
         bgClasses = "bg-gradient-to-r from-blue-500 to-blue-400";
@@ -137,20 +154,40 @@ const StatusBadge = ({ type, status, auctionId }) => {
   }
 
   return (
-    <div className="absolute top-4 left-4 z-10 group/status cursor-pointer">
-      <motion.div
-        className={`${bgClasses} text-white text-xs font-bold px-4 py-1 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm`}
-      >
-        {Icon && <Icon className="text-white" />}
-        <span>{text}</span>
-      </motion.div>
+    <div className="absolute top-4 left-4 z-10 flex gap-2">
+      {/* STATUS badge & tooltip */}
+      <div className="relative group/status">
+        <motion.div
+          className={`${bgClasses} cursor-pointer text-white text-xs font-bold px-4 py-1 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm`}
+        >
+          {Icon && <Icon className="text-white" />}
+          <span>{text}</span>
+        </motion.div>
 
-      {/* Tooltip */}
-      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 text-[11px] text-emerald-100 bg-emerald-900/80 rounded-md shadow-xl opacity-0 group-hover/status:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap backdrop-blur-sm z-20">
-        <span className="block text-center">{tooltipText}</span>
-        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 bg-emerald-900/80 shadow-md" />
+        {/* Tooltip for status */}
+        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 text-[11px] text-emerald-100 bg-emerald-900/80 rounded-md shadow-xl opacity-0 group-hover/status:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap backdrop-blur-sm z-20">
+          <span className="block text-center">{tooltipText}</span>
+          <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 bg-emerald-900/80 shadow-md" />
+        </div>
+      </div>
+
+      {/* PARTICIPANTS badge & tooltip */}
+      <div className="relative group/participants">
+        <div className="flex items-center gap-1 text-white text-sm bg-gray-700/80 px-2 py-1 rounded-md shadow backdrop-blur-sm cursor-pointer">
+          <FaUsers className="text-white text-base" />
+          <span>{participantCount ?? "0"}</span>
+        </div>
+
+        {/* Tooltip for participants */}
+        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2.5 py-1 text-[11px] text-white bg-gray-900/90 rounded shadow-lg opacity-0 group-hover/participants:opacity-100 transition-opacity duration-300 pointer-events-none z-20 whitespace-nowrap">
+          {participantCount === 1
+            ? "1 participant"
+            : `${participantCount ?? 0} participants`}
+          <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 bg-gray-900/90 shadow-sm" />
+        </div>
       </div>
     </div>
+
   );
 };
 

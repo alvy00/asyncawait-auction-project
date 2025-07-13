@@ -9,11 +9,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "../../../../components/ui/button";
 import { DropzoneUploader } from "../../../components/DropzoneUploader";
 import { FaTwitter, FaTelegramPlane, FaTag, FaDollarSign, FaRegCalendarAlt, FaImage, FaBoxOpen, FaGavel } from "react-icons/fa";
-import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/react'
 import { FaCrown } from 'react-icons/fa';
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useUser } from "../../../../lib/user-context";
 
@@ -35,7 +34,6 @@ const LoadingSpinner = () => (
   </div>
 );
 
-
 export default function AuctionCreationForm() {
   const { user } = useUser();
   const [startTime, setStartTime] = useState("");
@@ -44,7 +42,11 @@ export default function AuctionCreationForm() {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [selectedType, setSelectedType] = useState(auctionTypes[0]);
+  const [newAuctionTitle, setNewAuctionTitle] = useState<string>("");
   const router = useRouter();
+
+  // Construct share URL based on new auction title
+  const shareUrl = `https://auctasync.vercel.app/auctions/live?search=${encodeURIComponent(newAuctionTitle)}`;
 
   // fetch user
   useEffect(() => {
@@ -54,45 +56,32 @@ export default function AuctionCreationForm() {
         console.warn("No session token found");
         return;
       }
-  
+
       try {
         const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getUser', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-  
+
         if (!res.ok) {
-          const err = await res.json();
-          console.error("Failed to fetch user:", err.message || res.statusText);
+          console.error("Failed to fetch user");
           return;
         }
-  
+
         const userData = await res.json();
         setCurrentUser(userData);
       } catch (error) {
         console.error("Error fetching user:", error);
       }
     };
-  
     fetchUser();
   }, []);
-  
-  const handleImageChange = (index: number, value: string) => {
-    const updated = [...imageUrls];
-    updated[index] = value;
-    setImageUrls(updated);
-  };
-
-  //const addImageField = () => setImageUrls((prev) => [...prev, ""]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
-
       if (!token) {
         toast.error("No session token found");
         setIsLoading(false);
@@ -100,72 +89,57 @@ export default function AuctionCreationForm() {
       }
 
       const formData = new FormData(e.currentTarget);
-
-      const startTimeStr = formData.get("start_time") as string;
+      const startTime = new Date(formData.get("start_time") as string);
+      let endTime: Date;
       const endTimeStr = formData.get("end_time") as string;
       const durationStr = formData.get("duration") as string;
-
-      const startTime = new Date(startTimeStr);
-
-      let endTime: Date;
 
       if (endTimeStr) {
         endTime = new Date(endTimeStr);
       } else if (durationStr) {
-        const durationInMinutes = parseInt(durationStr, 10);
-        endTime = new Date(startTime.getTime() + durationInMinutes * 60000); // add duration in ms
+        const duration = parseInt(durationStr, 10);
+        endTime = new Date(startTime.getTime() + duration * 60000);
       } else {
         throw new Error("Either end_time or duration must be provided");
       }
 
-      const startTimeUTC = startTime.toISOString();
-      const endTimeUTC = endTime.toISOString();
-
       const now = new Date();
-
-      let auctionStatus = "upcoming";
-      if (endTime < now) {
-        auctionStatus = "ended";
-      } else if (startTime <= now) {
-        auctionStatus = "live";
-      }
+      let status = "upcoming";
+      if (endTime < now) status = "ended";
+      else if (startTime <= now) status = "live";
 
       const auctionBody = {
         creator: currentUser.name,
         item_name: formData.get('item_name') as string,
         description: formData.get('description') as string,
-        category: formData.get('category') as 'electronics' | 'art' | 'fashion' | 'vehicles' | 'other',
+        category: formData.get('category') as string,
         auction_type: formData.get('auction_type') as string,
         starting_price: parseFloat(formData.get('starting_price') as string),
         buy_now: formData.get('buy_now') ? parseFloat(formData.get('buy_now') as string) : undefined,
         start_time: startTime.toISOString(),
         end_time: endTime.toISOString(),
-        status: auctionStatus,
-        images: imageUrls.filter(url => url.trim() !== ""),
-        condition: formData.get('condition') as 'new' | 'used' | 'refurbished',
+        status,
+        images: imageUrls.filter(url => url.trim()),
+        condition: formData.get('condition') as string,
       };
-      //console.log(formData.get('auction_type') as string)
-      
+
       const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/create', {
         method: 'POST',
-        headers: {
-          'Content-type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(auctionBody),
       });
-
-      const r = await res.json();
+      const result = await res.json();
 
       if (res.ok) {
         toast.success("Auction created successfully");
+        setNewAuctionTitle(auctionBody.item_name);
         setIsDialogOpen(true);
       } else {
-        toast.error(r.message || "Failed to create auction");
+        toast.error(result.message || "Failed to create auction");
       }
-    } catch (e) {
+    } catch (error) {
       toast.error("Auction creation failed");
-      console.error("Error creating auction:", e);
+      console.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -181,7 +155,6 @@ export default function AuctionCreationForm() {
       }
     }
   };
-
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
@@ -191,14 +164,15 @@ export default function AuctionCreationForm() {
     }
   };
 
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
+  // Redirect if not logged in
+  // useEffect(() => {
+  //   if (user === null) {
+  //     toast.error("Please login first to create auctions");
+  //     router.push('/login');
+  //   }
+  // }, [user, router]);
 
-  // if(!user) {
-  //   toast.error("Please login first to create auctions");
-  //   router.push('/login');
-  // }
+  if (isLoading) return <LoadingSpinner />;
   
   return (
     <div className="min-h-screen bg-[#0A111B] py-12 px-4 sm:px-6 relative overflow-hidden mt-10">
@@ -503,110 +477,59 @@ export default function AuctionCreationForm() {
         </motion.div>
       </motion.div>
 
-      <Dialog 
-        open={isDialogOpen} 
-        onOpenChange={(open) => {
-          setIsDialogOpen(open);
-          if (!open) {
-            router.push("/auctions");
-          }
-        }}
-      >
-        <DialogContent className="bg-gradient-to-b from-[#0A111B]/95 to-[#0A111B] backdrop-blur-xl border border-white/10 text-white max-w-md mx-auto rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-orange-500">
-              Auction Created!
-            </DialogTitle>
-            <DialogDescription className="text-gray-300 text-center">
-              Your auction is live! You can share it with others to get more bids.
-            </DialogDescription>
-          </DialogHeader>
 
-          <div className="space-y-6 py-4">
-            {/* Success animation */}
-            <div className="flex justify-center">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ 
-                  type: "spring", 
-                  stiffness: 260, 
-                  damping: 20,
-                  delay: 0.1 
-                }}
-                className="w-20 h-20 rounded-full bg-gradient-to-r from-green-400 to-green-500 flex items-center justify-center"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                </svg>
+      {/* Auction creation success modal */}
+      <Dialog open={isDialogOpen} onOpenChange={(open) => {
+            setIsDialogOpen(open);
+            if (!open) router.push('/auctions/live');
+          }}>
+          <DialogContent className="bg-gradient-to-b from-[#0A111B]/95 to-[#0A111B] backdrop-blur-xl border border-white/10 text-white max-w-md mx-auto rounded-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-orange-500">
+                Auction Created!
+              </DialogTitle>
+              <DialogDescription className="text-gray-300 text-center">
+                Your auction is live! Share it to get more bids.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 py-4">
+              <div className="flex justify-center">
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 0.1 }} className="w-20 h-20 rounded-full bg-gradient-to-r from-green-400 to-green-500 flex items-center justify-center">
+                  <FaGavel className="h-10 w-10 text-white" />
+                </motion.div>
+              </div>
+
+              {/* Copy Link */}
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="space-y-4">
+                <Button variant="outline" className="w-full bg-white/5 hover:bg-white/10 text-white border border-white/10 py-6 rounded-xl transition-all duration-300" onClick={() => {
+                  navigator.clipboard.writeText(shareUrl);
+                  toast.success("Link copied to clipboard!");
+                }}>
+                  Copy Link
+                </Button>
+              </motion.div>
+
+              {/* Social Buttons */}
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="flex items-center justify-between space-x-4">
+                <Button variant="outline" className="w-1/2 bg-white/5 hover:bg-white/10 text-white border border-white/10 py-5 rounded-xl transition-all duration-300" onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}`, '_blank')}>
+                  <FaTwitter className="mr-2 text-blue-400" /> Share on Twitter
+                </Button>
+                <Button variant="outline" className="w-1/2 bg-white/5 hover:bg-white/10 text-white border border-white/10 py-5 rounded-xl transition-all duration-300" onClick={() => window.open(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}`, '_blank')}>
+                  <FaTelegramPlane className="mr-2 text-blue-500" /> Share on Telegram
+                </Button>
+              </motion.div>
+
+              {/* Preview Button */}
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+                <Button className="w-full py-6 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold text-lg shadow-lg shadow-orange-500/20 transition-all duration-300" onClick={() => router.push('/auctions')}>
+                  View Auction
+                </Button>
               </motion.div>
             </div>
-
-            {/* Shareable Link */}
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="space-y-4"
-            >
-              <Button
-                variant="outline"
-                className="w-full bg-white/5 hover:bg-white/10 text-white border border-white/10 py-6 rounded-xl transition-all duration-300"
-                onClick={() => {
-                  navigator.clipboard.writeText(window.location.href);
-                  toast.success("Link copied to clipboard!");
-                }}
-              >
-                Copy Link
-              </Button>
-            </motion.div>
-
-            {/* Social Promotion Tips */}
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="flex items-center justify-between space-x-4"
-            >
-              <Button
-                variant="outline"
-                className="w-1/2 bg-white/5 hover:bg-white/10 text-white border border-white/10 py-5 rounded-xl transition-all duration-300"
-                onClick={() =>
-                  window.open("https://twitter.com/intent/tweet?url=" + window.location.href, "_blank")
-                }
-              >
-                <FaTwitter className="mr-2 text-blue-400" />
-                Share on Twitter
-              </Button>
-
-              <Button
-                variant="outline"
-                className="w-1/2 bg-white/5 hover:bg-white/10 text-white border border-white/10 py-5 rounded-xl transition-all duration-300"
-                onClick={() =>
-                  window.open("https://t.me/share/url?url=" + window.location.href, "_blank")
-                }
-              >
-                <FaTelegramPlane className="mr-2 text-blue-500" />
-                Share on Telegram
-              </Button>
-            </motion.div>
-
-            {/* Preview Button */}
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <Button
-                className="w-full py-6 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold text-lg shadow-lg shadow-orange-500/20 transition-all duration-300"
-                onClick={() => router.push('/auctions')}
-              >
-                View Auction
-              </Button>
-            </motion.div>
-          </div>
-        </DialogContent>
+          </DialogContent>
       </Dialog>
+
     </div>
   );
 }

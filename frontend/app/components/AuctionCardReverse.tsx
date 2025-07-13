@@ -274,7 +274,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
       </div>
       
       {/* Status and Favorite Badge */}
-      <StatusBadge type={"reverse"} status={auction.status} auctionId={auction.auction_id}/>
+      <StatusBadge type={"reverse"} status={auction.status} auctionId={auction.auction_id} participantCount={auction.participants}/>
       <FavoriteBadge userId={user?.user_id} auctionId={auction.auction_id} initialFavorited={auction.isFavorite} isHovered={isHovered} />
       
       {/* Info section */}
