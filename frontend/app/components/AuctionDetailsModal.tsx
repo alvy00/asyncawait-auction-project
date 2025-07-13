@@ -70,6 +70,8 @@ export default function AuctionDetailsModal({ open, onClose, auction }: AuctionD
   useEffect(() => {
     const getTopBids = async () => {
       try {
+        // https://asyncawait-auction-project.onrender.com/api/auctions/topbids
+        // http://localhost:8000/api/auctions/topbids
         const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/topbids', {
           method: 'POST',
           headers: {
@@ -80,7 +82,7 @@ export default function AuctionDetailsModal({ open, onClose, auction }: AuctionD
 
         const data = await res.json();
         setTopBids(data);
-        //console.log(data)
+        console.log(data)
       } catch (e) {
         console.error('Failed to fetch top bids:', e);
       }
@@ -238,7 +240,7 @@ export default function AuctionDetailsModal({ open, onClose, auction }: AuctionD
             <hr className="border-t border-white/15 mb-2" />
 
             {/* Top Bidders Row */}
-            {auction.auction_type !== "phantom" && 
+            {auction.auction_type !== "phantom" && auction.auction_type !== "dutch" && 
               <div className="w-full mt-2 md:mt-4 px-0 md:px-0 relative">
                 <h4 className="text-white/90 font-semibold text-lg md:text-xl mb-3 tracking-wide drop-shadow-sm text-center">
                   Top Bids
@@ -247,22 +249,23 @@ export default function AuctionDetailsModal({ open, onClose, auction }: AuctionD
                   <div className="text-center text-white/60 italic py-6">No bids yet.</div>
                 ) : (
                   <div className="flex gap-6 overflow-x-auto pb-2 justify-center custom-scrollbar">
-                    {topBids?.map((bidder, i) => (
-                      <Tooltip key={i}>
-                        <TooltipTrigger asChild>
-                          <div className="flex flex-col items-center gap-2 cursor-pointer select-none min-w-[64px]">
-                            <Avatar className="ring-2 ring-white/60 hover:ring-blue-400 transition-shadow w-16 h-16 md:w-20 md:h-20 shadow-lg">
-                              <AvatarImage src={bidder.avatar} alt={bidder.name} />
-                              <AvatarFallback>{bidder.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <span className="text-xs md:text-base text-white/90 font-semibold drop-shadow-sm truncate max-w-[70px] text-center">{bidder.name}</span>
+                    <ul className="w-[90%] divide-y divide-white/30 mx-auto">
+                      {topBids.map((bidder, i) => (
+                        <li key={i} className="w-full px-5 flex items-center gap-4 py-3 hover:bg-white/10 rounded transition cursor-default">
+                          <Avatar className="ring-2 ring-white/60 hover:ring-blue-400 transition-shadow w-12 h-12 shadow-md flex-shrink-0">
+                            <AvatarImage src={bidder.avatar} alt={bidder.name} />
+                            <AvatarFallback className="bg-gradient-to-br from-white/30 via-purple-200/20 to-white/10 backdrop-blur-sm text-white border border-white/20 shadow-inner">{bidder.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <p className="text-white font-semibold truncate">{bidder.name}</p>
+                            <p className="text-white/70 text-sm font-mono">${bidder.amount.toFixed(2)}</p>
                           </div>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="text-xs font-mono animate-fade-in">
-                          ${bidder.amount.toFixed(2)}
-                        </TooltipContent>
-                      </Tooltip>
-                    ))}
+                          <span className="text-white/50 text-xs font-mono">
+                            #{i + 1}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 )}
                 <hr className="border-t border-white/15 mb-2" />
