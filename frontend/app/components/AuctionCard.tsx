@@ -384,25 +384,31 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                 >
                   <span>Login to bid</span>
                 </Button>
-              ) : ( !isEnded && auction?.user_id !== user?.user_id &&
+              ) : ( !isEnded &&
                 <div className={`relative w-full h-full ${shake ? "animate-shake" : ""}`}>
                   <div
                     className={`absolute inset-0 w-full h-full flex items-center justify-center transition-all duration-500 ease-in-out z-10 ${
                       isBidding ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100"
                     }`}
                   > 
-                      <button
-                        onClick={() => {
-                        setIsBidding(true);
-                        setShake(true);
-                        setTimeout(() => setShake(false), 600);
-                        }}
-                        type="button"
-                        className="w-full h-full flex items-center justify-center rounded-md border border-emerald-700 bg-emerald-800 hover:bg-emerald-700 font-medium text-white backdrop-blur-sm transition-all duration-300 ease-in-out cursor-pointer"
-                      >
-                        Place Bid
-                      </button>
-
+                      {auction?.user_id !== user?.user_id? (
+                        <button
+                          onClick={() => {
+                          setIsBidding(true);
+                          setShake(true);
+                          setTimeout(() => setShake(false), 600);
+                          }}
+                          type="button"
+                          className="w-full h-full flex items-center justify-center rounded-md border border-emerald-700 bg-emerald-800 hover:bg-emerald-700 font-medium text-white backdrop-blur-sm transition-all duration-300 ease-in-out cursor-pointer"
+                        >
+                          Place Bid
+                        </button>
+                      ):(
+                        <div className="w-full h-full flex items-center justify-center rounded-md border border-gray-500 bg-gray-800 text-gray-300 font-medium cursor-not-allowed shadow-inner text-sm">
+                          You created this auction
+                        </div>
+                      )}
+                    
                   </div>
 
                   {/* Bid form */}

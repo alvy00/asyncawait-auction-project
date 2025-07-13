@@ -10,9 +10,10 @@ import { Auction, User } from "../../../../lib/interfaces";
 import { FaSpinner, FaSearch } from "react-icons/fa";
 import { motion } from "framer-motion";
 import AuctionCardPhantom from "../../../components/AuctionCardPhantom";
+import { useUser } from "../../../../lib/user-context";
 
 const LiveAuctionsPage = () => {
-  const [user, setUser] = useState<User>();
+  const { user } = useUser();
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [favAuctionIDs, setFavAuctionIDs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,45 +24,45 @@ const LiveAuctionsPage = () => {
   const categories = ["all", "electronics", "art", "vehicles", "fashion", "other"];
 
   // Get User
-  useEffect(() => {
-    const getUser = async () => {
-      const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
-      if (!token) {
-        setUser(undefined);
-        setFavAuctionIDs([]);
-        setIsFavsLoading(false);
-        return;
-      }
+  // useEffect(() => {
+  //   const getUser = async () => {
+  //     const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
+  //     if (!token) {
+  //       setUser(undefined);
+  //       setFavAuctionIDs([]);
+  //       setIsFavsLoading(false);
+  //       return;
+  //     }
 
-      try {
-        const res = await fetch("https://asyncawait-auction-project.onrender.com/api/getuser", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+  //     try {
+  //       const res = await fetch("https://asyncawait-auction-project.onrender.com/api/getuser", {
+  //         method: "GET",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       });
 
-        if (!res.ok) {
-          const err = await res.json();
-          console.error("Failed to fetch user:", err.message);
-          setUser(undefined);
-          setFavAuctionIDs([]);
-          setIsFavsLoading(false);
-          return;
-        }
+  //       if (!res.ok) {
+  //         const err = await res.json();
+  //         console.error("Failed to fetch user:", err.message);
+  //         setUser(undefined);
+  //         setFavAuctionIDs([]);
+  //         setIsFavsLoading(false);
+  //         return;
+  //       }
 
-        const data = await res.json();
-        setUser(data);
-      } catch (e) {
-        console.error("Error fetching user:", e);
-        setUser(undefined);
-        setFavAuctionIDs([]);
-        setIsFavsLoading(false);
-      }
-    };
-    getUser();
-  }, []);
+  //       const data = await res.json();
+  //       setUser(data);
+  //     } catch (e) {
+  //       console.error("Error fetching user:", e);
+  //       setUser(undefined);
+  //       setFavAuctionIDs([]);
+  //       setIsFavsLoading(false);
+  //     }
+  //   };
+  //   getUser();
+  // }, []);
 
   // Fetch All Live Auctions
   useEffect(() => {

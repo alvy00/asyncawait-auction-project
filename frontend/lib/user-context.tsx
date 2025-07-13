@@ -1,69 +1,57 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { User } from "./interfaces";
 
 interface UserContextType {
-  user: any | null;
-  setUser: React.Dispatch<React.SetStateAction<any | null>>;
+  user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  isLoading: boolean;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-interface UserProviderProps {
-  children: React.ReactNode;
-}
-
-export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<any | null>(null);
+export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('sessionToken') || sessionStorage.getItem('sessionToken');
+    const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
     if (!token) {
-      setUser(null);
+      setIsLoading(false);
       return;
     }
 
     const fetchUser = async () => {
       try {
-        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getuser', {
-          method: 'GET',
+        const res = await fetch("https://asyncawait-auction-project.onrender.com/api/getuser", {
+          method: "GET",
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
         });
 
-        if (!res.ok) {
-          console.error('Failed to fetch user, status:', res.status);
-          setUser(null);
-          localStorage.removeItem('user');
-          return;
-        }
-
         const data = await res.json();
-        setUser(data);
-        localStorage.setItem('user', JSON.stringify(data));
+        if (!res.ok) {
+          console.error("Failed to fetch user:", data?.message || res.statusText);
+          setUser(null);
+        } else {
+          setUser(data);
+        }
       } catch (error) {
-        console.error('Error fetching user:', error);
+        console.error("Error fetching user:", error);
         setUser(null);
-        localStorage.removeItem('user');
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchUser();
   }, []);
 
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem('user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('user');
-    }
-  }, [user]);
-
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, isLoading }}>
       {children}
     </UserContext.Provider>
   );
@@ -72,7 +60,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 export const useUser = (): UserContextType => {
   const context = useContext(UserContext);
   if (!context) {
-    throw new Error('useUser must be used within a UserProvider');
+    throw new Error("useUser must be used within a UserProvider");
   }
   return context;
 };
