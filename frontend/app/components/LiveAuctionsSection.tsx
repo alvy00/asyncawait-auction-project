@@ -16,6 +16,7 @@ const maxVisibleItems = 3;
 const LiveAuctionsSection = () => {
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [user, setUser] = useState();
   const [isLoading, setIsLoading] = useState(true);
 
   // fetch featured auctions
@@ -39,6 +40,55 @@ const LiveAuctionsSection = () => {
     };
 
     fetchFeaturedAuctions();
+  }, []);
+
+  // fetch user
+  useEffect(() => {
+    let isMounted = true;
+    setIsLoading(true);
+
+    const getUser = async () => {
+      const token = localStorage.getItem('sessionToken') || sessionStorage.getItem('sessionToken');
+
+      if (!token) {
+        console.warn('No token found');
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getuser', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          console.error('Failed to fetch user:', data?.message || res.statusText);
+          return;
+        }
+
+        if (isMounted) {
+          setUser(data);
+        }
+      } catch (e) {
+        console.error('Error fetching user:', e);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    getUser();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const totalSlides = Math.ceil(auctions.length / maxVisibleItems);
@@ -94,34 +144,39 @@ const LiveAuctionsSection = () => {
                     auction={auction}
                     auctionCreator={auction.creator}
                     isFavourited={auction.isFavorite}
+                    user={user}
                   />
                 )}
                 {auction.auction_type === "blitz" && (
                   <AuctionCardBlitz 
                     key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
                     auction={auction} 
-                    auctionCreator={auction.creator} 
+                    auctionCreator={auction.creator}
+                    user={user} 
                   />
                 )}
                 {auction.auction_type === "dutch" && (
                   <AuctionCardDutch 
                     key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
                     auction={auction} 
-                    auctionCreator={auction.creator} 
+                    auctionCreator={auction.creator}
+                    user={user} 
                   />
                 )}
                 {auction.auction_type === "reverse" && (
                   <AuctionCardReverse 
                     key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
                     auction={auction} 
-                    auctionCreator={auction.creator} 
+                    auctionCreator={auction.creator}
+                    user={user} 
                   />
                 )}
                 {auction.auction_type === "phantom" && (
                   <AuctionCardPhantom 
                     key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
                     auction={auction} 
-                    auctionCreator={auction.creator} 
+                    auctionCreator={auction.creator}
+                    user={user} 
                   />
                 )}
               </motion.div>

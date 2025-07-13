@@ -291,34 +291,39 @@ const LiveAuctionsPage = () => {
                     auction={auction}
                     auctionCreator={auction.creator}
                     isFavourited={auction.isFavorite}
+                    user={user}
                   />
                 )}
                 {auction.auction_type === "blitz" && (
                   <AuctionCardBlitz 
                     key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
                     auction={auction} 
-                    auctionCreator={auction.creator} 
+                    auctionCreator={auction.creator}
+                    user={user}
                   />
                 )}
                 {auction.auction_type === "dutch" && (
                   <AuctionCardDutch 
                     key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
                     auction={auction} 
-                    auctionCreator={auction.creator} 
+                    auctionCreator={auction.creator}
+                    user={user} 
                   />
                 )}
                 {auction.auction_type === "reverse" && (
                   <AuctionCardReverse 
                     key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
                     auction={auction} 
-                    auctionCreator={auction.creator} 
+                    auctionCreator={auction.creator}
+                    user={user} 
                   />
                 )}
                 {auction.auction_type === "phantom" && (
                   <AuctionCardPhantom 
                     key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
                     auction={auction} 
-                    auctionCreator={auction.creator} 
+                    auctionCreator={auction.creator}
+                    user={user} 
                   />
                 )}
               </motion.div>

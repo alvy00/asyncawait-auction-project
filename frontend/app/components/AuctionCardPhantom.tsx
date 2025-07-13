@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { FaBolt, FaBullhorn, FaHourglassHalf, FaStar, FaStopwatch } from "react-icons/fa";
-import { Auction } from "../../lib/interfaces";
+import { Auction, User } from "../../lib/interfaces";
 import Image from "next/image";
 import { Countdown } from "./Countdown";
 import toast from "react-hot-toast";
@@ -14,11 +14,12 @@ import AuctionDetailsModal from "./AuctionDetailsModal";
 interface AuctionCardProps {
   auction: Auction;
   auctionCreator: string;
+  user: User;
 }
 
 const FIREY_ORANGE = "#FF4500"; // Firey Orange (OrangeRed)
 
-const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreator }) => {
+const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreator, user }) => {
   const controls = useAnimation();
   const [winner, setWinner] = useState(null);
   const [isBidding, setIsBidding] = useState(false);
@@ -26,7 +27,6 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
   const [bidAmount, setBidAmount] = useState(auction.starting_price);
   const [highestBid, setHighestBid] = useState(auction.highest_bid);
   const [totalBids, setTotalBids] = useState(auction.total_bids);
-  const [user, setUser] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -36,42 +36,42 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
   const token = typeof window !== "undefined"? localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken") : null;
 
   // fetch user
-  useEffect(() => {
-    const getUser = async () => {
-      const token =
-        localStorage.getItem("sessionToken") ||
-        sessionStorage.getItem("sessionToken");
-      if (!token) {
-        console.warn("No token found");
-        return;
-      }
+  // useEffect(() => {
+  //   const getUser = async () => {
+  //     const token =
+  //       localStorage.getItem("sessionToken") ||
+  //       sessionStorage.getItem("sessionToken");
+  //     if (!token) {
+  //       console.warn("No token found");
+  //       return;
+  //     }
 
-      try {
-        const res = await fetch(
-          "https://asyncawait-auction-project.onrender.com/api/getuser",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+  //     try {
+  //       const res = await fetch(
+  //         "https://asyncawait-auction-project.onrender.com/api/getuser",
+  //         {
+  //           method: "GET",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         }
+  //       );
 
-        if (!res.ok) {
-          const err = await res.json();
-          console.error("Failed to fetch user:", err.message);
-          return;
-        }
+  //       if (!res.ok) {
+  //         const err = await res.json();
+  //         console.error("Failed to fetch user:", err.message);
+  //         return;
+  //       }
 
-        const data = await res.json();
-        setUser(data);
-      } catch (e) {
-        console.error("Error fetching user:", e);
-      }
-    };
-    getUser();
-  }, []);
+  //       const data = await res.json();
+  //       setUser(data);
+  //     } catch (e) {
+  //       console.error("Error fetching user:", e);
+  //     }
+  //   };
+  //   getUser();
+  // }, []);
 
   // submit bid
   const handleBidSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -347,15 +347,17 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
                         : "opacity-100 scale-100 pointer-events-auto"
                     }`}
                   >
-                    <button
-                      onClick={() => {
-                        setIsBidding(true);
-                        setShake(true);
-                      }}
-                      className="w-full h-full flex items-center justify-center rounded-md border border-yellow-700 bg-yellow-800 hover:bg-yellow-700 font-medium text-white backdrop-blur-sm transition-all duration-300 ease-in-out cursor-pointer"
-                    >
-                      Place Hidden Bid
-                    </button>
+                    {auction?.user_id !== user?.user_id &&
+                      <button
+                        onClick={() => {
+                          setIsBidding(true);
+                          setShake(true);
+                        }}
+                        className="w-full h-full flex items-center justify-center rounded-md border border-yellow-700 bg-yellow-800 hover:bg-yellow-700 font-medium text-white backdrop-blur-sm transition-all duration-300 ease-in-out cursor-pointer"
+                      >
+                        Place Hidden Bid
+                      </button>
+                    }
                   </div>
 
                   {/* Bid Form (slide/scale/blur animated transition) */}
