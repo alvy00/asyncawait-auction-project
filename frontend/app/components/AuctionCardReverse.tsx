@@ -303,7 +303,13 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
             </div>
 
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-purple-500 font-extrabold text-3xl">
-              {highestBid > 0? `$${highestBid?.toFixed(2)}` : auction.starting_price}
+              {highestBid
+                ? `$${highestBid.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}`
+                : `$${auction.starting_price.toFixed(2)}`
+              }
             </span>
           </div>
 

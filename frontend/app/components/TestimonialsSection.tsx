@@ -135,31 +135,8 @@ const TestimonialsSection = () => {
     <section className="py-16 bg-[#0a0a18] relative overflow-hidden">
       <div className="container mx-auto px-4 relative z-10">
         {/* Header with left-aligned title and right-aligned navigation */}
-        <div className="flex justify-between items-center mb-16">
-          <h2 className="text-3xl font-bold text-white">What Our Client Say?</h2>
-          
-          {/* Navigation buttons - positioned on the right side of the heading */}
-          <div className="flex space-x-2">
-            <button 
-              onClick={prevTestimonial}
-              className="bg-[#1a1a2e] hover:bg-[#2a2a3e] rounded-full p-2 transition-colors"
-              aria-label="Previous testimonial"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            
-            <button 
-              onClick={nextTestimonial}
-              className="bg-[#1a1a2e] hover:bg-[#2a2a3e] rounded-full p-2 transition-colors"
-              aria-label="Next testimonial"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
+        <div className="flex justify-center items-center mb-16">
+          <h2 className="text-3xl font-bold text-white text-center">What Our Clients Say?</h2>
         </div>
         
         <div className="relative max-w-6xl mx-auto">

@@ -243,7 +243,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
       animate={{ opacity: 1, y: 0 }}
       whileHover={{
         scale: 1.02,
-        boxShadow: "0 0 5px 1px rgba(255, 69, 0, 0.45)",
+        boxShadow: "0 0 5px 2px rgba(255, 69, 0, 0.45)",
         transition: { duration: 0.35, ease: "easeOut" },
       }}
       className={`relative w-full h-[500px] group rounded-lg overflow-hidden 
@@ -288,7 +288,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator 
               
             )}
             </div>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-purple-500 font-extrabold text-3xl">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-red-500 font-extrabold text-3xl">
               {highestBid
                 ? `$${highestBid.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
