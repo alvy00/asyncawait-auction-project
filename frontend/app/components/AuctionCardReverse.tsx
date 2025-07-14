@@ -332,7 +332,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
           </div>
         </div>
         {/* Bid button area */}
-        <div className="w-full mt-2">
+        <div className="w-full mt-2 relative">
           {!token? (
               <Button
               disabled
@@ -350,9 +350,9 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
               <span className="text-sm">Login to bid</span>
             </Button>
           ) : (
-            <div className="w-full">
+            <div className="w-full relative">
               {auction.status === "live" && (
-                <div className={`w-full ${shake ? "animate-shake" : ""}`}>
+                <div className={`w-full ${shake ? "animate-shake" : ""} relative`}>
                   {/* Bid Now Button */}
                   <div
                     className={`w-full flex items-center justify-center transition-all duration-500 ease-in-out z-10 ${
@@ -368,7 +368,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
                         setShake(true);
                         setTimeout(() => setShake(false), 600);
                       }}
-                      className={`${cardBidButton} ${accent.border}`}
+                      className={`${cardBidButton} ${accent.border} w-full`}
                       type="button"
                     >
                       Place Lower Bid
@@ -382,11 +382,12 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
                   {/* Bid Form (slide/scale/blur animated transition) */}
                   <form
                     onSubmit={handleBidSubmit}
-                    className={`absolute inset-0 w-full h-full flex items-center justify-center gap-2 transition-all duration-500 ease-in-out z-0 ${
+                    className={`absolute left-0 right-0 top-0 w-full h-full flex items-center justify-center gap-2 transition-all duration-500 ease-in-out z-0 ${
                       isBidding
                         ? "opacity-100 translate-x-0 scale-100 blur-none pointer-events-auto"
                         : "opacity-0 -translate-x-4 scale-95 blur-sm pointer-events-none"
                     }`}
+                    style={{ minHeight: '44px' }}
                   >
                     <input
                       type="number"

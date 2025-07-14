@@ -311,7 +311,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator,
           </div>
         </div>
         {/* Bid Now Area with Transition */}
-        <div className="w-full mt-2">
+        <div className="w-full mt-2 relative">
           {!token? (
               <Button
               disabled
@@ -329,9 +329,9 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator,
               <span className="text-sm">Login to bid</span>
             </Button>
           ) : (
-            <div className="w-full">
+            <div className="w-full relative">
               {auction.status === "live" && (
-                <div className={`w-full ${shake ? "animate-shake" : ""}`}>
+                <div className={`w-full ${shake ? "animate-shake" : ""} relative`}>
                   {/* Bid Now Button */}
                   <div
                     className={`w-full flex items-center justify-center transition-all duration-500 ease-in-out z-10 ${
@@ -340,36 +340,40 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator,
                         : "opacity-100 scale-100 pointer-events-auto"
                     }`}
                   >
-                    {auction?.user_id !== user?.user_id &&
-                      <button
-                        onClick={() => {
-                          setIsBidding(true);
-                          setShake(true);
-                        }}
-                        className={`${cardBidButton} ${accent.border}`}
-                      >
-                        Place Higher Bid
-                      </button>
-                    }
+                  {auction?.user_id !== user?.user_id ? (
+                    <button
+                      onClick={() => {
+                        setIsBidding(true);
+                        setShake(true);
+                        setTimeout(() => setShake(false), 600);
+                      }}
+                      className={`${cardBidButton} ${accent.border} w-full`}
+                      type="button"
+                    >
+                      Place Bid
+                    </button>
+                  ) : (
+                    <div className="w-full flex items-center justify-center rounded-full border border-gray-500 bg-gray-800 text-gray-300 font-medium cursor-not-allowed shadow-inner text-sm">
+                      You created this auction
+                    </div>
+                  )}
                   </div>
                   {/* Bid Form (slide/scale/blur animated transition) */}
                   <form
                     onSubmit={handleBidSubmit}
-                    className={`absolute inset-0 w-full h-full flex items-center justify-center gap-2 transition-all duration-500 ease-in-out z-0
-                      ${isBidding
+                    className={`absolute left-0 right-0 top-0 w-full h-full flex items-center justify-center gap-2 transition-all duration-500 ease-in-out z-0 ${
+                      isBidding
                         ? "opacity-100 translate-x-0 scale-100 blur-none pointer-events-auto"
-                        : "opacity-0 -translate-x-4 scale-95 blur-sm pointer-events-none"}`}
+                        : "opacity-0 -translate-x-4 scale-95 blur-sm pointer-events-none"
+                    }`}
+                    style={{ minHeight: '44px' }}
                   >
                     <input
                       type="number"
                       name="amount"
                       value={bidAmount}
                       onChange={(e) => setBidAmount(Number(e.target.value))}
-                      min={
-                        auction.starting_price === auction.highest_bid
-                          ? auction.starting_price
-                          : Math.max(auction.starting_price, auction.highest_bid) + 1
-                      }
+                      min={auction.starting_price}
                       placeholder="Your bid"
                       className="w-2/3 max-w-[100px] p-2 rounded-lg border bg-gray-800 text-white border-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-400 transition"
                     />
