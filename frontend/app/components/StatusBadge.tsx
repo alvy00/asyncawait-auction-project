@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { FaArrowDown, FaBan, FaBolt, FaClock, FaFlagCheckered, FaHourglassHalf, FaStopwatch, FaUsers} from "react-icons/fa";
+import { FaArrowDown, FaBan, FaBolt, FaClock, FaHourglassHalf, FaStopwatch, FaUsers, FaFlagCheckered
+} from "react-icons/fa";
 
 const StatusBadge = ({ type, status, auctionId, participantCount }) => {
 

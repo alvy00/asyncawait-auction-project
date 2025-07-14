@@ -298,7 +298,7 @@ export const HeroSection = () => {
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60"></div>
                                 
                                 {/* Live tag */}
-                                <StatusBadge auctionId={auction.auction_id} type={auction.auction_type} status={auction.status} />
+                                <StatusBadge auctionId={auction.auction_id} type={auction.auction_type} status={auction.status} participantCount={auction.participants} />
                                 
                                 {/* Favorite button - Improved touch target */}
                                 <button className="absolute top-2 sm:top-4 right-2 sm:right-4 bg-white/10 hover:bg-white/20 backdrop-blur-md p-2 sm:p-2 rounded-full z-10 transition-all duration-300 hover:scale-110 border border-white/20 shadow-lg touch-manipulation">
@@ -308,11 +308,16 @@ export const HeroSection = () => {
                                 </button>
                               </div>
                               
-                              {/* Content with simplified glass background effect */}
-                              <div className="p-3 sm:p-4 md:p-6 bg-black/60 backdrop-blur-sm relative z-10 h-[45%] flex flex-col justify-between border-t border-white/10">
+                              {/* Content with refined glass background effect for readability and elegance */}
+                              <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, ease: 'easeOut' }}
+                                className="h-[55%] p-4 md:p-6 bg-black/90 backdrop-blur-md border-t border-white/15 rounded-b-xl shadow-xl flex flex-col justify-between relative z-10"
+                              >
                                 <div>
                                   <h3 className="text-white text-base sm:text-lg md:text-2xl font-bold mb-0.5 sm:mb-1">{auction.item_name}</h3>
-                                  <p className="text-gray-300 text-xs sm:text-sm mb-2 sm:mb-3">{auction.item_name}(subtitle)</p>
+                                  <p className="text-gray-300 text-xs sm:text-sm mb-2 sm:mb-3">{auction.item_name}</p>
                                   
                                   <div className="text-gray-400 text-xs sm:text-sm mb-1">
                                     Current bid:
@@ -343,7 +348,7 @@ export const HeroSection = () => {
                                     </div>
                                   </div>
                                 </div>
-                              </div>
+                              </motion.div>
                             </div>
                           </motion.div>
                         );

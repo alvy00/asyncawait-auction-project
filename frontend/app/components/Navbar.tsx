@@ -287,6 +287,7 @@ export const Navbar = () => {
           {/* Search and Actions */}
           <div className="flex items-center space-x-4">
             {/* Search Bar */}
+            {/*
             <motion.div 
               className="relative hidden md:block"
               animate={{ width: searchFocused ? '220px' : '180px' }}
@@ -303,7 +304,7 @@ export const Navbar = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               </div>
             </motion.div>
-            
+            */}
             {/* Action Icons */}
             {loggedIn && <div className="hidden md:flex items-center space-x-1">
               {/* Notification Icon */}
