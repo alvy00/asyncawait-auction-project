@@ -283,7 +283,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
         <div className={cardOverlay}></div>
         {/* Status badge */}
         <div className={cardStatusBadge}>
-          <StatusBadge type="classic" status={currentStatus} auctionId={auction.auction_id} />
+          <StatusBadge type="classic" status={currentStatus} auctionId={auction.auction_id} participantCount={auction.participants}     />
         </div>
         {/* Favorite badge */}
         <div className={cardFavoriteBadge}>

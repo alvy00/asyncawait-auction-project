@@ -204,13 +204,14 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
         />
         <div className={cardOverlay}></div>
         <div className={cardStatusBadge}>
-          <StatusBadge type="dutch" status={auction.status} auctionId={auction.auction_id} />
+        <StatusBadge type={"dutch"} status={auction.status} auctionId={auction.auction_id} participantCount={auction.participants}/>
         </div>
         <div className={cardFavoriteBadge}>
           <FavoriteBadge userId={user?.user_id} auctionId={auction.auction_id} initialFavorited={auction.isFavorite} isHovered={isHovered} />
         </div>
       </div>
-      {/* Content area */}
+      
+      {/* Info section */}
       <div className={cardContent}>
         <div onClick={() => setDetailsOpen(true)}>
           <h3 className={cardTitle}>#{auction.item_name}</h3>
