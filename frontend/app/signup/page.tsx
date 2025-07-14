@@ -191,350 +191,236 @@ export default function SignUpPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-[#0A111B] flex flex-col lg:flex-row">
-        {/* Left side - Image with animated gradient overlay */}
-        <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
-          {/* Animated gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#0a1929] via-[#162a3d] to-[#0a1929] z-0"></div>
-          
-          {/* Animated gradient bubbles */}
-          <motion.div 
-            variants={bubbleVariants}
-            initial="initial"
-            animate="animate"
-            className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-orange-600 rounded-full filter blur-[80px] opacity-30 z-0"
-          />
-          <motion.div 
-            variants={bubbleVariants}
-            initial="initial"
-            animate="animate"
-            className="absolute bottom-[-10%] left-[10%] w-[400px] h-[400px] bg-gray-800 rounded-full filter blur-[70px] opacity-50 z-0"
-          />
-          
-          {/* Image with overlay */}
-          <div className="absolute inset-0 opacity-40 z-0">
-            <Image
-              src="https://images.unsplash.com/photo-1600367163359-d51d40bcb5f8?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-              alt="Auction Items"
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
-          
-          {/* Content overlay */}
-          <div className="absolute inset-0 flex flex-col justify-center items-center p-16 text-white z-10">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="max-w-md text-center backdrop-blur-sm bg-black/20 p-8 rounded-xl border border-white/10"
-            >
-              <h2 className="text-3xl font-bold mb-6 font-serif">Join Our Global Auction Community</h2>
-              <p className="text-lg mb-8">Create an account today to discover unique items and place bids on exclusive auctions from around the world.</p>
-              
-              <div className="grid grid-cols-2 gap-6">
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-left border border-white/5"
-                >
-                  <div className="text-orange-400 mb-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-9.618 5.04L2 9.5l5 5a8.001 8.001 0 0014 0l5-5-.382-1.516z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Secure Bidding</h3>
-                  <p className="text-sm opacity-80">Our platform ensures your transactions are protected and secure.</p>
-                </motion.div>
-                
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                  className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-left border border-white/5"
-                >
-                  <div className="text-orange-400 mb-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Real-time Updates</h3>
-                  <p className="text-sm opacity-80">Get instant notifications when you&apos;re outbid or win an auction.</p>
-                </motion.div>
-                
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                  className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-left border border-white/5"
-                >
-                  <div className="text-orange-400 mb-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Easy Payments</h3>
-                  <p className="text-sm opacity-80">Multiple payment options available for your convenience.</p>
-                </motion.div>
-                
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.5 }}
-                  className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-left border border-white/5"
-                >
-                  <div className="text-orange-400 mb-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">24/7 Support</h3>
-                  <p className="text-sm opacity-80">Our team is always ready to assist you with any questions.</p>
-                </motion.div>
+      {/* Animated Gradient Background */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-32 -left-32 w-[600px] h-[600px] bg-gradient-to-br from-orange-500 via-purple-600 to-blue-500 rounded-full filter blur-[120px] opacity-40 animate-pulse-slow" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-gradient-to-tr from-blue-500 via-orange-400 to-purple-500 rounded-full filter blur-[100px] opacity-30 animate-float" />
+      </div>
+
+      {/* Centered Signup Card */}
+      <div className="min-h-screen flex items-center justify-center px-4 py-12 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: 'easeOut' }}
+          className="w-full max-w-xl bg-[#10182A]/90 backdrop-blur-xl p-8 sm:p-10 rounded-2xl shadow-2xl border border-white/10 flex flex-col items-center"
+        >
+          <Link href="/" className="mb-8 block">
+            <Image src="/logo-white.png" alt="AuctaSync Logo" width={180} height={45} priority />
+          </Link>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 font-serif text-center">Create your account</h1>
+          <p className="text-gray-400 mb-8 text-center">Join AuctaSync and start bidding on exclusive items.</p>
+
+          <form onSubmit={handleSubmit} className="w-full space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName" className="text-gray-300">First Name</Label>
+                <div className="flex items-center bg-[#181F2F] border border-gray-700 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-orange-500 transition">
+                  <FaUser className="text-orange-400 mr-3" />
+                  <Input
+                    id="firstName"
+                    name="firstName"
+                    placeholder="John"
+                    required
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    className="w-full bg-transparent border-0 text-white focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500"
+                  />
+                </div>
+                {formErrors.firstName && (
+                  <p className="text-red-500 text-xs mt-1">{formErrors.firstName}</p>
+                )}
               </div>
-            </motion.div>
-          </div>
-        </div>
-        
-        {/* Right side - Signup Form */}
-        <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 lg:p-16 relative z-10">
-          <div className="absolute top-4 left-4">
-            <BackButton />
-          </div>
-          
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="w-full max-w-md"
-          >
-            <div className="text-center mb-8">
-              <Link href="/" className="inline-block">
-                <Image src="/logo-white.png" alt="AuctaSync Logo" width={180} height={45} />
+              <div className="space-y-2">
+                <Label htmlFor="lastName" className="text-gray-300">Last Name</Label>
+                <div className="flex items-center bg-[#181F2F] border border-gray-700 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-orange-500 transition">
+                  <FaUser className="text-orange-400 mr-3" />
+                  <Input
+                    id="lastName"
+                    name="lastName"
+                    placeholder="Doe"
+                    required
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    className="w-full bg-transparent border-0 text-white focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500"
+                  />
+                </div>
+                {formErrors.lastName && (
+                  <p className="text-red-500 text-xs mt-1">{formErrors.lastName}</p>
+                )}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="username" className="text-gray-300">Username</Label>
+              <div className="flex items-center bg-[#181F2F] border border-gray-700 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-orange-500 transition">
+                <FaUser className="text-orange-400 mr-3" />
+                <Input
+                  id="username"
+                  name="username"
+                  placeholder="user001"
+                  required
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  className="w-full bg-transparent border-0 text-white focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500"
+                />
+              </div>
+              {formErrors.username && (
+                <p className="text-red-500 text-xs mt-1">{formErrors.username}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-gray-300">Email</Label>
+              <div className="flex items-center bg-[#181F2F] border border-gray-700 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-orange-500 transition">
+                <FaEnvelope className="text-orange-400 mr-3" />
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="name@example.com"
+                  required
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="w-full bg-transparent border-0 text-white focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500"
+                />
+              </div>
+              {formErrors.email && (
+                <p className="text-red-500 text-xs mt-1">{formErrors.email}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-gray-300">Password</Label>
+              <div className="flex items-center bg-[#181F2F] border border-gray-700 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-orange-500 transition">
+                <FaLock className="text-orange-400 mr-3" />
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  required
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className="w-full bg-transparent border-0 text-white focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="ml-3 text-gray-500 hover:text-orange-400 focus:outline-none"
+                  aria-label="Toggle password visibility"
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+              {/* Password strength meter */}
+              <div className="flex items-center">
+                <div className="h-1.5 flex-grow bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full ${
+                      passwordStrength === 0
+                        ? 'w-0'
+                        : passwordStrength === 1
+                        ? 'w-1/4 bg-red-500'
+                        : passwordStrength === 2
+                        ? 'w-2/4 bg-yellow-500'
+                        : passwordStrength === 3
+                        ? 'w-3/4 bg-blue-500'
+                        : 'w-full bg-green-500'
+                    } transition-all duration-300`}
+                  ></div>
+                </div>
+                {passwordStrength > 0 && (
+                  <span className={`ml-2 text-xs ${getPasswordStrengthColor()}`}>
+                    {getPasswordStrengthText()}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-gray-500">Use 8+ characters with a mix of letters, numbers & symbols</p>
+              {formErrors.password && (
+                <p className="text-red-500 text-xs mt-1">{formErrors.password}</p>
+              )}
+            </div>
+            <div className="flex items-start space-x-2">
+              <Checkbox
+                id="terms"
+                required
+                className="border-gray-600 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+              />
+              <div className="grid gap-1.5 leading-none">
+                <label
+                  htmlFor="terms"
+                  className="text-sm text-gray-400 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  I agree to the{' '}
+                  <Link href="/terms" className="text-orange-500 hover:text-orange-400 underline">
+                    Terms of Service
+                  </Link>
+                  {' '}and{' '}
+                  <Link href="/privacy" className="text-orange-500 hover:text-orange-400 underline">
+                    Privacy Policy
+                  </Link>
+                </label>
+              </div>
+            </div>
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-lg py-3 rounded-xl shadow-lg transition-all duration-300"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Creating account...
+                </div>
+              ) : "Create Account"}
+            </Button>
+            <div className="text-center">
+              <span className="text-gray-400">Already have an account?</span>{' '}
+              <Link href="/login" className="text-orange-400 font-medium hover:text-orange-300">
+                Sign in
               </Link>
             </div>
-
-            <h1 className="text-3xl font-bold mb-2 text-white font-serif">Create an account</h1>
-            <p className="text-gray-400 mb-8">Join AuctaSync and start bidding on exclusive items</p>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName" className="text-gray-300">First Name</Label>
-                  <div className="flex items-center bg-[#1a1f2a] border border-[#2a3548] rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-orange-500 transition-all">
-                    <div className="pl-3 pr-2">
-                      <FaUser className="text-gray-400" />
-                    </div>
-                    <Input
-                      id="firstName"
-                      name="firstName"
-                      placeholder="John"
-                      required
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                      className="border-0 bg-transparent text-white focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500"
-                    />
-                  </div>
-                  {formErrors.firstName && (
-                    <p className="text-red-500 text-xs mt-1">{formErrors.firstName}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="lastName" className="text-gray-300">Last Name</Label>
-                  <div className="flex items-center bg-[#1a1f2a] border border-[#2a3548] rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-orange-500 transition-all">
-                    <div className="pl-3 pr-2">
-                      <FaUser className="text-gray-400" />
-                    </div>
-                    <Input
-                      id="lastName"
-                      name="lastName"
-                      placeholder="Doe"
-                      required
-                      value={formData.lastName}
-                      onChange={handleInputChange}
-                      className="border-0 bg-transparent text-white focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500"
-                    />
-                  </div>
-                  {formErrors.lastName && (
-                    <p className="text-red-500 text-xs mt-1">{formErrors.lastName}</p>
-                  )}
-                </div>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-700"></div>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="username" className="text-gray-300">Username</Label>
-                <div className="flex items-center bg-[#1a1f2a] border border-[#2a3548] rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-orange-500 transition-all">
-                  <div className="pl-3 pr-2">
-                    <FaUser className="text-gray-400" />
-                  </div>
-                  <Input
-                    id="username"
-                    name="username"
-                    placeholder="user001"
-                    required
-                    value={formData.username}
-                    onChange={handleInputChange}
-                    className="border-0 bg-transparent text-white focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500"
-                  />
-                </div>
-                {formErrors.username && (
-                  <p className="text-red-500 text-xs mt-1">{formErrors.username}</p>
-                )}
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-[#10182A] text-gray-400">Or continue with</span>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-300">Email</Label>
-                <div className="flex items-center bg-[#1a1f2a] border border-[#2a3548] rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-orange-500 transition-all">
-                  <div className="pl-3 pr-2">
-                    <FaEnvelope className="text-gray-400" />
-                  </div>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="name@example.com"
-                    required
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="border-0 bg-transparent text-white focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500"
-                  />
-                </div>
-                {formErrors.email && (
-                  <p className="text-red-500 text-xs mt-1">{formErrors.email}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-gray-300">Password</Label>
-                <div className="flex items-center bg-[#1a1f2a] border border-[#2a3548] rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-orange-500 transition-all">
-                  <div className="pl-3 pr-2">
-                    <FaLock className="text-gray-400" />
-                  </div>
-                  <Input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    required
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    className="border-0 bg-transparent text-white focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500"
-                  />
-                  <button 
-                    type="button" 
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="pr-3 text-gray-400 hover:text-gray-300 transition-colors"
-                  >
-                    {showPassword ? <FaEyeSlash /> : <FaEye />}
-                  </button>
-                </div>
-
-                {/* Password strength meter */}
-                <div className="flex items-center">
-                  <div className="h-1.5 flex-grow bg-gray-700 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${
-                        passwordStrength === 0
-                          ? 'w-0'
-                          : passwordStrength === 1
-                          ? 'w-1/4 bg-red-500'
-                          : passwordStrength === 2
-                          ? 'w-2/4 bg-yellow-500'
-                          : passwordStrength === 3
-                          ? 'w-3/4 bg-blue-500'
-                          : 'w-full bg-green-500'
-                      } transition-all duration-300`}
-                    ></div>
-                  </div>
-                  {passwordStrength > 0 && (
-                    <span className={`ml-2 text-xs ${getPasswordStrengthColor()}`}>
-                      {getPasswordStrengthText()}
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-gray-500">Use 8+ characters with a mix of letters, numbers & symbols</p>
-                {formErrors.password && (
-                  <p className="text-red-500 text-xs mt-1">{formErrors.password}</p>
-                )}
-              </div>
-
-              <div className="flex items-start space-x-2">
-                <Checkbox 
-                  id="terms" 
-                  required 
-                  className="border-gray-600 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-                />
-                <div className="grid gap-1.5 leading-none">
-                  <label
-                    htmlFor="terms"
-                    className="text-sm text-gray-400 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    I agree to the{' '}
-                    <Link href="/terms" className="text-orange-500 hover:text-orange-400 underline">
-                      Terms of Service
-                    </Link>
-                    {' '}and{' '}
-                    <Link href="/privacy" className="text-orange-500 hover:text-orange-400 underline">
-                      Privacy Policy
-                    </Link>
-                  </label>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <div className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C"></path>
-                    </svg>
-                    Loading...
-                    </div>
-                  ) : (
-                  'Create Account'
-                )}
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <Button variant="outline" className="w-full border-gray-700 bg-[#181F2F] text-white hover:bg-[#232B3E] transition" type="button">
+                <FaGoogle className="mr-2 h-5 w-5 text-orange-400" />
+                Google
               </Button>
-
-              <div className="text-center">
-                <span className="text-gray-400">Already have an account?</span>{' '}
-                <Link href="/login" className="text-orange-500 font-medium hover:text-orange-400 transition-colors">
-                  Sign in
-                </Link>
-              </div>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-700"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-[#0A111B] text-gray-400">
-                    Or continue with
-                  </span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <Button variant="outline" className="w-full flex items-center justify-center">
-                  <FaGoogle className="mr-2 h-5 w-5 text-blue-500" />
-                  Google
-                </Button>
-                <Button variant="outline" className="w-full flex items-center justify-center">
-                  <FaFacebookF className="mr-2 h-5 w-5 text-blue-600" />
-                  Facebook
-                </Button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
-        </div>
+              <Button variant="outline" className="w-full border-gray-700 bg-[#181F2F] text-white hover:bg-[#232B3E] transition" type="button">
+                <FaFacebookF className="mr-2 h-5 w-5 text-orange-400" />
+                Facebook
+              </Button>
+            </div>
+          </form>
+        </motion.div>
+      </div>
+      {/* Custom Animations */}
+      <style jsx global>{`
+        @keyframes float {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-20px); }
+          100% { transform: translateY(0px); }
+        }
+        @keyframes pulse-slow {
+          0% { opacity: 0.5; }
+          50% { opacity: 0.7; }
+          100% { opacity: 0.5; }
+        }
+        .animate-float {
+          animation: float 8s ease-in-out infinite;
+        }
+        .animate-pulse-slow {
+          animation: pulse-slow 6s ease-in-out infinite;
+        }
+      `}</style>
     </>
-    
   );
 }

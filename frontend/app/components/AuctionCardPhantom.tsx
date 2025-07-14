@@ -10,6 +10,23 @@ import { Button } from "../../components/ui/button";
 import FavoriteBadge from "./FavouriteBadge";
 import StatusBadge from "./StatusBadge";
 import AuctionDetailsModal from "./AuctionDetailsModal";
+import {
+  cardBase,
+  cardImageContainer,
+  cardImage,
+  cardOverlay,
+  cardStatusBadge,
+  cardFavoriteBadge,
+  cardContent,
+  cardTitle,
+  cardLabel,
+  cardPrice,
+  cardCountdown,
+  cardFooter,
+  cardCreatorBadge,
+  cardBidButton,
+  getCardAccent
+} from "./auction-detail/CardStyleSystem";
 
 interface AuctionCardProps {
   auction: Auction;
@@ -34,6 +51,8 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
 
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : "/fallback.jpg";
   const token = typeof window !== "undefined"? localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken") : null;
+
+  const accent = getCardAccent("phantom");
 
   // fetch user
   // useEffect(() => {
@@ -250,78 +269,49 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
         boxShadow: "0 0 6px 2px rgba(240, 200, 0, 0.5)",
         transition: { duration: 0.35, ease: "easeOut" },
       }}
-      className={`relative w-full h-[500px] group rounded-lg overflow-hidden 
-        bg-gradient-to-br from-[#3f3700] via-[#7a6d00] to-[#d4b400]
-        border border-yellow-700/40 text-white select-none`}
+      className={`${cardBase} bg-gradient-to-br ${accent.bg}`}
     >
-
       {/* Image container */}
-      <div onClick={() => setDetailsOpen(true)} className="relative h-[55%] w-full overflow-hidden group">
+      <div className={cardImageContainer} onClick={() => setDetailsOpen(true)}>
         <Image
           src={imageSrc}
           alt={auction.item_name}
           fill
-          style={{ objectFit: "cover" }}
-          className="brightness-90 group-hover:brightness-110 object-cover transition-transform duration-700 group-hover:scale-110"
+          className={cardImage}
           priority
         />
+        <div className={cardOverlay}></div>
+        <div className={cardStatusBadge}>
+          <StatusBadge type="phantom" status={auction.status} auctionId={auction.auction_id} participantCount={auction.participants} />
+        </div>
+        <div className={cardFavoriteBadge}>
+          <FavoriteBadge userId={user?.user_id} auctionId={auction.auction_id} initialFavorited={auction.isFavorite} isHovered={isHovered} />
+        </div>
       </div>
-
-      {/* Status and Favorite Badge */}
-      <StatusBadge type={"phantom"} status={auction.status} auctionId={auction.auction_id} participantCount={auction.participants}/>
-      <FavoriteBadge userId={user?.user_id} auctionId={auction.auction_id} initialFavorited={auction.isFavorite} isHovered={isHovered} />
-      
       {/* Content area */}
-      <div className="p-5 flex flex-col justify-between h-[45%] bg-gradient-to-t from-black/80 to-transparent">
+      <div className={cardContent}>
         <div onClick={() => setDetailsOpen(true)}>
-          <h3
-            className="text-2xl font-bold tracking-wide uppercase mb-2 text-yellow-100 drop-shadow-sm cursor-pointer"
-          >
-            #{auction.item_name}
-          </h3>
-          <div className="mt-2 text-lg">
-            {/* Bidding starts Label */}
-            <div className={`text-gray-400 text-xs mb-1 font-medium`}>
-                <span className="text-gray-300 flex items-center gap-1">
-                  <FaBullhorn className="text-yellow-400" />
-                  Bidding starts at:
-                </span>
-            </div>
-
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500 font-extrabold text-3xl">
-                ${auction.starting_price.toFixed(2)}
-            </span>
+          <h3 className={cardTitle}>#{auction.item_name}</h3>
+          <div className={cardLabel}>
+            <span className="flex items-center gap-1"><FaBullhorn className="text-yellow-400" />Bidding starts at:</span>
           </div>
-
-          {/* Higest bid and name(nothing here rn) */}
-          <div
-            className="mt-1 text-sm flex items-center gap-2 select-none
-            text-yellow-300 font-semibold tracking-wide
-            transition-all duration-300 ease-in-out"
-          >
-           {totalBids ? (`
-                ${totalBids} Bids Already!!
-            `) : (
-                ""
-           )} 
-          </div>
-
-          {/* Countdown */}
-          <div className="mt-3 flex items-center gap-2 text-sm font-semibold text-yellow-400">
-            <span className="text-white bg-white/5 backdrop-blur-sm px-3 py-1 rounded-md border border-white/10 font-mono tracking-wide">
+          <div className={`${cardPrice} bg-gradient-to-r ${accent.price}`}>${auction.starting_price.toFixed(2)}</div>
+          <div className={cardFooter}>
+            <div className={cardCountdown}>
               <Countdown endTime={auction.end_time} />
-            </span>
+            </div>
+            <div className={cardCreatorBadge}>{auctionCreator}</div>
+          </div>
+          <div className="mt-1 text-xs text-yellow-300 font-semibold tracking-wide transition-all duration-300 ease-in-out">
+            {totalBids ? (`${totalBids} Bids Already!!`) : ("")}
           </div>
         </div>
-
         {/* Bid Now Area with Transition */}
-        <div className="absolute bottom-5 right-5 z-10">
+        <div className="w-full mt-2">
           {!token? (
               <Button
               disabled
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md 
-                        bg-gray-800 border border-gray-700 text-gray-400 opacity-60 
-                        cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30"
+              className="w-full flex items-center justify-center gap-2 rounded-full bg-gray-800 border border-gray-700 text-gray-400 opacity-60 cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30"
             >
               <svg
                 className="w-4 h-4 text-gray-500"
@@ -335,44 +325,43 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
               <span className="text-sm">Login to bid</span>
             </Button>
           ) : (
-            <div className="relative h-12 w-[160px] transition-all duration-500">
-              {/* If auction is live and user is allowed to bid */}
+            <div className="w-full">
               {auction.status === "live" && (
-                <div className={`relative w-full h-full ${shake ? "animate-shake" : ""}`}>
+                <div className={`w-full ${shake ? "animate-shake" : ""}`}>
                   {/* Bid Now Button */}
                   <div
-                    className={`absolute inset-0 w-full h-full flex items-center justify-center transition-all duration-500 ease-in-out z-10 ${
+                    className={`w-full flex items-center justify-center transition-all duration-500 ease-in-out z-10 ${
                       isBidding
                         ? "opacity-0 scale-95 pointer-events-none"
                         : "opacity-100 scale-100 pointer-events-auto"
                     }`}
                   >
-                    {auction?.user_id !== user?.user_id ? (
-                      <button
-                        onClick={() => {
-                          setIsBidding(true);
-                          setShake(true);
-                        }}
-                        className="w-full h-full flex items-center justify-center rounded-md border border-yellow-700 bg-yellow-800 hover:bg-yellow-700 font-medium text-white backdrop-blur-sm transition-all duration-300 ease-in-out cursor-pointer"
-                      >
-                        Place Hidden Bid
-                      </button>
-                    ):(
-                      <div className="w-full h-full flex items-center justify-center rounded-md border border-gray-500 bg-gray-800 text-gray-300 font-medium cursor-not-allowed shadow-inner text-sm">
-                        You created this auction
-                      </div>
-                    )
-                      
-                    }
+                  {auction?.user_id !== user?.user_id ? (
+                    <button
+                      onClick={() => {
+                        setIsBidding(true);
+                        setShake(true);
+                        setTimeout(() => setShake(false), 600);
+                      }}
+                      className={`${cardBidButton} ${accent.border}`}
+                      type="button"
+                    >
+                      Place Bid
+                    </button>
+                  ) : (
+                    <div className="w-full flex items-center justify-center rounded-full border border-gray-500 bg-gray-800 text-gray-300 font-medium cursor-not-allowed shadow-inner text-sm">
+                      You created this auction
+                    </div>
+                  )}
                   </div>
-
                   {/* Bid Form (slide/scale/blur animated transition) */}
                   <form
                     onSubmit={handleBidSubmit}
-                    className={`absolute inset-0 w-full h-full flex items-center justify-center gap-2 transition-all duration-500 ease-in-out z-0
-                      ${isBidding
+                    className={`absolute inset-0 w-full h-full flex items-center justify-center gap-2 transition-all duration-500 ease-in-out z-0 ${
+                      isBidding
                         ? "opacity-100 translate-x-0 scale-100 blur-none pointer-events-auto"
-                        : "opacity-0 -translate-x-4 scale-95 blur-sm pointer-events-none"}`}
+                        : "opacity-0 -translate-x-4 scale-95 blur-sm pointer-events-none"
+                    }`}
                   >
                     <input
                       type="number"
@@ -381,12 +370,12 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
                       onChange={(e) => setBidAmount(Number(e.target.value))}
                       min={auction.starting_price}
                       placeholder="Your bid"
-                      className="w-2/3 max-w-[100px] p-2 rounded-lg border bg-gray-800 text-white border-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder-gray-400 transition"
+                      className="w-2/3 max-w-[100px] p-2 rounded-lg border bg-gray-800 text-white border-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder-gray-400 transition"
                     />
                     <button
                       type="submit"
                       disabled={submittingBid}
-                      className={`px-3 py-2 bg-yellow-700 text-black font-semibold rounded-lg border border-yellow-600 shadow hover:bg-yellow-600 transition-all duration-300 ease-in-out cursor-pointer ${
+                      className={`px-3 py-2 bg-yellow-800 text-white font-semibold rounded-lg border border-yellow-700 shadow hover:bg-yellow-700 hover:border-yellow-500 transition-all duration-300 ease-in-out cursor-pointer ${
                         submittingBid ? "opacity-50 cursor-not-allowed" : ""
                       }`}
                     >
@@ -397,10 +386,8 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
               )}
             </div>
           )}
-          
         </div>
       </div>
-
       {/* Overlay during bidding */}
       {submittingBid && (
         <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-xl font-bold text-white z-50 pointer-events-auto space-x-4">
@@ -412,7 +399,6 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
           <span>Submitting Bid...</span>
         </div>
       )}
-
       {/* Auction details Modal */}
       <AuctionDetailsModal
         open={detailsOpen}
@@ -421,7 +407,6 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
         }}
         auction={auction}
       />
-
       {/* Shake animation styles */}
       <style>
         {`
@@ -431,14 +416,12 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
             50% { transform: translateX(0.3px); }
             70% { transform: translateX(-0.2px); }
           }
-
           .animate-shake {
             animation: gentle-shake 0.4s ease-in-out;
           }
         `}
       </style>
     </motion.div>
-
   );
 };
 
