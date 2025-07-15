@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useUser } from "../../../../lib/user-context";
+import Image from "next/image";
 
 const auctionTypes = [
   { value: 'classic', label: 'Classic', description: 'Standard auction, highest bid wins.' },
@@ -43,6 +44,20 @@ export default function AuctionCreationForm() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [selectedType, setSelectedType] = useState(auctionTypes[0]);
   const [newAuctionTitle, setNewAuctionTitle] = useState<string>("");
+  const [formStep, setFormStep] = useState(0);
+  const [formData, setFormData] = useState({
+    item_name: '',
+    description: '',
+    category: '',
+    condition: '',
+    auction_type: auctionTypes[0].value,
+    starting_price: '',
+    buy_now: '',
+    start_time: '',
+    end_time: '',
+    duration: '',
+    images: [] as string[],
+  });
   const router = useRouter();
 
   // Construct share URL based on new auction title
@@ -56,17 +71,14 @@ export default function AuctionCreationForm() {
         console.warn("No session token found");
         return;
       }
-
       try {
         const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getUser', {
           headers: { Authorization: `Bearer ${token}` },
         });
-
         if (!res.ok) {
           console.error("Failed to fetch user");
           return;
         }
-
         const userData = await res.json();
         setCurrentUser(userData);
       } catch (error) {
@@ -76,10 +88,28 @@ export default function AuctionCreationForm() {
     fetchUser();
   }, []);
 
+  // Stepper steps
+  const steps = [
+    "Auction Details",
+    "Pricing & Timing",
+    "Images",
+    "Preview & Submit"
+  ];
+
+  // Handle input change
+  function handleInputChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  }
+
+  // Handle next/prev step
+  function nextStep() { setFormStep(s => Math.min(s + 1, steps.length - 1)); }
+  function prevStep() { setFormStep(s => Math.max(s - 1, 0)); }
+
+  // Handle form submit
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
       const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
       if (!token) {
@@ -87,49 +117,40 @@ export default function AuctionCreationForm() {
         setIsLoading(false);
         return;
       }
-
-      const formData = new FormData(e.currentTarget);
-      const startTime = new Date(formData.get("start_time") as string);
+      const startTime = new Date(formData.start_time);
       let endTime: Date;
-      const endTimeStr = formData.get("end_time") as string;
-      const durationStr = formData.get("duration") as string;
-
-      if (endTimeStr) {
-        endTime = new Date(endTimeStr);
-      } else if (durationStr) {
-        const duration = parseInt(durationStr, 10);
+      if (formData.end_time) {
+        endTime = new Date(formData.end_time);
+      } else if (formData.duration) {
+        const duration = parseInt(formData.duration, 10);
         endTime = new Date(startTime.getTime() + duration * 60000);
       } else {
         throw new Error("Either end_time or duration must be provided");
       }
-
       const now = new Date();
       let status = "upcoming";
       if (endTime < now) status = "ended";
       else if (startTime <= now) status = "live";
-
       const auctionBody = {
         creator: currentUser.name,
-        item_name: formData.get('item_name') as string,
-        description: formData.get('description') as string,
-        category: formData.get('category') as string,
-        auction_type: formData.get('auction_type') as string,
-        starting_price: parseFloat(formData.get('starting_price') as string),
-        buy_now: formData.get('buy_now') ? parseFloat(formData.get('buy_now') as string) : undefined,
+        item_name: formData.item_name,
+        description: formData.description,
+        category: formData.category,
+        auction_type: formData.auction_type,
+        starting_price: parseFloat(formData.starting_price),
+        buy_now: formData.buy_now ? parseFloat(formData.buy_now) : undefined,
         start_time: startTime.toISOString(),
         end_time: endTime.toISOString(),
         status,
         images: imageUrls.filter(url => url.trim()),
-        condition: formData.get('condition') as string,
+        condition: formData.condition,
       };
-
       const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(auctionBody),
       });
       const result = await res.json();
-
       if (res.ok) {
         toast.success("Auction created successfully");
         setNewAuctionTitle(auctionBody.item_name);
@@ -145,391 +166,246 @@ export default function AuctionCreationForm() {
     }
   };
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { type: "spring", stiffness: 300, damping: 24 }
-    }
-  };
+  // Responsive hero/intro section
+  const HeroSection = (
+    <section className="relative w-full flex flex-col items-center justify-center py-12 md:py-20 bg-gradient-to-br from-orange-500/10 via-purple-700/10 to-blue-500/10 overflow-hidden">
+      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="z-10 text-center">
+        <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/10 border border-white/20 mb-6">
+          <FaGavel className="text-orange-400 text-2xl" />
+          <span className="text-white font-semibold tracking-wide text-lg">Create a New Auction</span>
+        </div>
+        <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 font-serif">List Your Item for Auction</h1>
+        <p className="text-lg text-gray-300 max-w-2xl mx-auto">Share your unique items with the world. Fill in the details, set your price, and let the bidding begin!</p>
+      </motion.div>
+      <div className="absolute -top-32 -left-32 w-[600px] h-[600px] bg-gradient-to-br from-orange-500 via-purple-600 to-blue-500 rounded-full filter blur-[120px] opacity-30 animate-pulse-slow" />
+      <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-gradient-to-tr from-blue-500 via-orange-400 to-purple-500 rounded-full filter blur-[100px] opacity-20 animate-float" />
+    </section>
+  );
 
-  // Redirect if not logged in
-  // useEffect(() => {
-  //   if (user === null) {
-  //     toast.error("Please login first to create auctions");
-  //     router.push('/login');
-  //   }
-  // }, [user, router]);
+  // Stepper/progress indicator
+  const Stepper = (
+    <div className="flex items-center justify-center gap-4 my-8">
+      {steps.map((step, idx) => (
+        <div key={step} className="flex items-center gap-2">
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg border-2 transition-all duration-300 ${formStep === idx ? 'bg-orange-500 text-white border-orange-500 scale-110 shadow-lg' : 'bg-white/10 text-white border-white/20'}`}>{idx + 1}</div>
+          <span className={`text-base font-medium ${formStep === idx ? 'text-orange-400' : 'text-gray-400'}`}>{step}</span>
+          {idx < steps.length - 1 && <span className="w-8 h-1 bg-gradient-to-r from-orange-400 to-purple-500 rounded-full mx-2" />}
+        </div>
+      ))}
+    </div>
+  );
+
+  // Live preview/summary
+  const Preview = (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="bg-white/5 border border-white/10 rounded-xl p-6 shadow-xl mt-8">
+      <h2 className="text-xl font-bold text-white mb-2">Live Preview</h2>
+      <div className="flex flex-col md:flex-row gap-6 items-center">
+        <div className="w-full md:w-1/3 aspect-video bg-black/30 rounded-lg flex items-center justify-center overflow-hidden">
+          {imageUrls[0] ? (
+            <Image src={imageUrls[0]} alt="Preview" width={320} height={180} className="object-cover w-full h-full rounded-lg" />
+          ) : (
+            <span className="text-gray-500">Image Preview</span>
+          )}
+        </div>
+        <div className="flex-1 space-y-2">
+          <div className="text-2xl font-bold text-white">{formData.item_name || 'Auction Title'}</div>
+          <div className="text-gray-300">{formData.description || 'Auction description will appear here.'}</div>
+          <div className="flex gap-4 mt-2">
+            <span className="px-3 py-1 rounded-full bg-orange-500/20 text-orange-300 font-semibold text-xs">{formData.auction_type || 'Type'}</span>
+            <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 font-semibold text-xs">{formData.category || 'Category'}</span>
+            <span className="px-3 py-1 rounded-full bg-green-500/20 text-green-300 font-semibold text-xs">{formData.condition || 'Condition'}</span>
+          </div>
+          <div className="mt-2 text-lg text-orange-300 font-bold">${formData.starting_price || '0.00'}</div>
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  // Main form sections
+  const FormSections = [
+    // Step 1: Auction Details
+    <motion.div key={0} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="item_name" className="text-lg font-medium text-white/90">Item Name</Label>
+        <Input id="item_name" name="item_name" placeholder="Vintage Camera" required minLength={5} maxLength={50} value={formData.item_name} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder:text-white/50" />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="description" className="text-lg font-medium text-white/90">Description</Label>
+        <textarea id="description" name="description" required minLength={10} placeholder="Describe your item in detail..." value={formData.description} onChange={handleInputChange} className="w-full py-3 bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder:text-white/50 min-h-[120px] resize-y" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="category" className="text-lg font-medium text-white/90">Category</Label>
+          <select id="category" name="category" required value={formData.category} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 cursor-pointer">
+            <option value="">Select category</option>
+            <option value="electronics">Electronics</option>
+            <option value="art">Art</option>
+            <option value="fashion">Fashion</option>
+            <option value="vehicles">Vehicles</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="condition" className="text-lg font-medium text-white/90">Condition</Label>
+          <select id="condition" name="condition" required value={formData.condition} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 cursor-pointer">
+            <option value="">Select condition</option>
+            <option value="new">New</option>
+            <option value="used">Used</option>
+            <option value="refurbished">Refurbished</option>
+          </select>
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="auction_type" className="text-lg font-medium text-white/90">Auction Type</Label>
+        <select id="auction_type" name="auction_type" required value={formData.auction_type} onChange={e => { setFormData(prev => ({ ...prev, auction_type: e.target.value })); setSelectedType(auctionTypes.find(type => type.value === e.target.value) || auctionTypes[0]); }} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 cursor-pointer">
+          {auctionTypes.map(type => (
+            <option key={type.value} value={type.value}>{type.label}</option>
+          ))}
+        </select>
+        <div className="text-xs text-gray-400 mt-1">{selectedType.description}</div>
+      </div>
+    </motion.div>,
+    // Step 2: Pricing & Timing
+    <motion.div key={1} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="starting_price" className="text-lg font-medium text-white/90">Starting Price ($)</Label>
+          <Input type="number" id="starting_price" name="starting_price" placeholder="0.00" required min={0} step="0.01" value={formData.starting_price} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder:text-white/50" />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="buy_now" className="text-lg font-medium text-white/90">Buy Now Price ($)</Label>
+          <Input type="number" id="buy_now" name="buy_now" placeholder="Optional" min={0} step="0.01" value={formData.buy_now} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder:text-white/50" />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="start_time" className="text-lg font-medium text-white/90">Start Time</Label>
+          <Input type="datetime-local" id="start_time" name="start_time" required min={new Date().toISOString().slice(0, 16)} value={formData.start_time} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 calendar-white" />
+        </div>
+        {selectedType?.value === "blitz" ? (
+          <div className="space-y-2">
+            <Label htmlFor="duration" className="text-lg font-medium text-white/90">Duration (minutes)</Label>
+            <select id="duration" name="duration" required value={formData.duration} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 cursor-pointer">
+              <option value="">Select duration</option>
+              <option value="10">10</option>
+              <option value="15">15</option>
+              <option value="30">30</option>
+              <option value="45">45</option>
+            </select>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <Label htmlFor="end_time" className="text-lg font-medium text-white/90">End Time</Label>
+            <Input type="datetime-local" id="end_time" name="end_time" required min={formData.start_time || new Date().toISOString().slice(0, 16)} value={formData.end_time} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 calendar-white" />
+          </div>
+        )}
+      </div>
+    </motion.div>,
+    // Step 3: Images
+    <motion.div key={2} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="space-y-6">
+      <Label className="text-lg font-medium text-white/90">Upload Images</Label>
+      <DropzoneUploader imageUrls={imageUrls} setImageUrls={setImageUrls} />
+      <div className="text-xs text-gray-400">Add at least one high-quality image to attract more bidders.</div>
+    </motion.div>,
+    // Step 4: Preview & Submit
+    <motion.div key={3} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="space-y-6">
+      {Preview}
+      <Button type="submit" className="w-full py-4 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold text-lg flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 transition-all duration-300 cursor-pointer" disabled={isLoading}>
+        <FaGavel className="text-white" />
+        <span>{isLoading ? "Creating auction..." : "Create Auction"}</span>
+      </Button>
+    </motion.div>
+  ];
 
   if (isLoading) return <LoadingSpinner />;
-  
+
   return (
-    <div className="min-h-screen bg-[#0A111B] py-12 px-4 sm:px-6 relative overflow-hidden mt-10">
-      {/* Animated background elements */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        {/* Orange/red gradient bubble - top right */}
-        <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-orange-500 rounded-full filter blur-[80px] opacity-20 animate-pulse-slow"></div>
-        
-        {/* Blue accent bubble - bottom left */}
-        <div className="absolute bottom-[-10%] left-[10%] w-[400px] h-[400px] bg-blue-600 rounded-full filter blur-[70px] opacity-10 animate-float"></div>
-        
-        {/* Purple accent bubble - middle right */}
-        <div className="absolute top-[40%] right-[20%] w-[300px] h-[300px] bg-purple-600 rounded-full filter blur-[60px] opacity-10 animate-float-delayed"></div>
-        
-        {/* Grid pattern overlay */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-      </div>
-
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-4xl mx-auto relative z-10"
-      >
-        <div className="text-center mb-8">
-          <motion.h1 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-3xl md:text-4xl font-bold text-white font-serif mb-2"
-          >
-            Create Your Auction
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-gray-300 max-w-2xl mx-auto"
-          >
-            Fill in the details below to list your item for auction. High-quality images and detailed descriptions attract more bidders!
-          </motion.p>
-        </div>
-
-        <motion.form 
-          onSubmit={handleSubmit} 
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+    <div className="min-h-screen bg-[#0A111B] flex flex-col">
+      {HeroSection}
+      <div className="flex-1 w-full max-w-4xl mx-auto px-2 sm:px-6 py-8">
+        {Stepper}
+        <motion.form
+          onSubmit={handleSubmit}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden p-6 md:p-10"
         >
-          <div className="p-6 md:p-8 space-y-6">
-
-            {/* Auction Type */}
-            <motion.div variants={itemVariants} className="space-y-2">
-              <Label htmlFor="auction_type" className="text-lg font-medium text-white/90">Auction Type</Label>
-              <div className="relative overflow-hidden rounded-xl bg-white/5 border border-white/10 transition-all focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/50">
-                <FaCrown className="absolute top-3 left-3 text-orange-400" />
-                <select
-                  id="auction_type"
-                  name="auction_type"
-                  value={selectedType.value}
-                  onChange={(e) => {
-                    const selected = auctionTypes.find(type => type.value === e.target.value);
-                    setSelectedType(selected);
-                  }}
-                  required
-                  className="pl-10 py-3 w-full bg-transparent border-none text-white focus:ring-0 appearance-none cursor-pointer"
-                >
-                  <option value="" className="bg-[#0A111B]">Select auction type</option>
-                  {auctionTypes.map(type => (
-                    <option key={type.value} value={type.value} className="bg-[#0A111B]">
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute right-3 top-3 pointer-events-none text-orange-400">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Item Name */}
-            <motion.div variants={itemVariants} className="space-y-2">
-              <Label htmlFor="item_name" className="text-lg font-medium text-white/90">Item Name</Label>
-              <div className="relative flex items-center overflow-hidden rounded-xl bg-white/5 border border-white/10 transition-all focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/50">
-                <FaTag className="absolute left-3 text-orange-400" />
-                <Input
-                  id="item_name"
-                  name="item_name"
-                  placeholder="Vintage Camera"
-                  required
-                  minLength={5}
-                  maxLength={50}
-                  className="pl-10 py-3 w-full bg-transparent border-none text-white focus:ring-0 placeholder:text-white/50"
-                />
-              </div>
-            </motion.div>
-
-            {/* Description */}
-            <motion.div variants={itemVariants} className="space-y-2">
-              <Label htmlFor="description" className="text-lg font-medium text-white/90">Description</Label>
-              <div className="relative overflow-hidden rounded-xl bg-white/5 border border-white/10 transition-all focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/50">
-                <FaBoxOpen className="absolute top-3 left-3 text-orange-400" />
-                <textarea
-                  id="description"
-                  name="description"
-                  required
-                  minLength={10}
-                  placeholder="Describe your item in detail..."
-                  className="pl-10 w-full py-3 bg-transparent border-none text-white focus:ring-0 placeholder:text-white/50 min-h-[120px] resize-y"
-                />
-              </div>
-            </motion.div>
-
-            {/* Category and Condition */}
-            <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="category" className="text-lg font-medium text-white/90">Category</Label>
-                <div className="relative overflow-hidden rounded-xl bg-white/5 border border-white/10 transition-all focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/50">
-                  <FaRegCalendarAlt className="absolute top-3 left-3 text-orange-400" />
-                  <select 
-                    id="category" 
-                    name="category" 
-                    required 
-                    className="pl-10 py-3 w-full bg-transparent border-none text-white focus:ring-0 appearance-none cursor-pointer"
-                  >
-                    <option value="" className="bg-[#0A111B]">Select category</option>
-                    <option value="electronics" className="bg-[#0A111B]">Electronics</option>
-                    <option value="art" className="bg-[#0A111B]">Art</option>
-                    <option value="fashion" className="bg-[#0A111B]">Fashion</option>
-                    <option value="vehicles" className="bg-[#0A111B]">Vehicles</option>
-                    <option value="other" className="bg-[#0A111B]">Other</option>
-                  </select>
-                  <div className="absolute right-3 top-3 pointer-events-none text-orange-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="condition" className="text-lg font-medium text-white/90">Condition</Label>
-                <div className="relative overflow-hidden rounded-xl bg-white/5 border border-white/10 transition-all focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/50">
-                  <FaBoxOpen className="absolute top-3 left-3 text-orange-400" />
-                  <select 
-                    id="condition" 
-                    name="condition" 
-                    required 
-                    className="pl-10 py-3 w-full bg-transparent border-none text-white focus:ring-0 appearance-none cursor-pointer"
-                  >
-                    <option value="" className="bg-[#0A111B]">Select condition</option>
-                    <option value="new" className="bg-[#0A111B]">New</option>
-                    <option value="used" className="bg-[#0A111B]">Used</option>
-                    <option value="refurbished" className="bg-[#0A111B]">Refurbished</option>
-                  </select>
-                  <div className="absolute right-3 top-3 pointer-events-none text-orange-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Start & End Time or Duration Based on Auction Type */}
-            <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Always show Start Time */}
-              <div className="space-y-2">
-                <Label htmlFor="start_time" className="text-lg font-medium text-white/90">Start Time</Label>
-                <div className="relative overflow-hidden rounded-xl bg-white/5 border border-white/10 transition-all focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/50">
-                  <FaRegCalendarAlt className="absolute top-3 left-3 text-orange-400" />
-                  <Input
-                    type="datetime-local"
-                    id="start_time"
-                    name="start_time"
-                    required
-                    min={new Date().toISOString().slice(0, 16)}
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
-                    className="pl-10 py-3 w-full bg-transparent border-none text-white focus:ring-0 calendar-white"
-                  />
-                </div>
-              </div>
-
-              {/* Conditionally show either End Time or Duration */}
-              {selectedType?.value === "blitz" ? (
-                <div className="space-y-2">
-                  <Label htmlFor="duration" className="text-lg font-medium text-white/90">Duration (minutes)</Label>
-                  <div className="relative overflow-hidden rounded-xl bg-white/5 border border-white/10 transition-all focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/50">
-                    <select
-                      id="duration"
-                      name="duration"
-                      required
-                      className="pl-4 pr-10 py-3 w-full bg-transparent border-none text-white focus:ring-0 appearance-none cursor-pointer"
-                    >
-                      <option value="10" className="bg-[#0A111B]">5</option>
-                      <option value="15" className="bg-[#0A111B]">10</option>
-                      <option value="30" className="bg-[#0A111B]">15</option>
-                      <option value="45" className="bg-[#0A111B]">30</option>
-                    </select>
-                    <div className="absolute right-3 top-3 pointer-events-none text-orange-400">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Label htmlFor="end_time" className="text-lg font-medium text-white/90">End Time</Label>
-                  <div className="relative overflow-hidden rounded-xl bg-white/5 border border-white/10 transition-all focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/50">
-                    <FaRegCalendarAlt className="absolute top-3 left-3 text-orange-400" />
-                    <Input
-                      type="datetime-local"
-                      id="end_time"
-                      name="end_time"
-                      required
-                      min={startTime || new Date().toISOString().slice(0, 16)}
-                      className="pl-10 py-3 w-full bg-transparent border-none text-white focus:ring-0 calendar-white"
-                    />
-                  </div>
-                </div>
-              )}
-
-            </motion.div>
-            
-            {/* Prices */}
-            <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="starting_price" className="text-lg font-medium text-white/90">Starting Price ($)</Label>
-                <div className="relative overflow-hidden rounded-xl bg-white/5 border border-white/10 transition-all focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/50">
-                  <FaDollarSign className="absolute top-3 left-3 text-orange-400" />
-                  <Input
-                    type="number"
-                    id="starting_price"
-                    name="starting_price"
-                    placeholder="0.00"
-                    required
-                    min={0}
-                    step="0.01"
-                    className="pl-10 py-3 w-full bg-transparent border-none text-white focus:ring-0 placeholder:text-white/50"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="buy_now" className="text-lg font-medium text-white/90">Buy Now Price ($)</Label>
-                <div className="relative overflow-hidden rounded-xl bg-white/5 border border-white/10 transition-all focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/50">
-                  <FaDollarSign className="absolute top-3 left-3 text-orange-400" />
-                  <Input
-                    type="number"
-                    id="buy_now"
-                    name="buy_now"
-                    placeholder="Optional"
-                    min={0}
-                    step="0.01"
-                    className="pl-10 py-3 w-full bg-transparent border-none text-white focus:ring-0 placeholder:text-white/50"
-                  />
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Images */}
-            <DropzoneUploader imageUrls={imageUrls} setImageUrls={setImageUrls} />
-
-            <motion.div 
-              variants={itemVariants}
-              className="pt-4"
-            >
-              <motion.button
-                type="submit"
-                className="w-full py-4 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold text-lg flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 transition-all duration-300 cursor-pointer"
-                whileHover={{ scale: 1.02, boxShadow: "0 10px 25px -5px rgba(249, 115, 22, 0.4)" }}
-                whileTap={{ scale: 0.98 }}
-                disabled={isLoading}
-              >
-                <FaGavel className="text-white" />
-                <span>{isLoading ? "Creating auction..." : "Create Auction"}</span>
-              </motion.button>
-            </motion.div>
+          {FormSections[formStep]}
+          <div className="flex justify-between mt-8">
+            <Button type="button" variant="outline" className="rounded-xl px-6 py-2 text-white border-white/20 bg-white/10" onClick={prevStep} disabled={formStep === 0}>Back</Button>
+            {formStep < steps.length - 1 && (
+              <Button type="button" className="rounded-xl px-6 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold" onClick={nextStep}>Next</Button>
+            )}
           </div>
         </motion.form>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.5 }}
-          className="mt-6 text-center"
-        >
-          <Link 
-            href="/dashboard"
-            className="text-orange-400 hover:text-orange-300 transition-colors inline-flex items-center gap-1"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            <span>Back to Dashboard</span>
-          </Link>
-        </motion.div>
-      </motion.div>
-
-
+      </div>
       {/* Auction creation success modal */}
       <Dialog open={isDialogOpen} onOpenChange={(open) => {
-            setIsDialogOpen(open);
-            if (!open) router.push('/auctions/live');
-          }}>
-          <DialogContent className="bg-gradient-to-b from-[#0A111B]/95 to-[#0A111B] backdrop-blur-xl border border-white/10 text-white max-w-md mx-auto rounded-2xl">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-orange-500">
-                Auction Created!
-              </DialogTitle>
-              <DialogDescription className="text-gray-300 text-center">
-                Your auction is live! Share it to get more bids.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-6 py-4">
-              <div className="flex justify-center">
-                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 0.1 }} className="w-20 h-20 rounded-full bg-gradient-to-r from-green-400 to-green-500 flex items-center justify-center">
-                  <FaGavel className="h-10 w-10 text-white" />
-                </motion.div>
-              </div>
-
-              {/* Copy Link */}
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="space-y-4">
-                <Button variant="outline" className="w-full bg-white/5 hover:bg-white/10 text-white border border-white/10 py-6 rounded-xl transition-all duration-300" onClick={() => {
-                  navigator.clipboard.writeText(shareUrl);
-                  toast.success("Link copied to clipboard!");
-                }}>
-                  Copy Link
-                </Button>
-              </motion.div>
-
-              {/* Social Buttons */}
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="flex items-center justify-between space-x-4">
-                <Button variant="outline" className="w-1/2 bg-white/5 hover:bg-white/10 text-white border border-white/10 py-5 rounded-xl transition-all duration-300" onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}`, '_blank')}>
-                  <FaTwitter className="mr-2 text-blue-400" /> Share on Twitter
-                </Button>
-                <Button variant="outline" className="w-1/2 bg-white/5 hover:bg-white/10 text-white border border-white/10 py-5 rounded-xl transition-all duration-300" onClick={() => window.open(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}`, '_blank')}>
-                  <FaTelegramPlane className="mr-2 text-blue-500" /> Share on Telegram
-                </Button>
-              </motion.div>
-
-              {/* Preview Button */}
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-                <Button className="w-full py-6 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold text-lg shadow-lg shadow-orange-500/20 transition-all duration-300" onClick={() => router.push('/auctions')}>
-                  View Auction
-                </Button>
+        setIsDialogOpen(open);
+        if (!open) router.push('/auctions/live');
+      }}>
+        <DialogContent className="bg-gradient-to-b from-[#0A111B]/95 to-[#0A111B] backdrop-blur-xl border border-white/10 text-white max-w-md mx-auto rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-orange-500">
+              Auction Created!
+            </DialogTitle>
+            <DialogDescription className="text-gray-300 text-center">
+              Your auction is live! Share it to get more bids.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="flex justify-center">
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 0.1 }} className="w-20 h-20 rounded-full bg-gradient-to-r from-green-400 to-green-500 flex items-center justify-center">
+                <FaGavel className="h-10 w-10 text-white" />
               </motion.div>
             </div>
-          </DialogContent>
+            {/* Copy Link */}
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="space-y-4">
+              <Button variant="outline" className="w-full bg-white/5 hover:bg-white/10 text-white border border-white/10 py-6 rounded-xl transition-all duration-300" onClick={() => {
+                navigator.clipboard.writeText(shareUrl);
+                toast.success("Link copied to clipboard!");
+              }}>
+                Copy Link
+              </Button>
+            </motion.div>
+            {/* Social Buttons */}
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="flex items-center justify-between space-x-4">
+              <Button variant="outline" className="w-1/2 bg-white/5 hover:bg-white/10 text-white border border-white/10 py-5 rounded-xl transition-all duration-300" onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}`, '_blank')}>
+                <FaTwitter className="mr-2 text-blue-400" /> Share on Twitter
+              </Button>
+              <Button variant="outline" className="w-1/2 bg-white/5 hover:bg-white/10 text-white border border-white/10 py-5 rounded-xl transition-all duration-300" onClick={() => window.open(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}`, '_blank')}>
+                <FaTelegramPlane className="mr-2 text-blue-500" /> Share on Telegram
+              </Button>
+            </motion.div>
+            {/* Preview Button */}
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+              <Button className="w-full py-6 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold text-lg shadow-lg shadow-orange-500/20 transition-all duration-300" onClick={() => router.push('/auctions')}>
+                View Auction
+              </Button>
+            </motion.div>
+          </div>
+        </DialogContent>
       </Dialog>
-
+      {/* Custom Animations */}
+      <style jsx global>{`
+        @keyframes float {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-20px); }
+          100% { transform: translateY(0px); }
+        }
+        @keyframes pulse-slow {
+          0% { opacity: 0.5; }
+          50% { opacity: 0.7; }
+          100% { opacity: 0.5; }
+        }
+        .animate-float {
+          animation: float 8s ease-in-out infinite;
+        }
+        .animate-pulse-slow {
+          animation: pulse-slow 6s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 }
