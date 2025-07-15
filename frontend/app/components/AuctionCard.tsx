@@ -313,12 +313,42 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
           {auctionCreator && <div className={cardCreatorBadge}><span className="mr-2">👤</span>{auctionCreator}</div>}
         </div>
         {/* Bid button / form */}
-        <div className="w-full mt-2">
+        <div className="w-full mt-2 relative">
           {!token ? (
             <Button disabled className="w-full flex items-center justify-center gap-2 rounded-full bg-gray-800 border border-gray-700 text-gray-400 opacity-60 cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30 font-semibold text-base md:text-lg">Login to bid</Button>
           ) : (!isEnded && <div className="w-full">
             {auction?.user_id !== user?.user_id ? (
-              <button onClick={() => { setIsBidding(true); setShake(true); setTimeout(() => setShake(false), 600); }} type="button" className={`${cardBidButton} ${accent.border}`}>Place Bid</button>
+              <>
+                <button onClick={() => { setIsBidding(true); setShake(true); setTimeout(() => setShake(false), 600); }} type="button" className={`${cardBidButton} ${accent.border} ${isBidding ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100 pointer-events-auto'} transition-all duration-500 ease-in-out w-full`}>Place Bid</button>
+                <form
+                  onSubmit={handleBidSubmit}
+                  className={`absolute left-0 right-0 top-0 w-full flex items-center justify-center gap-2 transition-all duration-500 ease-in-out z-10 ${
+                    isBidding
+                      ? "opacity-100 translate-x-0 scale-100 blur-none pointer-events-auto"
+                      : "opacity-0 -translate-x-4 scale-95 blur-sm pointer-events-none"
+                  }`}
+                  style={{ minHeight: '44px' }}
+                >
+                  <input
+                    type="number"
+                    name="amount"
+                    value={bidAmount}
+                    onChange={(e) => setBidAmount(Number(e.target.value))}
+                    min={auction.starting_price}
+                    placeholder="Your bid"
+                    className="w-2/3 max-w-[100px] p-2 rounded-lg border bg-gray-800 text-white border-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder-gray-400 transition"
+                  />
+                  <button
+                    type="submit"
+                    disabled={submittingBid}
+                    className={`px-3 py-2 bg-yellow-800 text-white font-semibold rounded-lg border border-yellow-700 shadow hover:bg-yellow-700 hover:border-yellow-500 transition-all duration-300 ease-in-out cursor-pointer ${
+                      submittingBid ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                  >
+                    Bid
+                  </button>
+                </form>
+              </>
             ) : (
               <div className="w-full flex items-center justify-center rounded-full border border-gray-500 bg-gray-800 text-gray-300 font-medium cursor-not-allowed shadow-inner text-xs md:text-sm">You created this auction</div>
             )}
