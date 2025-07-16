@@ -252,13 +252,14 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator,
     className={`${cardBase} relative rounded-2xl bg-[rgba(30,10,5,0.3)] backdrop-blur-md border border-orange-700 shadow-lg bg-gradient-to-br from-[#3a0c00]/40 via-[#5b1900]/25 to-[#3a0c00]/40 text-white`}
   >
     {/* Image container */}
-    <div className={`${cardImageContainer} cursor-pointer rounded-t-2xl overflow-hidden`} onClick={() => setDetailsOpen(true)}>
+    <div className={`${cardImageContainer} cursor-pointer rounded-t-2xl overflow-hidden`}>
       <Image
         src={imageSrc}
         alt={auction.item_name}
         fill
         className={`object-cover ${cardImage}`}
         priority
+        onClick={() => setDetailsOpen(true)}
       />
       <div className={cardStatusBadge}>
         <StatusBadge type="blitz" status={auction.status} auctionId={auction.auction_id} participantCount={participants} />
@@ -270,8 +271,8 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator,
 
     {/* Content area */}
     <div className={`${cardContent}`}>
-      <div onClick={() => setDetailsOpen(true)} className="cursor-pointer">
-        <h3 className={`${cardTitle} text-orange-300`}>#{auction.item_name}</h3>
+      <div onClick={() => setDetailsOpen(true)}>
+        <h3 className={`${cardTitle} text-orange-300 cursor-pointer`}>#{auction.item_name}</h3>
         <div className={`${cardLabel} flex items-center gap-1 text-orange-300`}>
           {!highestBid ? (
             <>

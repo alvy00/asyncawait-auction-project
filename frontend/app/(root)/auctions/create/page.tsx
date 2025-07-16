@@ -395,74 +395,171 @@ export default function AuctionCreationForm() {
         </div>
       </div>
 
-      {/* Auction Type */}
-      <div className="space-y-2">
-        <Label htmlFor="auction_type" className="text-lg font-medium text-white/90 flex items-center gap-2">
-          <FaExchangeAlt className="text-orange-400" />
-          Auction Type
-        </Label>
-        <select
-          ref={auctionTypeRef}
-          id="auction_type"
-          name="auction_type"
-          required
-          value={formData.auction_type}
-          onChange={(e) => {
-            setFormData((prev) => ({ ...prev, auction_type: e.target.value }));
-            setSelectedType(auctionTypes.find((type) => type.value === e.target.value) || auctionTypes[0]);
-          }}
-          className="py-3 px-3 w-full bg-white/10 backdrop-blur-md border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder:text-white/50 appearance-none cursor-pointer"
-        >
-          {auctionTypes.map((type) => (
-            <option key={type.value} value={type.value} className="bg-[#1a1a1a] text-white">
-              {type.label}
-            </option>
-          ))}
-        </select>
-        <div className="text-xs text-gray-400 mt-1">{selectedType.description}</div>
+    {/* Auction Type */}
+    <div className="space-y-2">
+      <Label htmlFor="auction_type" className="text-lg font-medium text-white/90 flex items-center gap-2">
+        <FaExchangeAlt className="text-orange-400" />
+        Auction Type
+      </Label>
+      <select
+        ref={auctionTypeRef}
+        id="auction_type"
+        name="auction_type"
+        required
+        value={formData.auction_type}
+        onChange={(e) => {
+          setFormData((prev) => ({ ...prev, auction_type: e.target.value }));
+          setSelectedType(auctionTypes.find((type) => type.value === e.target.value) || auctionTypes[0]);
+        }}
+        className="py-3 px-3 w-full bg-white/10 backdrop-blur-md border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder:text-white/50 appearance-none cursor-pointer"
+      >
+        {auctionTypes.map((type) => (
+          <option key={type.value} value={type.value} className="bg-[#1a1a1a] text-white">
+            {type.label}
+          </option>
+        ))}
+      </select>
+
+      {/* Description Box */}
+      <div className="mt-1 p-3 rounded-lg border border-white/20 text-white shadow-lg flex items-center max-w-full inline-flex">
+        <p className="text-sm leading-relaxed">{selectedType.description}</p>
       </div>
+    </div>
+
     </motion.div>,
 
     // Step 2: Pricing & Timing
-    <motion.div key={1} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="space-y-6">
+    <motion.div
+      key={1}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6"
+    >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="starting_price" className="text-lg font-medium text-white/90">Starting Price ($)</Label>
-          <Input ref={startingPriceRef} type="number" id="starting_price" name="starting_price" placeholder="0.00" required min={0} step="0.01" value={formData.starting_price} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder:text-white/50" />
+          <Label htmlFor="starting_price" className="text-lg font-medium text-white/90 flex items-center gap-2">
+            <FaDollarSign className="text-orange-400" />
+            Starting Price ($)
+          </Label>
+          <Input
+            ref={startingPriceRef}
+            type="number"
+            id="starting_price"
+            name="starting_price"
+            placeholder="0.00"
+            required
+            min={0}
+            step="0.01"
+            value={formData.starting_price}
+            onChange={handleInputChange}
+            className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder:text-white/50"
+          />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="buy_now" className="text-lg font-medium text-white/90">Buy Now Price ($)</Label>
-          <Input type="number" id="buy_now" name="buy_now" placeholder="Optional" min={0} step="0.01" value={formData.buy_now} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder:text-white/50" />
+          <Label htmlFor="buy_now" className="text-lg font-medium text-white/90 flex items-center gap-2">
+            <FaTag className="text-orange-400" />
+            Buy Now Price ($)
+          </Label>
+          <Input
+            type="number"
+            id="buy_now"
+            name="buy_now"
+            placeholder="Optional"
+            min={0}
+            step="0.01"
+            value={formData.buy_now}
+            onChange={handleInputChange}
+            className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder:text-white/50"
+          />
         </div>
       </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="start_time" className="text-lg font-medium text-white/90">Start Time</Label>
-          <Input ref={startTimeRef} type="datetime-local" id="start_time" name="start_time" required min={new Date().toISOString().slice(0, 16)} value={formData.start_time} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 calendar-white" />
+          <Label htmlFor="start_time" className="text-lg font-medium text-white/90 flex items-center gap-2">
+            <FaRegCalendarAlt className="text-orange-400" />
+            Start Time
+          </Label>
+          <Input
+            ref={startTimeRef}
+            type="datetime-local"
+            id="start_time"
+            name="start_time"
+            required
+            min={new Date().toISOString().slice(0, 16)}
+            value={formData.start_time}
+            onChange={handleInputChange}
+            className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 calendar-white"
+          />
         </div>
+
         {selectedType?.value === "blitz" ? (
           <div className="space-y-2">
-            <Label htmlFor="duration" className="text-lg font-medium text-white/90">Duration (minutes)</Label>
-            <select ref={durationRef} id="duration" name="duration" required value={formData.duration} onChange={handleInputChange} className="py-2 px-5 w-full bg-white/10 backdrop-blur-md border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 appearance-none cursor-pointer">
-              <option className="bg-[#1a1a1a] text-white" value="">Select duration</option>
-              <option className="bg-[#1a1a1a] text-white" value="10">10</option>
-              <option className="bg-[#1a1a1a] text-white" value="15">15</option>
-              <option className="bg-[#1a1a1a] text-white" value="30">30</option>
-              <option className="bg-[#1a1a1a] text-white" value="45">45</option>
+            <Label htmlFor="duration" className="text-lg font-medium text-white/90 flex items-center gap-2">
+              <FaRegCalendarAlt className="text-orange-400" />
+              Duration (minutes)
+            </Label>
+            <select
+              ref={durationRef}
+              id="duration"
+              name="duration"
+              required
+              value={formData.duration}
+              onChange={handleInputChange}
+              className="py-2 px-5 w-full bg-white/10 backdrop-blur-md border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 appearance-none cursor-pointer"
+            >
+              <option className="bg-[#1a1a1a] text-white" value="">
+                Select duration
+              </option>
+              <option className="bg-[#1a1a1a] text-white" value="10">
+                10
+              </option>
+              <option className="bg-[#1a1a1a] text-white" value="15">
+                15
+              </option>
+              <option className="bg-[#1a1a1a] text-white" value="30">
+                30
+              </option>
+              <option className="bg-[#1a1a1a] text-white" value="45">
+                45
+              </option>
             </select>
           </div>
         ) : (
           <div className="space-y-2">
-            <Label htmlFor="end_time" className="text-lg font-medium text-white/90">End Time</Label>
-            <Input ref={endTimeRef} type="datetime-local" id="end_time" name="end_time" required min={formData.start_time || new Date().toISOString().slice(0, 16)} value={formData.end_time} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 calendar-white" />
+            <Label htmlFor="end_time" className="text-lg font-medium text-white/90 flex items-center gap-2">
+              <FaRegCalendarAlt className="text-orange-400" />
+              End Time
+            </Label>
+            <Input
+              ref={endTimeRef}
+              type="datetime-local"
+              id="end_time"
+              name="end_time"
+              required
+              min={formData.start_time || new Date().toISOString().slice(0, 16)}
+              value={formData.end_time}
+              onChange={handleInputChange}
+              className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 calendar-white"
+            />
           </div>
         )}
       </div>
     </motion.div>,
 
     // Step 3: Images
-    <motion.div key={2} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="space-y-6">
-      <Label className="text-lg font-medium text-white/90">Upload Images</Label>
+    <motion.div
+      key={2}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6"
+    >
+      <Label className="text-lg font-medium text-white/90 flex items-center gap-2">
+        <FaImage className="text-orange-400" />
+        Upload Images
+      </Label>
       <DropzoneUploader imageUrls={imageUrls} setImageUrls={setImageUrls} />
       <div className="text-xs text-gray-400">Add at least one high-quality image to attract more bidders.</div>
     </motion.div>,

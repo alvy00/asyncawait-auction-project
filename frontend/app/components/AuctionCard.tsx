@@ -276,7 +276,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
     </div>
 
     {/* Content */}
-    <div className={cardContent}>
+    <div className={cardContent} >
       <div onClick={() => setDetailsOpen(true)}>
         <h3 className={`${cardTitle} text-emerald-300`}>#{auction.item_name}</h3>
         <div className={cardLabel}>
@@ -291,7 +291,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
         </div>
       </div>
 
-      <div className={`${cardFooter} mt-[-0.03rem] flex items-center justify-between text-green-300`}>
+      <div onClick={() => setDetailsOpen(true)} className={`${cardFooter} mt-[-0.03rem] flex items-center justify-between text-green-300`}>
         <div className={cardCountdown}>
           {isEnded
             ? winner
@@ -300,7 +300,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
             : <Countdown endTime={auction.end_time} onComplete={() => setIsEnded(true)} />}
         </div>
         { auctionCreator && 
-          <div className="text-emerald-400 text-xs md:text-sm">
+          <div className="text-emerald-400 text-xs md:text-sm cursor-pointer">
             👤 {auctionCreator}
           </div>
         }

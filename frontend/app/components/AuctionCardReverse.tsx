@@ -281,8 +281,9 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
     className={`flex flex-col ${cardBase} bg-gradient-to-br from-purple-900/40 to-purple-800/20 backdrop-blur-xl border border-purple-700/30 shadow-inner shadow-purple-900/20 transition-all duration-300`}
   >
     {/* Image container */}
-    <div className={cardImageContainer} onClick={() => setDetailsOpen(true)}>
+    <div className={cardImageContainer} >
       <Image
+        onClick={() => setDetailsOpen(true)}
         src={imageSrc}
         alt={auction.item_name}
         fill
@@ -300,7 +301,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
     {/* Content area */}
     <div className={cardContent}>
       <div onClick={() => setDetailsOpen(true)}>
-        <h3 className={`${cardTitle} text-purple-300`}>#{auction.item_name}</h3>
+        <h3 className={`${cardTitle} text-purple-300 cursor-pointer`}>#{auction.item_name}</h3>
         <div className={cardLabel}>
           {!highestBid ? (
             <span className="flex items-center gap-1 text-purple-400">

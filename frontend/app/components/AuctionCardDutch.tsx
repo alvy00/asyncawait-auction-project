@@ -194,8 +194,8 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
     className={`${cardBase} bg-gradient-to-br from-cyan-800/90 to-cyan-800/50 backdrop-blur-xl border border-emerald-700/30 rounded-2xl shadow-inner shadow-emerald-900/20 transition-all duration-300`}
     >
     {/* Image container */}
-    <div className={cardImageContainer} onClick={() => setDetailsOpen(true)}>
-      <Image src={imageSrc} alt={auction.item_name} fill className={cardImage} priority />
+    <div className={cardImageContainer} >
+      <Image src={imageSrc} alt={auction.item_name} fill className={cardImage} priority onClick={() => setDetailsOpen(true)}/>
       <div className={cardStatusBadge}>
         <StatusBadge type={"dutch"} status={auction.status} auctionId={auction.auction_id} participantCount={auction.participants} />
       </div>
@@ -207,7 +207,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
     {/* Info section */}
     <div className={cardContent}>
       <div onClick={() => setDetailsOpen(true)}>
-        <h3 className={`${cardTitle} text-blue-300`}>#{auction.item_name}</h3>
+        <h3 className={`${cardTitle} text-blue-300 cursor-pointer`}>#{auction.item_name}</h3>
         <div className="flex items-center gap-2 text-sm text-blue-300 font-medium mt-1">
           <FaTag className="text-blue-400" />
           Original Price: <span className="font-bold text-blue-100">${auction.starting_price.toFixed(2)}</span>
@@ -226,7 +226,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
         </div>
       </div>
 
-      <div className={cardFooter}>
+      <div onClick={() => setDetailsOpen(true)} className={cardFooter}>
         <div className={cardCountdown}>
           <Countdown endTime={auction.end_time} />
         </div>

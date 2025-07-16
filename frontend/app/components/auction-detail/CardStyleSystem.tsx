@@ -2,7 +2,7 @@
 // Use these exported constants and helpers in all card components for pixel-perfect consistency
 
 export const cardBase =
-  "relative w-full h-[420px] md:h-[440px] flex flex-col rounded-2xl overflow-hidden select-none border border-white/15 shadow-xl bg-gradient-to-br backdrop-blur-xl transition-all duration-300";
+  "relative w-full h-[420px] md:h-[500px] flex flex-col rounded-2xl overflow-hidden select-none border border-white/15 shadow-xl bg-gradient-to-br backdrop-blur-xl transition-all duration-300";
 
 export const cardImageContainer =
   "relative w-full aspect-[4/3] min-h-[180px] max-h-[220px] overflow-hidden";

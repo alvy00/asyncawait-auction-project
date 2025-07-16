@@ -274,9 +274,10 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
     {/* Image container */}
     <div
       className={`${cardImageContainer} cursor-pointer rounded-t-2xl overflow-hidden`}
-      onClick={() => setDetailsOpen(true)}
+      
     >
       <Image
+        onClick={() => setDetailsOpen(true)}
         src={imageSrc}
         alt={auction.item_name}
         fill
@@ -305,7 +306,7 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
     {/* Content area */}
     <div className={cardContent}>
       <div onClick={() => setDetailsOpen(true)}>
-        <h3 className={`${cardTitle} text-emerald-300`}>
+        <h3 className={`${cardTitle} text-emerald-300 cursor-pointer`}>
           #{auction.item_name}
         </h3>
         <div className={`${cardLabel} flex items-center gap-1 text-yellow-300`}>
