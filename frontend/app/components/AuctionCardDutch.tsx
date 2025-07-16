@@ -181,161 +181,163 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
   const accent = getCardAccent("dutch");
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{
-        scale: 1.02,
-        boxShadow: "0 0 5px 1px rgba(0,191,255,0.8)",
-        transition: { duration: 0.35, ease: "easeOut" },
-      }}
-      className={`${cardBase} bg-gradient-to-br ${accent.bg} ${shake ? "animate-shake" : ""}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    whileHover={{
+      scale: 1.02,
+      boxShadow: "0 0 8px 2px rgba(0, 140, 255, 0.5)",
+      transition: { duration: 0.35, ease: "easeOut" },
+    }}
+    onMouseEnter={() => setIsHovered(true)}
+    onMouseLeave={() => setIsHovered(false)}
+    className={`${cardBase} bg-gradient-to-br from-cyan-800/90 to-cyan-800/50 backdrop-blur-xl border border-emerald-700/30 rounded-2xl shadow-inner shadow-emerald-900/20 transition-all duration-300`}
     >
-      {/* Image container */}
-      <div className={cardImageContainer} onClick={() => setDetailsOpen(true)}>
-        <Image
-          src={imageSrc}
-          alt={auction.item_name}
-          fill
-          className={cardImage}
-          priority
-        />
-        <div className={cardOverlay}></div>
-        <div className={cardStatusBadge}>
-        <StatusBadge type={"dutch"} status={auction.status} auctionId={auction.auction_id} participantCount={auction.participants}/>
+    {/* Image container */}
+    <div className={cardImageContainer} onClick={() => setDetailsOpen(true)}>
+      <Image src={imageSrc} alt={auction.item_name} fill className={cardImage} priority />
+      <div className={cardStatusBadge}>
+        <StatusBadge type={"dutch"} status={auction.status} auctionId={auction.auction_id} participantCount={auction.participants} />
+      </div>
+      <div className={cardFavoriteBadge}>
+        <FavoriteBadge userId={user?.user_id} auctionId={auction.auction_id} initialFavorited={auction.isFavorite} isHovered={isHovered} />
+      </div>
+    </div>
+
+    {/* Info section */}
+    <div className={cardContent}>
+      <div onClick={() => setDetailsOpen(true)}>
+        <h3 className={`${cardTitle} text-blue-300`}>#{auction.item_name}</h3>
+        <div className="flex items-center gap-2 text-sm text-blue-300 font-medium mt-1">
+          <FaTag className="text-blue-400" />
+          Original Price: <span className="font-bold text-blue-100">${auction.starting_price.toFixed(2)}</span>
         </div>
-        <div className={cardFavoriteBadge}>
-          <FavoriteBadge userId={user?.user_id} auctionId={auction.auction_id} initialFavorited={auction.isFavorite} isHovered={isHovered} />
+        <div className="flex flex-wrap items-center gap-2 mt-1 text-blue-300">
+          <span className="flex items-center gap-2 font-semibold">
+            <FaArrowDown className="text-blue-400" />
+            Price dropped to:
+          </span>
+          <span className={`${cardPrice} inline-block text-white text-lg font-bold px-3 py-1 rounded shadow-inner ring-1 ring-blue-500/20`}>
+            ${currentPrice.toFixed(2)} 
+            <span className="text-sm text-lime-400 font-semibold ml-2">
+              ({Math.round(((auction.starting_price - currentPrice) / auction.starting_price) * 100)}%)
+            </span>
+          </span>
         </div>
       </div>
-      
-      {/* Info section */}
-      <div className={cardContent}>
-        <div onClick={() => setDetailsOpen(true)}>
-          <h3 className={cardTitle}>#{auction.item_name}</h3>
-          <div className={cardLabel}>
-            <FaTag className="text-cyan-400" />
-            Original Price: <span className="font-extrabold text-cyan-200">${auction.starting_price.toFixed(2)}</span>
-          </div>
-          <div className={cardLabel}>
-            <span className="flex items-center gap-2 text-cyan-300 font-semibold">
-              <FaArrowDown className="text-cyan-500" />
-              Price dropped to:
-            </span>
-            <span className={`${cardPrice} bg-gradient-to-r ${accent.price}`}>${currentPrice.toFixed(2)} <span className="text-base text-green-500 font-semibold">({Math.round(((auction.starting_price - currentPrice) / auction.starting_price) * 100)}%)</span></span>
-          </div>
+
+      <div className={cardFooter}>
+        <div className={cardCountdown}>
+          <Countdown endTime={auction.end_time} />
         </div>
-        <div className={cardFooter}>
-          <div className={cardCountdown}>
-            <Countdown endTime={auction.end_time} />
+        {auctionCreator && (
+          <div className="text-blue-300 text-xs md:text-sm flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            {auctionCreator}
           </div>
-          {auctionCreator && (
-            <div className={cardCreatorBadge}>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        )}
+      </div>
+
+      {/* Bid button area */}
+      {auction.status === "live" && !submittingBid && (
+        <div className="w-full mt-2 flex flex-col items-end">
+          {!token ? (
+            <Button
+              disabled
+              className="w-full flex items-center justify-center gap-2 rounded-full bg-gray-800 border border-gray-700 text-gray-400 opacity-60 cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30"
+            >
+              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636L5.636 18.364M5.636 5.636l12.728 12.728" />
               </svg>
-              {auctionCreator}
+              <span className="text-sm">Login to bid</span>
+            </Button>
+          ) : auction?.user_id !== user?.user_id ? (
+            <motion.button
+              onClick={handleAcceptClick}
+              whileTap={{ scale: 0.95 }}
+              disabled={showConfirmModal}
+              className={`px-6 py-3 font-bold text-white rounded-full focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-400 border border-blue-500 transition-all duration-300
+                ${showConfirmModal
+                  ? "bg-blue-400 cursor-not-allowed opacity-60"
+                  : "bg-blue-500 hover:bg-blue-600 hover:shadow-md cursor-pointer"
+                }`}
+            >
+              Accept Price
+            </motion.button>
+          ) : (
+            <div className="w-full flex items-center justify-center rounded-full border border-gray-500 bg-gray-800 text-gray-300 font-medium cursor-not-allowed shadow-inner text-sm">
+              You created this auction
             </div>
           )}
-        </div>
-        {/* Bid button area */}
-        {auction.status === "live" && !submittingBid && (
-          <div className="w-full mt-2 flex flex-col items-end">
-            {!token ? (
-              <Button
-                disabled
-                className="w-full flex items-center justify-center gap-2 rounded-full bg-gray-800 border border-gray-700 text-gray-400 opacity-60 cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30"
-              >
-                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636L5.636 18.364M5.636 5.636l12.728 12.728" />
-                </svg>
-                <span className="text-sm">Login to bid</span>
-              </Button>
-            ) : (
-              auction?.user_id !== user?.user_id ? (
-                <motion.button
-                  onClick={handleAcceptClick}
-                  whileTap={{ scale: 0.95 }}
-                  disabled={showConfirmModal}
-                  className={`${cardBidButton} ${accent.border} px-6 py-3 font-bold focus:outline-none focus:ring-2 focus:ring-cyan-400 ${showConfirmModal ? "bg-cyan-400 cursor-not-allowed opacity-60" : "bg-cyan-600 hover:bg-cyan-500 border-cyan-400 cursor-pointer"}`}
-                >
-                  Accept Price
-                </motion.button>
-              ) : (
-                <div className="w-full flex items-center justify-center rounded-full border border-gray-500 bg-gray-800 text-gray-300 font-medium cursor-not-allowed shadow-inner text-sm">
-                  You created this auction
-                </div>
-              )
-            )}
-            {showConfirmModal && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 8 }}
-                className="absolute bottom-[60px] right-0 w-64 bg-white text-gray-800 rounded-lg shadow-xl z-30 border border-gray-200"
-              >
-                <div className="absolute -bottom-1.5 right-4 w-3 h-3 bg-white rotate-45 border-l border-b border-gray-200"></div>
-                <div className="p-4">
-                  <h3 className="text-sm font-semibold mb-2 text-center">Confirm Your Bid</h3>
-                  <p className="text-center text-sm mb-4">
-                    Accept <strong>${currentPrice.toFixed(2)}</strong>?
-                  </p>
-                  <div className="flex justify-between gap-2">
-                    <button
-                      onClick={() => setShowConfirmModal(false)}
-                      className="w-full px-3 py-1.5 rounded-md bg-gray-200 text-sm hover:bg-gray-300 cursor-pointer"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={submitBid}
-                      className="w-full px-3 py-1.5 rounded-md bg-cyan-600 text-white text-sm hover:bg-cyan-700 font-semibold cursor-pointer"
-                    >
-                      Confirm
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </div>
-        )}
-        {/* Overlay during bidding */}
-        {submittingBid && (
-          <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-xl font-bold text-white z-50 pointer-events-auto space-x-4">
+
+          {showConfirmModal && (
             <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-              className="w-10 h-10 border-4 border-white border-t-transparent rounded-full"
-            />
-            <span>Submitting Bid...</span>
-          </div>
-        )}
-      </div>
-      {/* Auction details Modal */}
-      <AuctionDetailsModal
-        open={detailsOpen}
-        onClose={() => {
-          setDetailsOpen(false);
-        }}
-        auction={auction}
-      />
-      {/* Shake animation styles */}
-      <style>
-        {`
-          @keyframes gentle-shake {
-            0%, 100% { transform: translateX(0); }
-            30% { transform: translateX(-0.3px); }
-            50% { transform: translateX(0.3px); }
-            70% { transform: translateX(-0.2px); }
-          }
-          .animate-shake {
-            animation: gentle-shake 0.4s ease-in-out;
-          }
-        `}
-      </style>
-    </motion.div>
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              className="absolute bottom-[60px] right-0 w-64 bg-white text-gray-800 rounded-lg shadow-xl z-30 border border-gray-200"
+            >
+              <div className="absolute -bottom-1.5 right-4 w-3 h-3 bg-white rotate-45 border-l border-b border-gray-200"></div>
+              <div className="p-4">
+                <h3 className="text-sm font-semibold mb-2 text-center">Confirm Your Bid</h3>
+                <p className="text-center text-sm mb-4">
+                  Accept <strong>${currentPrice.toFixed(2)}</strong>?
+                </p>
+                <div className="flex justify-between gap-2">
+                  <button
+                    onClick={() => setShowConfirmModal(false)}
+                    className="w-full px-3 py-1.5 rounded-md bg-gray-200 text-sm hover:bg-gray-300 cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={submitBid}
+                    className="w-full px-3 py-1.5 rounded-md bg-blue-700 text-white text-sm hover:bg-blue-600 font-semibold cursor-pointer"
+                  >
+                    Confirm
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </div>
+      )}
+
+      {/* Overlay during bidding */}
+      {submittingBid && (
+        <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-xl font-bold text-white z-50 pointer-events-auto space-x-4">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+            className="w-10 h-10 border-4 border-white border-t-transparent rounded-full"
+          />
+          <span>Submitting Bid...</span>
+        </div>
+      )}
+    </div>
+
+    {/* Auction details Modal */}
+    <AuctionDetailsModal
+      open={detailsOpen}
+      onClose={() => setDetailsOpen(false)}
+      auction={auction}
+  />
+
+    {/* Shake animation styles */}
+    <style>{`
+      @keyframes gentle-shake {
+        0%, 100% { transform: translateX(0); }
+        30% { transform: translateX(-0.3px); }
+        50% { transform: translateX(0.3px); }
+        70% { transform: translateX(-0.2px); }
+      }
+      .animate-shake {
+        animation: gentle-shake 0.4s ease-in-out;
+      }
+    `}</style>
+  </motion.div>
   );
 };
 

@@ -12,23 +12,7 @@ import AuctionDetailsModal from "./AuctionDetailsModal";
 import { FaBolt, FaBullhorn, FaClock, FaFlagCheckered, FaGavel } from "react-icons/fa";
 import FavoriteBadge from "./FavouriteBadge";
 import StatusBadge from "./StatusBadge";
-import {
-  cardBase,
-  cardImageContainer,
-  cardImage,
-  cardOverlay,
-  cardStatusBadge,
-  cardFavoriteBadge,
-  cardContent,
-  cardTitle,
-  cardLabel,
-  cardPrice,
-  cardCountdown,
-  cardFooter,
-  cardCreatorBadge,
-  cardBidButton,
-  getCardAccent
-} from "./auction-detail/CardStyleSystem";
+import { cardBase, cardImageContainer, cardImage, cardOverlay, cardStatusBadge, cardFavoriteBadge, cardContent, cardTitle, cardLabel, cardPrice, cardCountdown, cardFooter, cardCreatorBadge, cardBidButton, getCardAccent } from "./auction-detail/CardStyleSystem";
 
 const FALLBACK_IMAGE = "/fallback.jpg";
 
@@ -41,6 +25,8 @@ interface AuctionCardProps {
 
 const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFavourited, user })  => {
   const [winner, setWinner] = useState(null);
+  const [ userMoney, setUserMoney] = useState(user?.money);
+  const [ participants, setParticipants ] = useState(auction.participants);
   const [isEnded, setIsEnded] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
   const [isBidding, setIsBidding] = useState(false);
@@ -145,7 +131,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
       const amountStr = formData.get('amount');
       const bidAmount = amountStr ? parseFloat(amountStr.toString()) : 0;
 
-      if (bidAmount > user.money) {
+      if (bidAmount > userMoney) {
         toast.error("Insufficient balance, please deposit more money!");
         setSubmittingBid(false);
         return;
@@ -176,6 +162,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
       toast.success(`Bid of $${bidAmount.toFixed(2)} placed successfully!`);
       setHighestBid(bidAmount);
       setWinner(user.name);
+      //setParticipants(prev => prev + 1);
       setIsBidding(false);
       setSubmittingBid(false);
       setRefresh(prev => !prev);
@@ -259,67 +246,81 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
   }, [shake]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{
-        scale: 1.02,
-        boxShadow: "0 4px 32px 0 rgba(16,30,54,0.18)",
-        transition: { duration: 0.35, ease: "easeOut" },
-      }}
-      className={`${cardBase} bg-gradient-to-br ${accent.bg}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={handleMouseLeave}
-    >
-      {/* Image */}
-      <div className={cardImageContainer}>
-        <Image
-          src={imageSrc}
-          alt={auction.item_name}
-          fill
-          onClick={() => setDetailsOpen(true)}
-          className={cardImage}
-        />
-        <div className={cardOverlay}></div>
-        {/* Status badge */}
-        <div className={cardStatusBadge}>
-          <StatusBadge type="classic" status={currentStatus} auctionId={auction.auction_id} participantCount={auction.participants}     />
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    whileHover={{
+      scale: 1.02,
+      boxShadow: "0 0 8px 2px rgba(0, 255, 170, 0.5)",
+      transition: { duration: 0.35, ease: "easeOut" },
+    }}
+    className={`${cardBase} bg-gradient-to-br from-emerald-900/40 to-emerald-800/20 backdrop-blur-xl border-2 border-green-300 rounded-2xl shadow-inner shadow-emerald-900/20 transition-all duration-300`}
+    onMouseEnter={() => setIsHovered(true)}
+    onMouseLeave={handleMouseLeave}
+  >
+    {/* Image */}
+    <div className={cardImageContainer}>
+      <Image
+        src={imageSrc}
+        alt={auction.item_name}
+        fill
+        onClick={() => setDetailsOpen(true)}
+        className={cardImage}
+      />
+      <div className={cardStatusBadge}>
+        <StatusBadge type="classic" status={currentStatus} auctionId={auction.auction_id} participantCount={participants} />
+      </div>
+      <div className={cardFavoriteBadge}>
+        <FavoriteBadge userId={user?.user_id} auctionId={auction.auction_id} initialFavorited={isFavourited} isHovered={isHovered} />
+      </div>
+    </div>
+
+    {/* Content */}
+    <div className={cardContent}>
+      <div onClick={() => setDetailsOpen(true)}>
+        <h3 className={`${cardTitle} text-emerald-300`}>#{auction.item_name}</h3>
+        <div className={cardLabel}>
+          {!highestBid ? (
+            <span className="flex items-center gap-1 text-emerald-400"><FaBullhorn /> Bidding starts at:</span>
+          ) : (
+            <span className="flex items-center gap-1 text-green-300"><FaGavel /> Current bid:</span>
+          )}
         </div>
-        {/* Favorite badge */}
-        <div className={cardFavoriteBadge}>
-          <FavoriteBadge userId={user?.user_id} auctionId={auction.auction_id} initialFavorited={isFavourited} isHovered={isHovered} />
+        <div className={`${cardPrice} inline-block text-white text-lg font-bold px-3 py-1 rounded shadow-inner ring-1 ring-green-500/20`}>
+          {highestBid ? `$${highestBid.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : `$${auction.starting_price.toFixed(2)}`}
         </div>
       </div>
-      {/* Content */}
-      <div className={cardContent}>
-        <div onClick={() => setDetailsOpen(true)}>
-          <h3 className={cardTitle}>#{auction.item_name}</h3>
-          <div className={cardLabel}>
-            {!highestBid ? (
-              <span className="flex items-center gap-1"><FaBullhorn className="text-yellow-400" />Bidding starts at:</span>
-            ) : (
-              <span className="flex items-center gap-1"><FaGavel className="text-orange-400" />Current bid:</span>
-            )}
-          </div>
-          <div className={`${cardPrice} bg-gradient-to-r ${accent.price}`}>
-            {highestBid ? `$${highestBid.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : `$${auction.starting_price.toFixed(2)}`}
-            {/* {highestBid && winner && <div className="text-xs md:text-sm font-medium text-white/80 mt-1">by {winner}</div>} */}
-          </div>
+
+      <div className={`${cardFooter} mt-[-0.03rem] flex items-center justify-between text-green-300`}>
+        <div className={cardCountdown}>
+          {isEnded
+            ? winner
+              ? <span className="text-green-400 font-bold animate-pulse">🎉 {winner} won!</span>
+              : <span className="text-red-400 font-semibold">❌ Expired</span>
+            : <Countdown endTime={auction.end_time} onComplete={() => setIsEnded(true)} />}
         </div>
-        <div className={cardFooter}>
-          <div className={cardCountdown}>
-            {isEnded ? (winner ? <span className="text-green-400 font-bold animate-pulse">🎉 {winner} won!</span> : <span className="text-red-400 font-semibold">❌ Expired</span>) : <Countdown endTime={auction.end_time} onComplete={() => setIsEnded(true)} />}
+        { auctionCreator && 
+          <div className="text-emerald-400 text-xs md:text-sm">
+            👤 {auctionCreator}
           </div>
-          {auctionCreator && <div className={cardCreatorBadge}><span className="mr-2">👤</span>{auctionCreator}</div>}
-        </div>
-        {/* Bid button / form */}
-        <div className="w-full mt-2 relative">
-          {!token ? (
-            <Button disabled className="w-full flex items-center justify-center gap-2 rounded-full bg-gray-800 border border-gray-700 text-gray-400 opacity-60 cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30 font-semibold text-base md:text-lg">Login to bid</Button>
-          ) : (!isEnded && <div className="w-full">
+        }
+      </div>
+
+      {/* Bid Section */}
+      <div className="w-full mt-2 relative">
+        {!token ? (
+          <Button disabled className="w-full flex items-center justify-center gap-2 rounded-full bg-gray-800 border border-gray-700 text-gray-400 opacity-60 cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30 font-semibold text-base md:text-lg">Login to bid</Button>
+        ) : (
+          !isEnded && <div className="w-full">
             {auction?.user_id !== user?.user_id ? (
               <>
-                <button onClick={() => { setIsBidding(true); setShake(true); setTimeout(() => setShake(false), 600); }} type="button" className={`${cardBidButton} ${accent.border} ${isBidding ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100 pointer-events-auto'} transition-all duration-500 ease-in-out w-full`}>Place Bid</button>
+                <button
+                  onClick={() => { setIsBidding(true); setShake(true); setTimeout(() => setShake(false), 600); }}
+                  type="button"
+                  className={`w-full py-2 px-4 font-semibold rounded-full text-white transition-all duration-500 ease-in-out bg-emerald-700 hover:bg-emerald-600 border border-emerald-500 shadow-md cursor-pointer ${isBidding ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100 pointer-events-auto'}`}
+                >
+                  Place Bid
+                </button>
                 <form
                   onSubmit={handleBidSubmit}
                   className={`absolute left-0 right-0 top-0 w-full flex items-center justify-center gap-2 transition-all duration-500 ease-in-out z-10 ${
@@ -334,14 +335,18 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
                     name="amount"
                     value={bidAmount}
                     onChange={(e) => setBidAmount(Number(e.target.value))}
-                    min={auction.starting_price}
+                    min={
+                      auction.starting_price === highestBid
+                        ? auction.starting_price
+                        : Math.max(auction.starting_price, highestBid) + 1
+                    }
                     placeholder="Your bid"
-                    className="w-2/3 max-w-[100px] p-2 rounded-lg border bg-gray-800 text-white border-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder-gray-400 transition"
+                    className="w-2/3 max-w-[100px] p-2 rounded-lg border bg-emerald-950 text-white border-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder-gray-400 transition"
                   />
                   <button
                     type="submit"
                     disabled={submittingBid}
-                    className={`px-3 py-2 bg-yellow-800 text-white font-semibold rounded-lg border border-yellow-700 shadow hover:bg-yellow-700 hover:border-yellow-500 transition-all duration-300 ease-in-out cursor-pointer ${
+                    className={`px-3 py-2 bg-emerald-700 text-white font-semibold rounded-lg border border-emerald-600 shadow hover:bg-emerald-600 hover:border-emerald-500 transition-all duration-300 ease-in-out cursor-pointer ${
                       submittingBid ? "opacity-50 cursor-not-allowed" : ""
                     }`}
                   >
@@ -352,17 +357,25 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
             ) : (
               <div className="w-full flex items-center justify-center rounded-full border border-gray-500 bg-gray-800 text-gray-300 font-medium cursor-not-allowed shadow-inner text-xs md:text-sm">You created this auction</div>
             )}
-          </div>)}
-        </div>
+          </div>
+        )}
       </div>
-      {/* Auction details Modal */}
-      <AuctionDetailsModal open={detailsOpen} onClose={() => setDetailsOpen(false)} auction={auction} />
-      {/* Shake animation */}
-      <style>{`
-        @keyframes gentle-shake { 0%, 100% { transform: translateX(0); } 30% { transform: translateX(-0.3px); } 50% { transform: translateX(0.3px); } 70% { transform: translateX(-0.2px); } }
-        .animate-shake { animation: gentle-shake 0.4s ease-in-out; }
-      `}</style>
-    </motion.div>
+    </div>
+
+    <AuctionDetailsModal open={detailsOpen} onClose={() => setDetailsOpen(false)} auction={auction} />
+
+    <style>{`
+      @keyframes gentle-shake {
+        0%, 100% { transform: translateX(0); }
+        30% { transform: translateX(-0.3px); }
+        50% { transform: translateX(0.3px); }
+        70% { transform: translateX(-0.2px); }
+      }
+      .animate-shake {
+        animation: gentle-shake 0.4s ease-in-out;
+      }
+    `}</style>
+  </motion.div>
   );
 };
 
