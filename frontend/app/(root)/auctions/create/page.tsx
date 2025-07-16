@@ -2,13 +2,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "../../../../components/ui/input";
 import { Label } from "../../../../components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../../../components/ui/dialog";
 import { Button } from "../../../../components/ui/button";
 import { DropzoneUploader } from "../../../components/DropzoneUploader";
-import { FaTwitter, FaTelegramPlane, FaTag, FaDollarSign, FaRegCalendarAlt, FaImage, FaBoxOpen, FaGavel } from "react-icons/fa";
+import { FaTwitter, FaTelegramPlane, FaTag, FaDollarSign, FaRegCalendarAlt, FaImage, FaBoxOpen, FaGavel, FaCameraRetro, FaAlignLeft, FaTags, FaCogs, FaExchangeAlt } from "react-icons/fa";
 import { FaCrown } from 'react-icons/fa';
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -58,6 +58,20 @@ export default function AuctionCreationForm() {
     duration: '',
     images: [] as string[],
   });
+
+  const itemNameRef = useRef<HTMLInputElement>(null);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
+  const categoryRef = useRef<HTMLSelectElement>(null);
+  const conditionRef = useRef<HTMLSelectElement>(null);
+  const auctionTypeRef = useRef<HTMLSelectElement>(null);
+
+  const startingPriceRef = useRef<HTMLInputElement>(null);
+  const startTimeRef = useRef<HTMLInputElement>(null);
+  const durationRef = useRef<HTMLSelectElement>(null);
+  const endTimeRef = useRef<HTMLInputElement>(null);
+
+  const imagesRef = useRef<HTMLDivElement>(null);
+
   const router = useRouter();
 
   // Construct share URL based on new auction title
@@ -97,14 +111,77 @@ export default function AuctionCreationForm() {
   ];
 
   // Handle input change
-  function handleInputChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   }
 
+  // step checks
+  const validateCurrentStep = () => {
+    switch (formStep) {
+      case 0:
+        if (!formData.item_name || formData.item_name.length < 5) {
+          itemNameRef.current?.focus();
+          return false;
+        }
+        if (!formData.description || formData.description.length < 10) {
+          descriptionRef.current?.focus();
+          return false;
+        }
+        if (!formData.category) {
+          categoryRef.current?.focus();
+          return false;
+        }
+        if (!formData.condition) {
+          conditionRef.current?.focus();
+          return false;
+        }
+        if (!formData.auction_type) {
+          auctionTypeRef.current?.focus();
+          return false;
+        }
+        return true;
+
+      case 1:
+        if (!formData.starting_price || parseFloat(formData.starting_price) < 0) {
+          startingPriceRef.current?.focus();
+          return false;
+        }
+        if (!formData.start_time) {
+          startTimeRef.current?.focus();
+          return false;
+        }
+        if (selectedType?.value === "blitz") {
+          if (!formData.duration) {
+            durationRef.current?.focus();
+            return false;
+          }
+        } else {
+          if (!formData.end_time) {
+            endTimeRef.current?.focus();
+            return false;
+          }
+        }
+        return true;
+
+      case 2:
+        if (imageUrls.length === 0) {
+          toast.error("Please upload at least one image.");
+          return false;
+        }
+        return true;
+
+      default:
+        return true;
+    }
+  }
+
   // Handle next/prev step
-  function nextStep() { setFormStep(s => Math.min(s + 1, steps.length - 1)); }
-  function prevStep() { setFormStep(s => Math.max(s - 1, 0)); }
+  const nextStep = () => {
+    if (!validateCurrentStep()) return;
+    setFormStep((s) => Math.min(s + 1, steps.length - 1));
+  }
+  const prevStep = () => { setFormStep(s => Math.max(s - 1, 0)); }
 
   // Handle form submit
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -166,6 +243,7 @@ export default function AuctionCreationForm() {
     }
   };
 
+
   // Responsive hero/intro section
   const HeroSection = (
     <section className="relative w-full flex flex-col items-center justify-center py-12 md:py-20 bg-gradient-to-br from-orange-500/10 via-purple-700/10 to-blue-500/10 overflow-hidden">
@@ -224,53 +302,133 @@ export default function AuctionCreationForm() {
   // Main form sections
   const FormSections = [
     // Step 1: Auction Details
-    <motion.div key={0} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="space-y-6">
+    <motion.div
+      key={0}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-8"
+    >
+      {/* Item Name */}
       <div className="space-y-2">
-        <Label htmlFor="item_name" className="text-lg font-medium text-white/90">Item Name</Label>
-        <Input id="item_name" name="item_name" placeholder="Vintage Camera" required minLength={5} maxLength={50} value={formData.item_name} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder:text-white/50" />
+        <Label htmlFor="item_name" className="text-lg font-medium text-white/90 flex items-center gap-2">
+          <FaCameraRetro className="text-orange-400" />
+          Item Name
+        </Label>
+        <Input
+          ref={itemNameRef}
+          id="item_name"
+          name="item_name"
+          placeholder="Vintage Camera"
+          required
+          minLength={5}
+          maxLength={60}
+          value={formData.item_name}
+          onChange={handleInputChange}
+          className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder:text-white/50"
+        />
       </div>
+
+      {/* Description */}
       <div className="space-y-2">
-        <Label htmlFor="description" className="text-lg font-medium text-white/90">Description</Label>
-        <textarea id="description" name="description" required minLength={10} placeholder="Describe your item in detail..." value={formData.description} onChange={handleInputChange} className="w-full py-3 bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder:text-white/50 min-h-[120px] resize-y" />
+        <Label htmlFor="description" className="text-lg font-medium text-white/90 flex items-center gap-2">
+          <FaAlignLeft className="text-orange-400" />
+          Description
+        </Label>
+        <textarea
+          ref={descriptionRef}
+          id="description"
+          name="description"
+          required
+          minLength={10}
+          placeholder="Describe your item in detail..."
+          value={formData.description}
+          onChange={handleInputChange}
+          className="w-full py-4 px-4 bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder:text-white/50 min-h-[140px] resize-y leading-relaxed"
+        />
       </div>
+
+      {/* Category & Condition */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="category" className="text-lg font-medium text-white/90">Category</Label>
-          <select id="category" name="category" required value={formData.category} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 cursor-pointer">
-            <option value="">Select category</option>
-            <option value="electronics">Electronics</option>
-            <option value="art">Art</option>
-            <option value="fashion">Fashion</option>
-            <option value="vehicles">Vehicles</option>
-            <option value="other">Other</option>
+          <Label htmlFor="category" className="text-lg font-medium text-white/90 flex items-center gap-2">
+            <FaTags className="text-orange-400" />
+            Category
+          </Label>
+          <select
+            ref={categoryRef}
+            id="category"
+            name="category"
+            required
+            value={formData.category}
+            onChange={handleInputChange}
+            className="py-3 px-3 w-full bg-white/10 backdrop-blur-md border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 appearance-none cursor-pointer"
+          >
+            <option className="bg-[#1a1a1a] text-white" value="">Select Category</option>
+            <option className="bg-[#1a1a1a] text-white" value="electronics">Electronics</option>
+            <option className="bg-[#1a1a1a] text-white" value="art">Art</option>
+            <option className="bg-[#1a1a1a] text-white" value="fashion">Fashion</option>
+            <option className="bg-[#1a1a1a] text-white" value="vehicles">Vehicles</option>
+            <option className="bg-[#1a1a1a] text-white" value="other">Other</option>
           </select>
         </div>
+
         <div className="space-y-2">
-          <Label htmlFor="condition" className="text-lg font-medium text-white/90">Condition</Label>
-          <select id="condition" name="condition" required value={formData.condition} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 cursor-pointer">
-            <option value="">Select condition</option>
-            <option value="new">New</option>
-            <option value="used">Used</option>
-            <option value="refurbished">Refurbished</option>
+          <Label htmlFor="condition" className="text-lg font-medium text-white/90 flex items-center gap-2">
+            <FaCogs className="text-orange-400" />
+            Condition
+          </Label>
+          <select
+            ref={conditionRef}
+            id="condition"
+            name="condition"
+            required
+            value={formData.condition}
+            onChange={handleInputChange}
+            className="py-3 px-3 w-full bg-white/10 backdrop-blur-md border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 appearance-none cursor-pointer"
+          >
+            <option className="bg-[#1a1a1a] text-white" value="">Select condition</option>
+            <option className="bg-[#1a1a1a] text-white" value="new">New</option>
+            <option className="bg-[#1a1a1a] text-white" value="used">Used</option>
+            <option className="bg-[#1a1a1a] text-white" value="refurbished">Refurbished</option>
           </select>
         </div>
       </div>
+
+      {/* Auction Type */}
       <div className="space-y-2">
-        <Label htmlFor="auction_type" className="text-lg font-medium text-white/90">Auction Type</Label>
-        <select id="auction_type" name="auction_type" required value={formData.auction_type} onChange={e => { setFormData(prev => ({ ...prev, auction_type: e.target.value })); setSelectedType(auctionTypes.find(type => type.value === e.target.value) || auctionTypes[0]); }} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 cursor-pointer">
-          {auctionTypes.map(type => (
-            <option key={type.value} value={type.value}>{type.label}</option>
+        <Label htmlFor="auction_type" className="text-lg font-medium text-white/90 flex items-center gap-2">
+          <FaExchangeAlt className="text-orange-400" />
+          Auction Type
+        </Label>
+        <select
+          ref={auctionTypeRef}
+          id="auction_type"
+          name="auction_type"
+          required
+          value={formData.auction_type}
+          onChange={(e) => {
+            setFormData((prev) => ({ ...prev, auction_type: e.target.value }));
+            setSelectedType(auctionTypes.find((type) => type.value === e.target.value) || auctionTypes[0]);
+          }}
+          className="py-3 px-3 w-full bg-white/10 backdrop-blur-md border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder:text-white/50 appearance-none cursor-pointer"
+        >
+          {auctionTypes.map((type) => (
+            <option key={type.value} value={type.value} className="bg-[#1a1a1a] text-white">
+              {type.label}
+            </option>
           ))}
         </select>
         <div className="text-xs text-gray-400 mt-1">{selectedType.description}</div>
       </div>
     </motion.div>,
+
     // Step 2: Pricing & Timing
     <motion.div key={1} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="starting_price" className="text-lg font-medium text-white/90">Starting Price ($)</Label>
-          <Input type="number" id="starting_price" name="starting_price" placeholder="0.00" required min={0} step="0.01" value={formData.starting_price} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder:text-white/50" />
+          <Input ref={startingPriceRef} type="number" id="starting_price" name="starting_price" placeholder="0.00" required min={0} step="0.01" value={formData.starting_price} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder:text-white/50" />
         </div>
         <div className="space-y-2">
           <Label htmlFor="buy_now" className="text-lg font-medium text-white/90">Buy Now Price ($)</Label>
@@ -280,33 +438,35 @@ export default function AuctionCreationForm() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="start_time" className="text-lg font-medium text-white/90">Start Time</Label>
-          <Input type="datetime-local" id="start_time" name="start_time" required min={new Date().toISOString().slice(0, 16)} value={formData.start_time} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 calendar-white" />
+          <Input ref={startTimeRef} type="datetime-local" id="start_time" name="start_time" required min={new Date().toISOString().slice(0, 16)} value={formData.start_time} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 calendar-white" />
         </div>
         {selectedType?.value === "blitz" ? (
           <div className="space-y-2">
             <Label htmlFor="duration" className="text-lg font-medium text-white/90">Duration (minutes)</Label>
-            <select id="duration" name="duration" required value={formData.duration} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 cursor-pointer">
-              <option value="">Select duration</option>
-              <option value="10">10</option>
-              <option value="15">15</option>
-              <option value="30">30</option>
-              <option value="45">45</option>
+            <select ref={durationRef} id="duration" name="duration" required value={formData.duration} onChange={handleInputChange} className="py-2 px-5 w-full bg-white/10 backdrop-blur-md border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 appearance-none cursor-pointer">
+              <option className="bg-[#1a1a1a] text-white" value="">Select duration</option>
+              <option className="bg-[#1a1a1a] text-white" value="10">10</option>
+              <option className="bg-[#1a1a1a] text-white" value="15">15</option>
+              <option className="bg-[#1a1a1a] text-white" value="30">30</option>
+              <option className="bg-[#1a1a1a] text-white" value="45">45</option>
             </select>
           </div>
         ) : (
           <div className="space-y-2">
             <Label htmlFor="end_time" className="text-lg font-medium text-white/90">End Time</Label>
-            <Input type="datetime-local" id="end_time" name="end_time" required min={formData.start_time || new Date().toISOString().slice(0, 16)} value={formData.end_time} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 calendar-white" />
+            <Input ref={endTimeRef} type="datetime-local" id="end_time" name="end_time" required min={formData.start_time || new Date().toISOString().slice(0, 16)} value={formData.end_time} onChange={handleInputChange} className="py-3 w-full bg-white/10 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 calendar-white" />
           </div>
         )}
       </div>
     </motion.div>,
+
     // Step 3: Images
     <motion.div key={2} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="space-y-6">
       <Label className="text-lg font-medium text-white/90">Upload Images</Label>
       <DropzoneUploader imageUrls={imageUrls} setImageUrls={setImageUrls} />
       <div className="text-xs text-gray-400">Add at least one high-quality image to attract more bidders.</div>
     </motion.div>,
+
     // Step 4: Preview & Submit
     <motion.div key={3} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="space-y-6">
       {Preview}
