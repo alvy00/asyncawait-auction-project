@@ -192,12 +192,12 @@ export const Navbar = () => {
             ) : (
               <>
                 <Link href="/login">
-                  <Button variant="ghost" className="text-white hover:bg-white/10 font-semibold">
+                  <Button variant="ghost" className="text-white hover:bg-white/70 font-semibold cursor-pointer">
                     Login
                   </Button>
                 </Link>
                 <Link href="/signup">
-                  <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold shadow-lg">
+                  <Button className="bg-gradient-to-r cursor-pointer from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold shadow-lg">
                     Sign up
                   </Button>
                 </Link>
