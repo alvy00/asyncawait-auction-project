@@ -83,18 +83,24 @@ function AuctionCardDeck({ auctions }: { auctions: Auction[] }) {
                 className={`absolute w-full h-full top-0 left-0 flex flex-col justify-between pointer-events-${scale === 1 ? "auto" : "none"}`}
                 style={{ zIndex }}
               >
-                <div className="relative h-full w-full rounded-[2.5rem] bg-black/60 shadow-2xl border border-white/10 overflow-hidden" style={{backdropFilter:'blur(16px)', boxShadow:'0 8px 32px 0 rgba(31,38,135,0.25)'}}>
+                <div className="relative h-full w-full rounded-[2.5rem] bg-black/60 shadow-[0_12px_48px_0_rgba(255,140,0,0.10),0_8px_32px_0_rgba(31,38,135,0.25)] border border-white/10 overflow-hidden" style={{backdropFilter:'blur(16px)'}}>
                   {/* Subtle dark gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-br from-[#18181b]/80 via-[#23232a]/60 to-transparent opacity-90" />
                   {/* Card content */}
                   <div className="relative z-10 flex flex-col justify-between h-full px-4 sm:px-7 pt-6 sm:pt-7 pb-4 sm:pb-5">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-white text-xs sm:text-sm md:text-base font-semibold tracking-wide">Personal Cards</span>
-                      <span className="text-gray-300 text-xs sm:text-sm md:text-base font-bold uppercase">{auction.auction_type?.toUpperCase()}</span>
+                    {/* Top badges */}
+                    <div className="flex items-center justify-between mb-2 gap-2">
+                      <span className="text-white text-xs sm:text-sm md:text-base font-semibold tracking-wide line-clamp-1">{auction.item_name}</span>
+                      <div className="flex gap-1 flex-wrap">
+                        <span className="bg-orange-500/80 text-white text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold uppercase">{auction.auction_type}</span>
+                        <span className="bg-blue-500/70 text-white text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold uppercase">{auction.category}</span>
+                        <span className={`text-white text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold uppercase ${auction.condition === 'new' ? 'bg-green-600/80' : 'bg-gray-500/80'}`}>{auction.condition}</span>
+                        {auction.buy_now && <span className="bg-gradient-to-r from-orange-400 to-orange-600 text-white text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold ml-1">Buy Now ${auction.buy_now}</span>}
+                      </div>
                     </div>
                     {/* Product image - large, eye-catching, with glow */}
-                    {auction.images?.[0] && (
-                      <div className="relative flex items-center justify-center w-full h-[120px] sm:h-[160px] md:h-[190px] lg:h-[220px] mb-3">
+                    {auction.images?.[0] ? (
+                      <div className="relative flex items-center justify-center w-full h-[120px] sm:h-[160px] md:h-[190px] lg:h-[220px] mb-2">
                         <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-orange-500/20 via-purple-700/10 to-blue-600/10 blur-2xl" />
                         <Image
                           src={auction.images[0]}
@@ -105,33 +111,28 @@ function AuctionCardDeck({ auctions }: { auctions: Auction[] }) {
                           priority={scale === 1}
                         />
                       </div>
+                    ) : (
+                      <div className="flex items-center justify-center w-full h-[120px] sm:h-[160px] md:h-[190px] lg:h-[220px] mb-2 bg-gray-800/60 rounded-2xl border-2 border-white/10">
+                        <span className="text-gray-400 text-xs">No Image</span>
+                      </div>
                     )}
-                    <div className="flex-1 flex flex-col justify-center items-center">
-                      <div className="text-white text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-center leading-tight mb-1 truncate w-full">
-                        {auction.item_name}
+                    {/* Description (2 lines ellipsis) */}
+                    <div className="text-gray-300 text-xs sm:text-sm md:text-base text-center mb-1 truncate w-full line-clamp-2 min-h-[2.5em]">{auction.description}</div>
+                    {/* Price and stats */}
+                    <div className="flex flex-col gap-1 mt-2">
+                      <div className="flex items-center justify-between text-gray-200 text-xs sm:text-sm md:text-base font-semibold">
+                        <span>Start: <span className="text-orange-300 font-bold">${auction.starting_price}</span></span>
+                        <span>Highest: <span className="text-green-400 font-bold">${auction.highest_bid}</span></span>
                       </div>
-                      <div className="text-orange-400 text-lg sm:text-xl md:text-2xl font-extrabold text-center mb-1">
-                        {auction.highest_bid ? `$${auction.highest_bid}` : ''}
-                      </div>
-                      <div className="text-gray-300 text-xs sm:text-sm md:text-base text-center mb-1 truncate w-full">
-                        {auction.creator}
-                      </div>
-                      <StatusBadge status={auction.status} />
-                    </div>
-                    <div className="flex items-center justify-between text-gray-400 text-[10px] sm:text-xs md:text-sm mt-2">
-                      <div>
-                        <div>Card No</div>
-                        <div className="font-mono text-[11px] sm:text-[12px] md:text-sm">{maskCardNumber(String(auction.auction_id).padStart(4, "0"))}</div>
-                      </div>
-                      <div className="text-right">
-                        <div>Exp Date</div>
-                        <div className="font-mono text-[11px] sm:text-[12px] md:text-sm">{auction.end_time ? new Date(auction.end_time).toLocaleDateString() : "--/--"}</div>
+                      <div className="flex items-center justify-between text-gray-400 text-xs mt-1">
+                        <span className="flex items-center gap-1"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" /><path d="M12 8v4l3 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg> {auction.participants} participants</span>
+                        <span className="flex items-center gap-1"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M12 20v-6M6 12l6-6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg> {auction.total_bids} bids</span>
                       </div>
                     </div>
                     {/* Floating CTA */}
-                    <div className="flex justify-center mt-5">
+                    <div className="flex justify-center mt-4">
                       <Button size="sm" className="rounded-full px-6 py-2 text-sm sm:text-base md:text-lg font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg transition-all duration-300">
-                        {auction.status === "live" ? "Bid Now" : "View Details"}
+                        {auction.status === "live" ? "Bid Now" : auction.status === "upcoming" ? "Coming Soon" : "View Details"}
                       </Button>
                     </div>
                   </div>
@@ -192,9 +193,11 @@ export function HeroSection() {
   }, []);
 
   return (
-    <section className="relative min-h-screen h-screen flex flex-col items-center justify-center overflow-visible pt-20 sm:pt-24 py-8 md:py-12 bg-[#19181c]">
+    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-16 sm:pt-24 md:pt-28 bg-[#19181c]">
       {/* Subtle, dynamic background shapes */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        {/* Vignette/fade on sides */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
         {/* Orange blob top left */}
         <div className="absolute top-[-10%] left-[-10%] w-[300px] h-[300px] md:w-[400px] md:h-[400px] bg-orange-500/30 rounded-full blur-[120px] animate-float" />
         {/* Purple blob top right */}
@@ -207,13 +210,13 @@ export function HeroSection() {
         <div className="absolute inset-0 bg-grid-pattern opacity-5" />
       </div>
       {/* Content */}
-      <div className="relative z-10 w-full max-w-3xl mx-auto flex flex-col items-center px-4 pt-24 sm:pt-32 md:pt-36">
+      <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center px-6 md:px-10 pt-0">
         {/* Headline */}
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-center mb-2 tracking-tight leading-tight"
+          className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-center mb-1 tracking-tight leading-tight"
         >
           Bid. Win. <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600">Collect.</span>
         </motion.h1>
@@ -249,9 +252,13 @@ export function HeroSection() {
         {/* Card Deck Carousel */}
         <div className="w-full flex flex-col items-center overflow-visible">
           {loading ? (
-            <div className="w-full max-w-[320px] h-[440px] sm:max-w-[360px] sm:h-[500px] md:max-w-[400px] md:h-[560px] flex items-center justify-center bg-white/5 rounded-[2.5rem] animate-pulse border border-white/10" />
+            <div className="w-full max-w-[320px] h-[440px] sm:max-w-[360px] sm:h-[500px] md:max-w-[400px] md:h-[560px] lg:max-w-[520px] lg:h-[650px] flex items-center justify-center bg-white/5 rounded-[2.5rem] animate-pulse border border-white/10 shadow-2xl" />
           ) : featuredAuctions.length > 0 ? (
-            <AuctionCardDeck auctions={featuredAuctions} />
+            <div className="w-full flex justify-center">
+              <div className="w-full max-w-[320px] h-[440px] sm:max-w-[360px] sm:h-[500px] md:max-w-[400px] md:h-[560px] lg:max-w-[520px] lg:h-[650px]">
+                <AuctionCardDeck auctions={featuredAuctions} />
+              </div>
+            </div>
           ) : (
             <div className="text-white/80 text-center py-8">No featured cards available.</div>
           )}
