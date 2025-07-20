@@ -252,13 +252,14 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator,
     className={`${cardBase} relative rounded-2xl bg-[rgba(30,10,5,0.3)] backdrop-blur-md border border-orange-700 shadow-lg bg-gradient-to-br from-[#3a0c00]/40 via-[#5b1900]/25 to-[#3a0c00]/40 text-white`}
   >
     {/* Image container */}
-    <div className={`${cardImageContainer} cursor-pointer rounded-t-2xl overflow-hidden`} onClick={() => setDetailsOpen(true)}>
+    <div className={`${cardImageContainer} cursor-pointer rounded-t-2xl overflow-hidden`}>
       <Image
         src={imageSrc}
         alt={auction.item_name}
         fill
         className={`object-cover ${cardImage}`}
         priority
+        onClick={() => setDetailsOpen(true)}
       />
       <div className={cardStatusBadge}>
         <StatusBadge type="blitz" status={auction.status} auctionId={auction.auction_id} participantCount={participants} />
@@ -270,8 +271,8 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator,
 
     {/* Content area */}
     <div className={`${cardContent}`}>
-      <div onClick={() => setDetailsOpen(true)} className="cursor-pointer">
-        <h3 className={`${cardTitle} text-orange-300`}>#{auction.item_name}</h3>
+      <div onClick={() => setDetailsOpen(true)}>
+        <h3 className={`${cardTitle} text-orange-300 cursor-pointer`}>#{auction.item_name}</h3>
         <div className={`${cardLabel} flex items-center gap-1 text-orange-300`}>
           {!highestBid ? (
             <>
@@ -318,7 +319,6 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator,
           </Button>
         ) : (
           <div className="w-full relative">
-            {auction.status === "live" && (
               <div className={`w-full ${shake ? "animate-shake" : ""} relative`}>
                 {/* Bid Now Button */}
                 <div
@@ -333,10 +333,18 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator,
                         setShake(true);
                         setTimeout(() => setShake(false), 600);
                       }}
-                      className="w-full py-2 px-4 rounded-full bg-gradient-to-r from-orange-600 to-orange-800 border border-orange-700 text-white font-bold shadow-lg hover:from-orange-700 hover:to-orange-900 hover:border-orange-600 transition duration-300 cursor-pointer"
+                      disabled={auction.status === "upcoming"}
                       type="button"
+                      className={`
+                        w-full py-2 px-4 rounded-full
+                        bg-gradient-to-r from-orange-600 to-orange-800
+                        border border-orange-700 text-white font-bold shadow-lg
+                        hover:from-orange-700 hover:to-orange-900 hover:border-orange-600
+                        transition duration-300
+                        cursor-pointer disabled:cursor-not-allowed disabled:opacity-50
+                      `}
                     >
-                      Place Bid
+                      {auction.status === "upcoming" ? "Coming Soon" : "Place Bid"}
                     </button>
                   ) : (
                     <div className="w-full flex items-center justify-center rounded-full border border-gray-600 bg-gray-900 text-gray-400 font-medium cursor-not-allowed shadow-inner text-sm">
@@ -375,7 +383,6 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator,
                   </button>
                 </form>
               </div>
-            )}
           </div>
         )}
       </div>
