@@ -150,7 +150,7 @@ const MyAuctionsPage = () => {
   }
 
   return (
-    <div className="p-6 min-h-screen">
+    <div className="mt-10 p-6 min-h-screen">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>

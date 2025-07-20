@@ -89,7 +89,7 @@ const Dashboard = () => {
     : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#021f49] to-[#010915] text-white p-6 rounded-xl">
+    <div className="mt-10 min-h-screen bg-gradient-to-b from-[#021f49] to-[#010915] text-white p-6 rounded-xl">
       {/* Welcome Header */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
