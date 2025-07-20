@@ -1,47 +1,62 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "../../components/ui/button"
-import { Menu, X, Bell, ChevronDown, LogOut, Settings } from "lucide-react"
+import { Menu, X, Bell, ChevronDown, LogOut, Settings, Heart } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { HiOutlineUserAdd } from "react-icons/hi"
 import { CiLogin } from "react-icons/ci"
-
-interface User {
-  id: string
-  name: string
-  email: string
-}
+import { MdDashboard, MdOutlineCreateNewFolder } from "react-icons/md";
+import { FaArrowRightLong } from "react-icons/fa6"
+import { User } from "../../lib/interfaces"
+import toast from "react-hot-toast"
+import { useAuth } from "../../lib/auth-context"
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false)
-  const [loggedIn, setLoggedIn] = useState(false)
+  const { loggedIn, logout } = useAuth();
+  const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<User>()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [auctionsDropdownOpen, setAuctionsDropdownOpen] = useState(false)
   const [mobileAuctionsOpen, setMobileAuctionsOpen] = useState(false)
+  const [avatarDropdownOpen, setAvatarDropdownOpen] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
   const router = useRouter()
 
+  const avatarDropdownRef = useRef<HTMLDivElement>(null);
+  
+  // fetch user
   useEffect(() => {
     const getUser = async () => {
-      const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken")
-      if (!token) return
+      const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       try {
         const res = await fetch("https://asyncawait-auction-project.onrender.com/api/getuser", {
           method: "GET",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        })
-        if (!res.ok) return
-        const data = await res.json()
-        setUser(data)
-        setLoggedIn(true)
-      } catch {}
-    }
-    getUser()
-  }, [])
+        });
+        if (!res.ok) {
+          setLoading(false);
+          return;
+        }
+        const data = await res.json();
+        setUser(data);
+        //setLoggedIn(true);
+      } catch (error) {
+          console.log(error)
+      } finally {
+        setLoading(false);
+      }
+    };
+    getUser();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10)
@@ -70,6 +85,30 @@ export const Navbar = () => {
     }
   }, [mobileMenuOpen])
 
+  // desktop outside clicks
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        avatarDropdownOpen &&
+        avatarDropdownRef.current &&
+        !avatarDropdownRef.current.contains(event.target as Node)
+      ) {
+        setAvatarDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [avatarDropdownOpen]);
+
+  const handleLogOut = () => {
+    logout();
+    toast.success('Logged out successfully')
+    router.push('/');
+  };
+
   const navItems = [
     { name: "Home", href: "/" },
     {
@@ -95,14 +134,83 @@ export const Navbar = () => {
     }
   }
 
+  const dropdownVariants = {
+    hidden: { opacity: 0, y: 10, scale: 0.95 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: { 
+        type: "spring", 
+        stiffness: 400, 
+        damping: 25 
+      } 
+    },
+    exit: { 
+      opacity: 0, 
+      y: 10, 
+      scale: 0.95,
+      transition: { 
+        duration: 0.2 
+      } 
+    }
+  };
+
+  const staggerMenuItems = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.07,
+      },
+    },
+  };
+
+  const menuItemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { 
+        type: "spring", 
+        stiffness: 300, 
+        damping: 24 
+      } 
+    },
+  };
+
+  const maxWidth6xl = 72 * 16;
+  const maxWidth7xl = 80 * 16;
+  useEffect(() => {
+    setHasLoaded(true);
+  }, []);
+
+
   return (
     <>
-      <header
-        className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95vw] max-w-6xl rounded-2xl transition-all duration-500 ${
-          isScrolled ? "bg-[#18181b]/95" : "bg-[#18181b]/85"
-        } border border-white/10 shadow-xl backdrop-blur-xl`}
+      <motion.header
+        initial={{ maxWidth: maxWidth6xl }}
+        animate={{ maxWidth: hasLoaded ? maxWidth7xl : maxWidth6xl }}
+        transition={{ duration: 1.5, ease: "easeInOut" }}
+        style={{
+          width: "95vw",
+          left: "50%",
+          transform: "translateX(-50%)",
+          position: "fixed",
+          borderRadius: "1rem",
+          border: "1px solid rgba(255,255,255,0.1)",
+          backdropFilter: "blur(10px)",
+          boxShadow: "0 10px 20px rgba(0,0,0,0.4)",
+          zIndex: 50,
+          backgroundColor: "rgba(24, 24, 27, 0.9)",
+        }}
       >
-        <div className="flex items-center justify-between h-[64px] px-4 sm:px-8">
+        <motion.div
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="flex items-center justify-between h-[64px] px-4 sm:px-8 relative z-50"
+        >
           {/* Logo */}
           <Link href="/" className="flex items-center group z-10">
             <motion.div
@@ -135,9 +243,14 @@ export const Navbar = () => {
                     aria-expanded={auctionsDropdownOpen}
                   >
                     {item.name}
-                    <ChevronDown className="w-4 h-4 transition-transform duration-200" />
+                    <motion.span
+                      animate={{ rotate: auctionsDropdownOpen ? 180 : 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                    </motion.span>
                   </button>
-                  {/* Desktop Dropdown */}
+
                   <AnimatePresence>
                     {auctionsDropdownOpen && (
                       <motion.div
@@ -145,18 +258,24 @@ export const Navbar = () => {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
                         transition={{ duration: 0.18 }}
-                        className="absolute left-1/2 -translate-x-1/2 top-full mt-2 min-w-[180px] bg-[#18181b]/95 rounded-xl shadow-lg border border-white/10 backdrop-blur-xl flex flex-col py-2 z-50"
+                        className="absolute left-1/2 -translate-x-1/2 top-full mt-2 min-w-[200px] bg-[#18181b]/95 rounded-xl shadow-xl border border-white/10 backdrop-blur-lg flex flex-col py-3 gap-1 z-50"
                         onMouseEnter={() => setAuctionsDropdownOpen(true)}
                         onMouseLeave={() => setAuctionsDropdownOpen(false)}
                       >
                         {item.items.map((sub) => (
-                          <Link
+                          <motion.div
                             key={sub.name}
-                            href={sub.href}
-                            className="px-5 py-2 text-sm text-white/90 hover:bg-white/10 hover:text-white rounded-lg mx-2 transition-all duration-150"
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.2 }}
                           >
-                            {sub.name}
-                          </Link>
+                            <Link
+                              href={sub.href}
+                              className="block px-5 py-2 text-sm text-white/90 hover:bg-white/10 hover:text-white rounded-md mx-2 transition-all duration-150"
+                            >
+                              {sub.name}
+                            </Link>
+                          </motion.div>
                         ))}
                       </motion.div>
                     )}
@@ -171,42 +290,182 @@ export const Navbar = () => {
                 >
                   {item.name}
                 </Link>
-              ),
+              )
             )}
           </nav>
 
           {/* Actions - desktop */}
           <div className="hidden lg:flex items-center gap-3">
-            {loggedIn ? (
-              <div className="flex items-center gap-3">
-                <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">
+            {loading ? (
+              // Skeleton while loading
+              <div className="flex items-center gap-3 animate-pulse">
+                <div className="w-8 h-8 rounded-full bg-white/10" />
+                <div className="w-8 h-8 rounded-full bg-white/10" />
+                <div className="w-8 h-8 rounded-full bg-white/10" />
+              </div>
+            ) : loggedIn ? (
+              // Authenticated user
+              <motion.div
+                ref={avatarDropdownRef}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="relative flex items-center gap-3"
+              >
+                {/* Notification Button */}
+                <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 cursor-pointer">
                   <Bell className="w-4 h-4" />
                 </Button>
-                <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">
+
+                {/* Favorites */}
+                <Link href="/favourites">
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 cursor-pointer">
+                    <Heart className="w-4 h-4" />
+                  </Button>
+                </Link>
+
+                {/* Settings */}
+                <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 cursor-pointer">
                   <Settings className="w-4 h-4" />
                 </Button>
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center text-white text-sm font-semibold">
-                  {user?.name?.charAt(0) || "U"}
-                </div>
-              </div>
+
+                
+                {/* Avatar Button */}
+                <button
+                  onClick={() => setAvatarDropdownOpen((v) => !v)}
+                  className="w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center text-white font-semibold text-sm cursor-pointer relative overflow-hidden"
+                  aria-label="User menu"
+                >
+                  {user?.name
+                    ? user.name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .toUpperCase()
+                    : "U"}
+                </button>
+
+                {/* Dropdown Menu */}
+                <AnimatePresence>
+                  {avatarDropdownOpen && (
+                    <motion.div
+                      variants={dropdownVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      className="absolute top-full left-1/2 transform -translate-x-1/2 w-56 bg-gradient-to-b from-[#0a1929]/95 to-[#0a1929]/90 rounded-lg py-2 mt-2 z-50 shadow-xl backdrop-blur-md border border-[#1e3a52]/30"
+                    >
+                      <motion.div
+                        className="px-4 py-3 border-b border-[#1e3a52]/50 mb-1"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                      >
+                        <p className="text-white font-medium">{user?.name}</p>
+                        <p className="text-gray-400 text-xs">{user?.email}</p>
+                      </motion.div>
+
+                      <motion.div variants={staggerMenuItems} initial="hidden" animate="visible">
+                        <motion.div variants={menuItemVariants}>
+                          <Link
+                            href="/dashboard"
+                            className="flex items-center gap-2 px-4 py-2 text-white hover:bg-[#162a3d]/70 hover:text-orange-400 text-sm transition-all duration-200"
+                            onClick={() => setAvatarDropdownOpen(false)}
+                          >
+                            <MdDashboard className="text-lg" />
+                            Dashboard
+                          </Link>
+                        </motion.div>
+
+                        {user?.is_admin && (
+                          <motion.div variants={menuItemVariants}>
+                            <Link
+                              href="/admin"
+                              className="flex items-center gap-2 px-4 py-2 text-white hover:bg-[#162a3d]/70 hover:text-orange-400 text-sm transition-all duration-200"
+                              onClick={() => setAvatarDropdownOpen(false)}
+                            >
+                              <Settings size={16} />
+                              Admin
+                            </Link>
+                          </motion.div>
+                        )}
+
+                        <motion.div variants={menuItemVariants}>
+                          <Link
+                            href="/auctions/create"
+                            className="flex items-center gap-2 px-4 py-2 text-white hover:bg-[#162a3d]/70 hover:text-orange-400 text-sm transition-all duration-200"
+                            onClick={() => setAvatarDropdownOpen(false)}
+                          >
+                            <MdOutlineCreateNewFolder className="text-lg" />
+                            Create Auction
+                          </Link>
+                        </motion.div>
+
+                        <motion.div variants={menuItemVariants}>
+                          <button
+                            onClick={() => {
+                              handleLogOut()
+                              setAvatarDropdownOpen(false)
+                            }}
+                            className="flex items-center gap-2 px-4 py-2 text-red-400 hover:bg-red-700/30 hover:text-red-300 text-sm w-full text-left transition-colors duration-200 cursor-pointer rounded"
+                          >
+                            <LogOut size={16} />
+                            Logout
+                          </button>
+                        </motion.div>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+              </motion.div>
+
             ) : (
-              <>
-                <Link href="/login">
-                  <Button variant="ghost" className="text-white hover:bg-white/70 font-semibold cursor-pointer">
-                    Login
-                  </Button>
-                </Link>
-                <Link href="/signup">
-                  <Button className="bg-gradient-to-r cursor-pointer from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold shadow-lg">
-                    Sign up
-                  </Button>
-                </Link>
-              </>
+              // Unauthenticated user
+              <motion.div className="flex items-center gap-4">
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1, duration: 0.4 }}
+                >
+                  <Link href="/login">
+                    <Button variant="ghost" className="text-white hover:bg-white/70 font-semibold">
+                      Login
+                    </Button>
+                  </Link>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.45 }}
+                >
+                  <Link href="/signup">
+                    <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold shadow-lg flex items-center gap-2">
+                      <motion.span
+                        initial={{ x: -6, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 0.35, duration: 0.3 }}
+                      >
+                        Get Started
+                      </motion.span>
+                      <motion.span
+                        initial={{ x: 6, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 0.45, duration: 0.3 }}
+                      >
+                        <FaArrowRightLong />
+                      </motion.span>
+                    </Button>
+                  </Link>
+                </motion.div>
+              </motion.div>
             )}
           </div>
 
-          {/* Hamburger - mobile & tablet */}
-          <button
+          {/* Hamburger - mobile */}
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
             className="lg:hidden flex items-center justify-center w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors duration-200 z-10"
             onClick={() => setMobileMenuOpen((v) => !v)}
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
@@ -234,9 +493,9 @@ export const Navbar = () => {
                 </motion.div>
               )}
             </AnimatePresence>
-          </button>
-        </div>
-      </header>
+          </motion.button>
+        </motion.div>
+      </motion.header>
 
       {/* Mobile menu overlay */}
       <AnimatePresence>
@@ -340,16 +599,42 @@ export const Navbar = () => {
                           <p className="text-white/60 text-sm">{user?.email}</p>
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Button variant="ghost" className="text-white hover:bg-white/10 justify-start">
-                          <Bell className="w-4 h-4 mr-2" />
-                          Notifications
-                        </Button>
-                        <Button variant="ghost" className="text-white hover:bg-white/10 justify-start">
-                          <Settings className="w-4 h-4 mr-2" />
-                          Settings
-                        </Button>
+
+                      {/* Notif, Fav, settings icon */}
+                      <div className="w-full px-4 py-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 w-full">
+                          {/* Notifications */}
+                          <Button
+                            variant="ghost"
+                            className="flex items-center justify-start gap-2 text-white hover:bg-white/10 transition rounded-full py-2"
+                          >
+                            <Bell className="w-5 h-5" />
+                            <span className="text-sm">Notifications</span>
+                          </Button>
+
+                          {/* Favourites */}
+                          <Link href="/favourites">
+                            <Button
+                              variant="ghost"
+                              className="flex items-center justify-start gap-2 text-white hover:bg-white/10 transition rounded-full py-2 w-full"
+                            >
+                              <Heart className="w-5 h-5" />
+                              <span className="text-sm">Favourites</span>
+                            </Button>
+                          </Link>
+
+                          {/* Settings */}
+                          <Button
+                            variant="ghost"
+                            className="flex items-center justify-start gap-2 text-white hover:bg-white/10 transition rounded-full py-2"
+                          >
+                            <Settings className="w-5 h-5" />
+                            <span className="text-sm">Settings</span>
+                          </Button>
+                        </div>
                       </div>
+
+                      {/* Login & Sign up */}
                       <Button
                         variant="ghost"
                         className="w-full text-red-400 hover:bg-red-500/10 hover:text-red-300 justify-start"

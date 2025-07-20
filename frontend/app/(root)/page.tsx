@@ -64,15 +64,15 @@ export default function Home() {
         {/* <AnimatedBackground /> */}
         <HeroSection />
         {/* <CategoryShowcase /> */}
-        <AuctionTypesSection />
         <LiveAuctionsSection />
-        <MarketingShowcase />
+        <AuctionTypesSection />
         <WhyChooseUsSection />
-        {/* <ConversionSection /> */}
+        <MarketingShowcase />
         {/* <CategorySection /> */}
-        <NewsletterSection />
-        {/* <CTASection /> */}
         <TestimonialsSection />
+        <NewsletterSection />
+        {/* <ConversionSection /> */}
+        {/* <CTASection /> */}
       </main>
     </>
   );

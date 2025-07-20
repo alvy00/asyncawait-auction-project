@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import { useState, useEffect } from "react";
@@ -24,16 +25,33 @@ function AuctionCardDeck({ auctions }: { auctions: Auction[] }) {
     const pos = ((idx - activeIndex + cardCount) % cardCount);
     let rel = pos;
     if (rel > Math.floor(cardCount / 2)) rel -= cardCount;
-    // Responsive spread: wider on desktop
+
     const isDesktop = typeof window !== 'undefined' ? window.innerWidth >= 768 : false;
-    let x = 0, scale = 1, z = 10, rotate = 0, opacity = 1, filter = "";
-    if (rel === 0) { x = 0; scale = 1; z = 30; rotate = 0; opacity = 1; }
-    else if (rel === -1) { x = isDesktop ? -180 : -70; scale = 0.93; z = 20; rotate = isDesktop ? -10 : -8; opacity = 0.85; }
-    else if (rel === 1) { x = isDesktop ? 180 : 70; scale = 0.93; z = 20; rotate = isDesktop ? 10 : 8; opacity = 0.85; }
-    else if (rel === -2) { x = isDesktop ? -340 : -130; scale = 0.87; z = 10; rotate = isDesktop ? -18 : -16; opacity = 0.65; filter = "blur(2.5px)"; }
-    else if (rel === 2) { x = isDesktop ? 340 : 130; scale = 0.87; z = 10; rotate = isDesktop ? 18 : 16; opacity = 0.65; filter = "blur(2.5px)"; }
-    else { opacity = 0; z = 0; }
-    return { x, scale, zIndex: z, rotate, opacity, filter };
+
+    let x = 0, scale = 1, z = 10, rotate = 0, rotateY = 0, opacity = 1, filter = "";
+
+    const spacing = isDesktop ? 180 : 100;
+
+    if (rel === 0) {
+      x = 0;
+      scale = 1;
+      z = 30;
+      rotateY = 0;
+      opacity = 1;
+      filter = "none";
+    } else {
+      x = rel * spacing;
+      scale = 0.92 - Math.abs(rel) * 0.05;
+      z = 20 - Math.abs(rel) * 2;
+      rotateY = rel * -20;
+      opacity = Math.max(1 - Math.abs(rel) * 0.3, 0);
+      
+      const blurAmount = Math.min(Math.abs(rel) * 2, 5);
+      const grayAmount = Math.min(Math.abs(rel) * 20, 80);
+      filter = `blur(${blurAmount}px) grayscale(${grayAmount}%)`;
+    }
+
+    return { x, scale, zIndex: z, rotate, rotateY, opacity, filter };
   }
 
   function handlePrev() {
@@ -65,23 +83,35 @@ function AuctionCardDeck({ auctions }: { auctions: Auction[] }) {
       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-32 h-72 bg-gradient-to-bl from-purple-700/20 to-transparent blur-2xl rounded-full pointer-events-none hidden md:block" />
       <div
         className="relative w-full max-w-[320px] h-[440px] sm:max-w-[360px] sm:h-[500px] md:max-w-[400px] md:h-[560px] flex items-center justify-center select-none"
+        style={{ perspective: '1000px' }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
         <AnimatePresence initial={false} mode="popLayout">
           {auctions.map((auction, idx) => {
-            const { x, scale, zIndex, rotate, opacity, filter } = getCardProps(idx);
+            const { x, scale, zIndex, rotate, rotateY, opacity, filter } = getCardProps(idx);
             if (opacity === 0) return null;
             return (
               <motion.div
                 key={auction.auction_id}
                 initial={{ x: 0, scale: 0.9, opacity: 0, rotate: 0 }}
-                animate={{ x, scale, opacity, zIndex, rotate, filter }}
-                exit={{ x: 0, scale: 0.9, opacity: 0, zIndex: 0, rotate: 0, filter: "blur(2.5px)" }}
+                animate={{
+                  x, 
+                  scale, 
+                  opacity, 
+                  zIndex, 
+                  rotate, 
+                  rotateY,
+                  filter 
+                }}
+                exit={{ x: 0, scale: 0.9, opacity: 0, zIndex: 0, rotate: 0, rotateY: 0, filter: "blur(2.5px)" }}
                 transition={{ type: "spring", stiffness: 200, damping: 30 }}
                 className={`absolute w-full h-full top-0 left-0 flex flex-col justify-between pointer-events-${scale === 1 ? "auto" : "none"}`}
-                style={{ zIndex }}
+                style={{ 
+                  zIndex,
+                  transformStyle: 'preserve-3d'
+                }}
               >
                 <div className="relative h-full w-full rounded-[2.5rem] bg-black/60 shadow-[0_12px_48px_0_rgba(255,140,0,0.10),0_8px_32px_0_rgba(31,38,135,0.25)] border border-white/10 overflow-hidden" style={{backdropFilter:'blur(16px)'}}>
                   {/* Subtle dark gradient overlay */}
@@ -143,14 +173,14 @@ function AuctionCardDeck({ auctions }: { auctions: Auction[] }) {
         </AnimatePresence>
         {/* Nav arrows */}
         <button
-          className="absolute left-[-32px] top-1/2 -translate-y-1/2 bg-gradient-to-br from-orange-500 to-orange-600 text-white p-2 rounded-full z-30 shadow-md border-2 border-white/30 hover:scale-110 transition"
+          className="absolute left-[-32px] top-1/2 -translate-y-1/2 bg-gradient-to-br from-orange-500 to-orange-600 text-white p-2 rounded-full z-30 shadow-md border-2 border-white/30 hover:scale-110 transition cursor-pointer"
           onClick={handlePrev}
           aria-label="Previous card"
         >
           <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
         </button>
         <button
-          className="absolute right-[-32px] top-1/2 -translate-y-1/2 bg-gradient-to-br from-orange-500 to-orange-600 text-white p-2 rounded-full z-30 shadow-md border-2 border-white/30 hover:scale-110 transition"
+          className="absolute right-[-32px] top-1/2 -translate-y-1/2 bg-gradient-to-br from-orange-500 to-orange-600 text-white p-2 rounded-full z-30 shadow-md border-2 border-white/30 hover:scale-110 transition cursor-pointer"
           onClick={handleNext}
           aria-label="Next card"
         >
@@ -176,6 +206,7 @@ export function HeroSection() {
   const [featuredAuctions, setFeaturedAuctions] = useState<Auction[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // fetch featured
   useEffect(() => {
     async function fetchFeatured() {
       try {
@@ -245,9 +276,6 @@ export function HeroSection() {
           transition={{ duration: 0.7, delay: 0.3 }}
           className="mb-8"
         >
-          <Button size="lg" className="rounded-full px-8 py-3 text-base font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg transition-all duration-300">
-            Start today!
-          </Button>
         </motion.div>
         {/* Card Deck Carousel */}
         <div className="w-full flex flex-col items-center overflow-visible">

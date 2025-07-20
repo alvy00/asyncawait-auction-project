@@ -281,8 +281,9 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
     className={`flex flex-col ${cardBase} bg-gradient-to-br from-purple-900/40 to-purple-800/20 backdrop-blur-xl border border-purple-700/30 shadow-inner shadow-purple-900/20 transition-all duration-300`}
   >
     {/* Image container */}
-    <div className={cardImageContainer} onClick={() => setDetailsOpen(true)}>
+    <div className={cardImageContainer} >
       <Image
+        onClick={() => setDetailsOpen(true)}
         src={imageSrc}
         alt={auction.item_name}
         fill
@@ -300,7 +301,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
     {/* Content area */}
     <div className={cardContent}>
       <div onClick={() => setDetailsOpen(true)}>
-        <h3 className={`${cardTitle} text-purple-300`}>#{auction.item_name}</h3>
+        <h3 className={`${cardTitle} text-purple-300 cursor-pointer`}>#{auction.item_name}</h3>
         <div className={cardLabel}>
           {!highestBid ? (
             <span className="flex items-center gap-1 text-purple-400">
@@ -355,7 +356,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
           </Button>
         ) : (
           <div className="w-full relative">
-            {auction.status === "live" && (
+            {(
               <div className={`w-full ${shake ? "animate-shake" : ""} relative`}>
                 <div
                   className={`w-full flex items-center justify-center transition-all duration-500 ease-in-out z-10 ${
@@ -371,10 +372,18 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
                         setShake(true);
                         setTimeout(() => setShake(false), 600);
                       }}
-                      className={`w-full py-2 px-4 font-semibold rounded-full text-white transition-all duration-500 ease-in-out bg-purple-700 hover:bg-purple-600 border border-purple-600 shadow-md cursor-pointer`}
+                      disabled={auction.status === "upcoming"}
+                      className={`
+                        w-full py-2 px-4 font-semibold rounded-full text-white transition-all duration-500 ease-in-out
+                        border border-purple-600 shadow-md
+                        ${auction.status === "upcoming"
+                          ? "bg-purple-400 cursor-not-allowed hover:bg-purple-400"
+                          : "bg-purple-700 hover:bg-purple-600 cursor-pointer"
+                        }
+                      `}
                       type="button"
                     >
-                      Place Lower Bid
+                      {auction.status === "upcoming" ? "Coming Soon" : "Place Lower Bid"}
                     </button>
                   ) : (
                     <div className="w-full flex items-center justify-center rounded-full border border-gray-500 bg-gray-800 text-gray-300 font-medium cursor-not-allowed shadow-inner text-sm">
