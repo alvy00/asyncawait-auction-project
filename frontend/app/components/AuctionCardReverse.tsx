@@ -356,7 +356,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
           </Button>
         ) : (
           <div className="w-full relative">
-            {auction.status === "live" && (
+            {(
               <div className={`w-full ${shake ? "animate-shake" : ""} relative`}>
                 <div
                   className={`w-full flex items-center justify-center transition-all duration-500 ease-in-out z-10 ${
@@ -372,10 +372,18 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
                         setShake(true);
                         setTimeout(() => setShake(false), 600);
                       }}
-                      className={`w-full py-2 px-4 font-semibold rounded-full text-white transition-all duration-500 ease-in-out bg-purple-700 hover:bg-purple-600 border border-purple-600 shadow-md cursor-pointer`}
+                      disabled={auction.status === "upcoming"}
+                      className={`
+                        w-full py-2 px-4 font-semibold rounded-full text-white transition-all duration-500 ease-in-out
+                        border border-purple-600 shadow-md
+                        ${auction.status === "upcoming"
+                          ? "bg-purple-400 cursor-not-allowed hover:bg-purple-400"
+                          : "bg-purple-700 hover:bg-purple-600 cursor-pointer"
+                        }
+                      `}
                       type="button"
                     >
-                      Place Lower Bid
+                      {auction.status === "upcoming" ? "Coming Soon" : "Place Lower Bid"}
                     </button>
                   ) : (
                     <div className="w-full flex items-center justify-center rounded-full border border-gray-500 bg-gray-800 text-gray-300 font-medium cursor-not-allowed shadow-inner text-sm">

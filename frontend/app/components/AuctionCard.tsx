@@ -315,11 +315,22 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
             {auction?.user_id !== user?.user_id ? (
               <>
                 <button
-                  onClick={() => { setIsBidding(true); setShake(true); setTimeout(() => setShake(false), 600); }}
+                  onClick={() => {
+                    setIsBidding(true);
+                    setShake(true);
+                    setTimeout(() => setShake(false), 600);
+                  }}
                   type="button"
-                  className={`w-full py-2 px-4 font-semibold rounded-full text-white transition-all duration-500 ease-in-out bg-emerald-700 hover:bg-emerald-600 border border-emerald-500 shadow-md cursor-pointer ${isBidding ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100 pointer-events-auto'}`}
+                  disabled={auction.status === "upcoming"}
+                  className={`
+                    w-full py-2 px-4 font-semibold rounded-full text-white
+                    transition-all duration-500 ease-in-out
+                    bg-emerald-700 hover:bg-emerald-600 border border-emerald-500 shadow-md
+                    cursor-pointer disabled:cursor-not-allowed disabled:opacity-50
+                    ${isBidding ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100 pointer-events-auto'}
+                  `}
                 >
-                  Place Bid
+                  {auction.status === "upcoming" ? "Coming soon" : "Place Bid"}
                 </button>
                 <form
                   onSubmit={handleBidSubmit}

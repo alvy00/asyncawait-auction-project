@@ -364,7 +364,7 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
           </Button>
         ) : (
           <div className="w-full relative">
-            {auction.status === "live" && (
+            {(
               <div className={`w-full ${shake ? "animate-shake" : ""} relative`}>
                 {/* Bid Now Button */}
                 <div
@@ -381,10 +381,19 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
                         setShake(true);
                         setTimeout(() => setShake(false), 600);
                       }}
-                      className="w-full py-2 px-4 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-700 border border-yellow-600 text-white font-bold shadow-lg hover:from-yellow-600 hover:to-yellow-800 hover:border-yellow-500 transition duration-300 cursor-pointer"
+                      disabled={auction.status === "upcoming"}
+                      className={`
+                        w-full py-2 px-4 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-700 border border-yellow-600
+                        text-white font-bold shadow-lg
+                        transition duration-300
+                        ${auction.status === "upcoming"
+                          ? "cursor-not-allowed bg-yellow-400 border-yellow-400 hover:from-yellow-400 hover:to-yellow-400 hover:border-yellow-400"
+                          : "cursor-pointer hover:from-yellow-600 hover:to-yellow-800 hover:border-yellow-500"
+                        }
+                      `}
                       type="button"
                     >
-                      Place Bid
+                      {auction.status === "upcoming" ? "Coming Soon" : "Place Bid"}
                     </button>
                   ) : (
                     <div className="w-full flex items-center justify-center rounded-full border border-gray-600 bg-gray-900 text-gray-400 font-medium cursor-not-allowed shadow-inner text-sm">

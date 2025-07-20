@@ -106,7 +106,7 @@ const LiveAuctionsSection = () => {
             <p className="text-gray-400 text-sm md:text-base mt-1">Handpicked deals from trusted sellers</p>
           </div>
 
-          {/* Arrows */}
+          {/* Arrows
           <div className="hidden md:flex items-center space-x-3">
             <button onClick={goToPrevSlide} className="w-10 h-10 rounded-full border border-gray-600 flex items-center justify-center text-white hover:bg-gray-800 transition-colors" aria-label="Previous slide">
               <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/></svg>
@@ -114,7 +114,7 @@ const LiveAuctionsSection = () => {
             <button onClick={goToNextSlide} className="w-10 h-10 rounded-full border border-gray-600 flex items-center justify-center text-white hover:bg-gray-800 transition-colors" aria-label="Next slide">
               <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/></svg>
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* Grid */}

@@ -241,7 +241,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
       </div>
 
       {/* Bid button area */}
-      {auction.status === "live" && !submittingBid && (
+      {!submittingBid && (
         <div className="w-full mt-2 flex flex-col items-end">
           {!token ? (
             <Button
@@ -258,13 +258,17 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
               onClick={handleAcceptClick}
               whileTap={{ scale: 0.95 }}
               disabled={showConfirmModal}
-              className={`px-6 py-3 font-bold text-white rounded-full focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-400 border border-blue-500 transition-all duration-300
+              className={`
+                px-6 py-3 font-bold text-white rounded-full
+                focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-400
+                border border-blue-500 transition-all duration-300
                 ${showConfirmModal
                   ? "bg-blue-400 cursor-not-allowed opacity-60"
                   : "bg-blue-500 hover:bg-blue-600 hover:shadow-md cursor-pointer"
-                }`}
+                }
+              `}
             >
-              Accept Price
+              {showConfirmModal ? "Coming Soon" : "Accept Price"}
             </motion.button>
           ) : (
             <div className="w-full flex items-center justify-center rounded-full border border-gray-500 bg-gray-800 text-gray-300 font-medium cursor-not-allowed shadow-inner text-sm">
