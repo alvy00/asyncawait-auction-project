@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -13,7 +12,6 @@ import toast from "react-hot-toast";
 import { useAuth } from "../../lib/auth-context";
 import { getSessionToken, clearSessionToken, isSessionExpired } from "../../lib/utils";
 import { FaEnvelope, FaFacebookF, FaGoogle, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
-import BackButton from "../components/BackButton";
 import { motion } from "framer-motion";
 
 export default function LoginPage() {
@@ -25,6 +23,12 @@ export default function LoginPage() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Safe access to window.location.origin
+  const redirectOrigin = typeof window !== "undefined" ? window.location.origin : "";
+
+  const googleLoginUrl = `https://asyncawait-auction-project.onrender.com/api/login/google?redirect_origin=${encodeURIComponent(redirectOrigin)}`;
+  const facebookLoginUrl = `https://asyncawait-auction-project.onrender.com/api/login/facebook?redirect_origin=${encodeURIComponent(redirectOrigin)}`;
 
   const handleSessionExpiry = () => {
     clearSessionToken();
@@ -49,14 +53,12 @@ export default function LoginPage() {
     }
   }, [router]);
 
-  // Prefetch dashboard routes after mount
   useEffect(() => {
     router.prefetch("/auctions/all");
     router.prefetch("/auctions/upcoming");
     router.prefetch("/auctions/past");
   }, [router]);
 
-  // Multi-tab sync + auto-logout
   useEffect(() => {
     const handleVisibilityOrFocus = () => {
       try {
@@ -85,7 +87,6 @@ export default function LoginPage() {
     };
   }, []);
 
-  // Auto-close logout modal after 8s
   useEffect(() => {
     if (showLogoutModal) {
       const timeout = setTimeout(() => setShowLogoutModal(false), 8000);
@@ -125,7 +126,7 @@ export default function LoginPage() {
         toast.success("Login successful!");
         router.push("/");
       }
-    } catch (error) {
+    } catch {
       toast.error("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
@@ -145,18 +146,26 @@ export default function LoginPage() {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: 'easeOut' }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
           className="w-full max-w-md bg-[#10182A]/90 backdrop-blur-xl p-8 sm:p-10 rounded-2xl shadow-2xl border border-white/10 flex flex-col items-center"
         >
           <Link href="/" className="mb-8 block">
             <Image src="/logo-white.png" alt="AuctaSync Logo" width={180} height={45} priority />
           </Link>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 font-serif text-center">Sign in to your account</h1>
-          <p className="text-gray-400 mb-8 text-center">Access exclusive auctions, track your bids, and more.</p>
+
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 font-serif text-center">
+            Sign in to your account
+          </h1>
+
+          <p className="text-gray-400 mb-8 text-center">
+            Access exclusive auctions, track your bids, and more.
+          </p>
 
           <form onSubmit={handleSubmit} className="w-full space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-300">Email</Label>
+              <Label htmlFor="email" className="text-gray-300">
+                Email
+              </Label>
               <div className="flex items-center bg-[#181F2F] border border-gray-700 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-orange-500 transition">
                 <FaEnvelope className="text-orange-400 mr-3" />
                 <Input
@@ -173,9 +182,14 @@ export default function LoginPage() {
 
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <Label htmlFor="password" className="text-gray-300">Password</Label>
-                <Link href="/forgot-password" className="text-sm text-orange-400 hover:text-orange-300">Forgot password?</Link>
+                <Label htmlFor="password" className="text-gray-300">
+                  Password
+                </Label>
+                <Link href="/forgot-password" className="text-sm text-orange-400 hover:text-orange-300">
+                  Forgot password?
+                </Link>
               </div>
+
               <div className="flex items-center bg-[#181F2F] border border-gray-700 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-orange-500 transition">
                 <FaLock className="text-orange-400 mr-3" />
                 <Input
@@ -217,13 +231,24 @@ export default function LoginPage() {
             >
               {isLoading ? (
                 <div className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
                   </svg>
                   Signing in...
                 </div>
-              ) : "Sign In"}
+              ) : (
+                "Sign In"
+              )}
             </Button>
 
             <div className="text-center">
@@ -243,30 +268,30 @@ export default function LoginPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-
-              <a href="https://asyncawait-auction-project.onrender.com/api/login/google" className="block w-full">
+              <a href={googleLoginUrl} className="block w-full">
                 <Button
                   variant="outline"
                   className="w-full border-gray-700 bg-[#181F2F] text-white hover:bg-[#232B3E] transition"
                   type="button"
+                  disabled={isLoading}
                 >
                   <FaGoogle className="mr-2 h-5 w-5 text-orange-400" />
                   Google
                 </Button>
               </a>
 
-              <a href="https://asyncawait-auction-project.onrender.com/api/login/facebook">
+              <a href={facebookLoginUrl} className="block w-full">
                 <Button
                   variant="outline"
                   className="w-full border-gray-700 bg-[#181F2F] text-white hover:bg-[#232B3E] transition"
                   onClick={() => toast("Facebook login coming soon!")}
                   type="button"
+                  disabled={isLoading}
                 >
                   <FaFacebookF className="mr-2 h-5 w-5 text-orange-400" />
                   Facebook
                 </Button>
               </a>
-
             </div>
           </form>
         </motion.div>
@@ -276,9 +301,7 @@ export default function LoginPage() {
       {showLogoutModal && (
         <div className="fixed z-50 inset-0 bg-black/60 flex items-center justify-center">
           <div className="bg-[#181F2F] p-6 rounded-2xl shadow-2xl max-w-sm text-center border border-white/10">
-            <h2 className="text-lg font-bold text-white mb-2">
-              You were logged out
-            </h2>
+            <h2 className="text-lg font-bold text-white mb-2">You were logged out</h2>
             <p className="text-gray-300 mb-4">
               Due to inactivity, your session expired. Please log in again to continue.
             </p>
