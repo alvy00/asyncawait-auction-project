@@ -10,21 +10,28 @@ export default function AuthCallback() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Extract code once here (a string or null)
+  const code = searchParams.get("code");
+
   useEffect(() => {
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    if (!code) {
+      toast.error("No authorization code in URL");
+      router.replace("/login");
+      return;
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      toast.error("Supabase credentials are missing");
+      router.replace("/login");
+      return;
+    }
+
+    const supabase = createBrowserClient(supabaseUrl, supabaseKey);
 
     async function manualExchangeCode() {
-      const code = searchParams.get("code");
-
-      if (!code) {
-        toast.error("No authorization code in URL");
-        router.replace("/login");
-        return;
-      }
-
       try {
         const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
@@ -43,7 +50,7 @@ export default function AuthCallback() {
     }
 
     manualExchangeCode();
-  }, [searchParams, router]);
+  }, [code, router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center text-white">
