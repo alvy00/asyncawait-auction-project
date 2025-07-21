@@ -2,7 +2,7 @@ import express from 'express'
 import supabase from '../../config/supabaseClient.js';
 import { v4 as uuidv4 } from 'uuid';
 
-const REDIRECT_TO = "https://auctasync.vercel.app/auth/callback";
+const REDIRECT_TO = "https://auctasync.vercel.app/callback";
 const authRouter = express.Router();
 
 // Server Ping
