@@ -243,24 +243,30 @@ export default function LoginPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <Button
-                variant="outline"
-                className="w-full border-gray-700 bg-[#181F2F] text-white hover:bg-[#232B3E] transition"
-                onClick={() => toast("Google login coming soon!")}
-                type="button"
-              >
-                <FaGoogle className="mr-2 h-5 w-5 text-orange-400" />
-                Google
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full border-gray-700 bg-[#181F2F] text-white hover:bg-[#232B3E] transition"
-                onClick={() => toast("Facebook login coming soon!")}
-                type="button"
-              >
-                <FaFacebookF className="mr-2 h-5 w-5 text-orange-400" />
-                Facebook
-              </Button>
+
+              <a href="https://asyncawait-auction-project.onrender.com/api/login/google" className="block w-full">
+                <Button
+                  variant="outline"
+                  className="w-full border-gray-700 bg-[#181F2F] text-white hover:bg-[#232B3E] transition"
+                  type="button"
+                >
+                  <FaGoogle className="mr-2 h-5 w-5 text-orange-400" />
+                  Google
+                </Button>
+              </a>
+
+              <a href="https://asyncawait-auction-project.onrender.com/api/login/facebook">
+                <Button
+                  variant="outline"
+                  className="w-full border-gray-700 bg-[#181F2F] text-white hover:bg-[#232B3E] transition"
+                  onClick={() => toast("Facebook login coming soon!")}
+                  type="button"
+                >
+                  <FaFacebookF className="mr-2 h-5 w-5 text-orange-400" />
+                  Facebook
+                </Button>
+              </a>
+
             </div>
           </form>
         </motion.div>

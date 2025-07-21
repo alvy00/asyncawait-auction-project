@@ -1,8 +1,8 @@
 import express from 'express'
 import supabase from '../../config/supabaseClient.js';
-import { type } from 'os';
+import { v4 as uuidv4 } from 'uuid';
 
-
+const REDIRECT_TO = "https://auctasync.vercel.app/auth/callback";
 const authRouter = express.Router();
 
 // Server Ping
@@ -349,5 +349,48 @@ authRouter.post('/record-win', async (req, res) => {
   }
 });
 
+// Social logins
+authRouter.post('/login/:provider', async (req, res) => {
+  const { provider } = req.params;
+  const state = uuidv4();
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: provider,
+    options: {
+      redirectTo: REDIRECT_TO,
+      scopes: 'email',
+      queryParams: { state },
+    },
+  });
+
+  if (error) {
+    return res.status(400).json({ error: error.message });
+  }
+
+  res.redirect(data.url);
+});
+
+// OAuth Callback
+authRouter.post('/oauth/callback', async (req, res) => {
+  const { access_token, refresh_token } = req.body;
+
+  if (!access_token || !refresh_token) {
+    return res.status(400).json({ message: 'Missing tokens' });
+  }
+
+  try {
+    await supabase.auth.setSession({ access_token, refresh_token });
+
+    const { data: user, error } = await supabase.auth.getUser();
+
+    if (error || !user) {
+      return res.status(401).json({ message: 'Invalid tokens', error });
+    }
+
+    return res.json({ user });
+  } catch (error) {
+    return res.status(500).json({ message: 'Server error', error });
+  }
+});
 
 export default authRouter;

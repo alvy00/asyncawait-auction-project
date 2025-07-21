@@ -114,7 +114,7 @@ const MyBidsPage = () => {
   }
 
   return (
-    <div className="p-6 min-h-screen">
+    <div className="mt-10 p-6 min-h-screen">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">My Bids</h1>

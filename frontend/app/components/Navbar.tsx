@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -180,7 +181,7 @@ export const Navbar = () => {
   };
 
   const maxWidth6xl = 72 * 16;
-  const maxWidth7xl = 80 * 16;
+  const maxWidth7xl = 78 * 16;
   useEffect(() => {
     setHasLoaded(true);
   }, []);
@@ -325,10 +326,11 @@ export const Navbar = () => {
                 </Link>
 
                 {/* Settings */}
-                <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 cursor-pointer">
-                  <Settings className="w-4 h-4" />
-                </Button>
-
+                <Link href="/dashboard/settings">
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 cursor-pointer">
+                    <Settings className="w-4 h-4" />
+                  </Button>
+                </Link>
                 
                 {/* Avatar Button */}
                 <button
@@ -428,19 +430,26 @@ export const Navbar = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1, duration: 0.4 }}
                 >
-                  <Link href="/login">
-                    <Button variant="ghost" className="text-white hover:bg-white/70 font-semibold">
+                  <Button 
+                    variant="ghost" 
+                    className="text-white hover:text-orange-400 hover:bg-[#162a3d]/50 h-9 px-4 text-sm relative group" 
+                    asChild
+                  >
+                    <Link href="/login">
+                      {/* <CiLogin className="text-sm" /> */}
                       Login
-                    </Button>
-                  </Link>
+                      <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-orange-400 to-orange-500 group-hover:w-full transition-all duration-300"></span>
+                    </Link>
+                  </Button>
                 </motion.div>
+                
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2, duration: 0.45 }}
                 >
                   <Link href="/signup">
-                    <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold shadow-lg flex items-center gap-2">
+                    <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold shadow-lg flex items-center gap-2 cursor-pointer">
                       <motion.span
                         initial={{ x: -6, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
@@ -624,13 +633,16 @@ export const Navbar = () => {
                           </Link>
 
                           {/* Settings */}
-                          <Button
-                            variant="ghost"
-                            className="flex items-center justify-start gap-2 text-white hover:bg-white/10 transition rounded-full py-2"
-                          >
-                            <Settings className="w-5 h-5" />
-                            <span className="text-sm">Settings</span>
-                          </Button>
+                          <Link href="/dashboard/settings">
+                            <Button
+                              variant="ghost"
+                              className="flex items-center justify-start gap-2 text-white hover:bg-white/10 transition rounded-full py-2"
+                            >
+                              <Settings className="w-5 h-5" />
+                              <span className="text-sm">Settings</span>
+                            </Button>
+                          </Link>
+
                         </div>
                       </div>
 
