@@ -114,7 +114,7 @@ const UpcomingAuctionsPage = () => {
                         className="text-center mb-12"
                     >
                         <motion.h1 
-                            className="mt-5 text-4xl md:text-5xl font-bold text-white mb-4"
+                            className="mt-10 text-4xl md:text-5xl font-bold text-white mb-4"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.2, duration: 0.8 }}
