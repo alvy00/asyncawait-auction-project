@@ -348,24 +348,38 @@ authRouter.post('/record-win', async (req, res) => {
 });
 
 // Social logins
-authRouter.get('/login/:provider', async (req, res) => {
+authRouter.get("/login/:provider", async (req, res) => {
   const { provider } = req.params;
-  const redirectOrigin = req.query.redirect_origin || req.headers.origin || 'https://auctasync.vercel.app';
-  const redirectTo = `${redirectOrigin}/callback`;
 
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider,
-    options: {
-      redirectTo,
-      scopes: 'email',
-    },
-  });
-
-  if (error) {
-    return res.status(400).json({ error: error.message });
+  const allowedProviders = ["google", "facebook"];
+  if (!allowedProviders.includes(provider)) {
+    return res.status(400).json({ error: "Unsupported provider" });
   }
 
-  res.redirect(data.url);
+  const redirectOrigin =
+    req.query.redirect_origin?.toString() ||
+    req.headers.origin ||
+    "https://auctasync.vercel.app";
+
+  const redirectTo = `${redirectOrigin}/auth/callback`;
+
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo,
+        scopes: "email",
+      },
+    });
+
+    if (error || !data?.url) {
+      throw new Error(error?.message || "Failed to generate OAuth URL");
+    }
+
+    res.redirect(data.url);
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Internal server error" });
+  }
 });
 
 // OAuth Callback
