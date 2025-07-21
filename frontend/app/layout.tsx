@@ -7,6 +7,7 @@ import { AnimatedBackground } from "./components/AnimatedBackground";
 import { Analytics } from '@vercel/analytics/next';
 import { UserProvider } from "../lib/user-context";
 import Chatbot from "./components/Chatbot";
+import SupabaseProvider from "../lib/supabaseProvider";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -41,12 +42,14 @@ export default function RootLayout({
         className={`${playfair.variable} ${montserrat.variable} font-sans antialiased bg-[#0a0a18]`}
       >
         <AnimatedBackground />
-        <UserProvider>
-        <AuthProvider>
-          <Toaster position='top-center'/>
-            {children}
-        </AuthProvider>
-        </UserProvider>
+          <SupabaseProvider>
+            <AuthProvider>
+              <UserProvider>
+                <Toaster position='top-center'/>
+                {children}
+              </UserProvider>
+            </AuthProvider>
+          </SupabaseProvider>
         <Chatbot />
         <Analytics />
       </body>
