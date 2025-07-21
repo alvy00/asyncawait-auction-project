@@ -288,7 +288,7 @@ const WalletPage = () => {
   }
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 relative bg-[#0f172a]">
+    <div className="mt-5 min-h-screen py-12 px-4 sm:px-6 relative bg-[#0f172a]">
       {/* Background gradients */}
       <div className="fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute top-1/4 right-1/4 w-[300px] h-[300px] bg-orange-500/10 rounded-full filter blur-[80px] animate-pulse"></div>
