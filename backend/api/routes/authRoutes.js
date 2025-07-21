@@ -1,9 +1,6 @@
 import express from 'express'
 import supabase from '../../config/supabaseClient.js';
 
-const redirectOrigin = req.query.redirect_origin || req.headers.origin || 'https://auctasync.vercel.app';
-const loginUrl = `https://asyncawait-auction-project.onrender.com/api/login/google?redirect_origin=${encodeURIComponent(redirectOrigin)}`;
-
 const authRouter = express.Router();
 
 // Server Ping
