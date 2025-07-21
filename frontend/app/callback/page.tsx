@@ -26,7 +26,6 @@ export default function AuthCallback() {
       }
 
       try {
-        // Manually exchange code for session
         const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
         if (error) {
@@ -35,9 +34,8 @@ export default function AuthCallback() {
           return;
         }
 
-        // data.session contains access_token, refresh_token etc.
         toast.success("Login successful!");
-        router.replace("/"); // Redirect to your app home or dashboard
+        router.replace("/");
       } catch (err) {
         toast.error("Unexpected error during code exchange.");
         router.replace("/login");
