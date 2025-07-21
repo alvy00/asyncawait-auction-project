@@ -352,14 +352,12 @@ authRouter.post('/record-win', async (req, res) => {
 // Social logins
 authRouter.get('/login/:provider', async (req, res) => {
   const { provider } = req.params;
-  const state = uuidv4();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: REDIRECT_TO,
+      redirectTo: `${window.location.origin}/callback`,
       scopes: 'email',
-      queryParams: { state },
     },
   });
 
