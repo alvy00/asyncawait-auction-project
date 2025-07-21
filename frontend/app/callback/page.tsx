@@ -1,50 +1,48 @@
-"use client"
+/* eslint-disable @typescript-eslint/no-unused-vars */
+"use client";
+
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { createBrowserClient } from "@supabase/ssr";
+import toast from "react-hot-toast";
 
 export default function AuthCallback() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    async function handleCallback() {
-      // Supabase OAuth returns tokens in the URL hash (after #)
-      const hash = window.location.hash;
+    const code = searchParams.get("code");
 
-      if (!hash) {
-        // No tokens? Redirect somewhere safe (like home)
-        router.replace("/");
-        return;
-      }
-
-      const params = new URLSearchParams(hash.substring(1));
-      const access_token = params.get("access_token");
-      const refresh_token = params.get("refresh_token");
-      const error = params.get("error");
-
-      if (error || !access_token || !refresh_token) {
-        // Something wrong, redirect to login or home
-        router.replace("/login");
-        return;
-      }
-
-      // Call your backend with tokens to verify and create session
-      const response = await fetch("https://asyncawait-auction-project.onrender.com/api/auth/oauth/callback", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ access_token, refresh_token }),
-      });
-
-      if (response.ok) {
-        // Optionally handle any returned token, then redirect to dashboard or home
-        router.replace("/");
-      } else {
-        // Backend error: redirect or show error
-        router.replace("/login");
-      }
+    if (!code) {
+      toast.error("Missing code in callback URL");
+      router.replace("/login");
+      return;
     }
 
-    handleCallback();
-  }, [router]);
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
 
-  return <p>Authenticating, please wait...</p>;
+    async function handleOAuth() {
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+
+      if (error) {
+        toast.error("OAuth login failed: " + error.message);
+        router.replace("/login");
+        return;
+      }
+
+      toast.success("Login successful!");
+      router.replace("/");
+    }
+
+    handleOAuth();
+  }, [searchParams, router]);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center text-white">
+      <p>Completing login...</p>
+    </div>
+  );
 }
