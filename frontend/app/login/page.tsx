@@ -32,22 +32,22 @@ export default function LoginPage() {
 
   // Safe access to window.location.origin
   const redirectOrigin = typeof window !== "undefined" ? window.location.origin : "";
-
-  const googleLoginUrl = `https://asyncawait-auction-project.onrender.com/api/login/google?redirect_origin=${encodeURIComponent(redirectOrigin)}`;
+  
   const facebookLoginUrl = `https://asyncawait-auction-project.onrender.com/api/login/facebook?redirect_origin=${encodeURIComponent(redirectOrigin)}`;
 
-  const handleGoogleLogin = async () => {
-    const redirectTo =
-      process.env.NODE_ENV === "development"
-        ? "http://localhost:3000/auth/callback"
-        : "https://auctasync.vercel.app/auth/callback";
+  const handleLogin = async () => {
+    const redirectTo = `${window.location.origin}/auth/callback`;
 
-    await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo,
       },
     });
+
+    if (error) {
+      console.error("OAuth login error:", error.message);
+    }
   };
 
   const handleSessionExpiry = () => {
@@ -293,7 +293,7 @@ export default function LoginPage() {
                   className="w-full border-gray-700 bg-[#181F2F] text-white hover:bg-[#232B3E] transition"
                   type="button"
                   disabled={isLoading}
-                  onClick={handleGoogleLogin}
+                  onClick={handleLogin}
                 >
                   <FaGoogle className="mr-2 h-5 w-5 text-orange-400" />
                   Google
