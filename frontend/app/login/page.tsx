@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -13,6 +14,8 @@ import { useAuth } from "../../lib/auth-context";
 import { getSessionToken, clearSessionToken, isSessionExpired } from "../../lib/utils";
 import { FaEnvelope, FaFacebookF, FaGoogle, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { createBrowserClient } from '@supabase/ssr';
+import { supabase } from "../../config/supabaseClient";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -24,11 +27,28 @@ export default function LoginPage() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+
+  
+
   // Safe access to window.location.origin
   const redirectOrigin = typeof window !== "undefined" ? window.location.origin : "";
 
   const googleLoginUrl = `https://asyncawait-auction-project.onrender.com/api/login/google?redirect_origin=${encodeURIComponent(redirectOrigin)}`;
   const facebookLoginUrl = `https://asyncawait-auction-project.onrender.com/api/login/facebook?redirect_origin=${encodeURIComponent(redirectOrigin)}`;
+
+  const handleGoogleLogin = async () => {
+    const redirectTo =
+      process.env.NODE_ENV === "development"
+        ? "http://localhost:3000/auth/callback"
+        : "https://auctasync.vercel.app/auth/callback";
+
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo,
+      },
+    });
+  };
 
   const handleSessionExpiry = () => {
     clearSessionToken();
@@ -268,17 +288,16 @@ export default function LoginPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <a href={googleLoginUrl} className="block w-full">
                 <Button
                   variant="outline"
                   className="w-full border-gray-700 bg-[#181F2F] text-white hover:bg-[#232B3E] transition"
                   type="button"
                   disabled={isLoading}
+                  onClick={handleGoogleLogin}
                 >
                   <FaGoogle className="mr-2 h-5 w-5 text-orange-400" />
                   Google
                 </Button>
-              </a>
 
               <a href={facebookLoginUrl} className="block w-full">
                 <Button
