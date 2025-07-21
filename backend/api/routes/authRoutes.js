@@ -1,9 +1,8 @@
 import express from 'express'
 import supabase from '../../config/supabaseClient.js';
 
-const redirectOrigin = window.location.origin;
+const redirectOrigin = req.query.redirect_origin || req.headers.origin || 'https://auctasync.vercel.app';
 const loginUrl = `https://asyncawait-auction-project.onrender.com/api/login/google?redirect_origin=${encodeURIComponent(redirectOrigin)}`;
-window.location.href = loginUrl;
 
 const authRouter = express.Router();
 
@@ -354,8 +353,7 @@ authRouter.post('/record-win', async (req, res) => {
 // Social logins
 authRouter.get('/login/:provider', async (req, res) => {
   const { provider } = req.params;
-  const redirectOrigin = req.query.redirect_origin || 'https://auctasync.vercel.app';
-
+  const redirectOrigin = req.query.redirect_origin || req.headers.origin || 'https://auctasync.vercel.app';
   const redirectTo = `${redirectOrigin}/callback`;
 
   const { data, error } = await supabase.auth.signInWithOAuth({
