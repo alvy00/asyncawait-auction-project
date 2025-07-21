@@ -3,8 +3,8 @@
 
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { createBrowserClient } from "@supabase/ssr";
 import toast from "react-hot-toast";
+import supabase from "../../../lib/supabasebrowserClient";
 
 export default function AuthCallback() {
   const router = useRouter();
@@ -18,17 +18,6 @@ export default function AuthCallback() {
       router.replace("/login");
       return;
     }
-
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    if (!supabaseUrl || !supabaseKey) {
-      toast.error("Supabase credentials are missing");
-      router.replace("/login");
-      return;
-    }
-
-    const supabase = createBrowserClient(supabaseUrl, supabaseKey);
 
     async function manualExchangeCode() {
       try {
