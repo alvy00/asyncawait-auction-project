@@ -1,8 +1,10 @@
 import express from 'express'
 import supabase from '../../config/supabaseClient.js';
-import { v4 as uuidv4 } from 'uuid';
 
-const REDIRECT_TO = "https://auctasync.vercel.app/callback";
+const redirectOrigin = window.location.origin;
+const loginUrl = `https://asyncawait-auction-project.onrender.com/api/login/google?redirect_origin=${encodeURIComponent(redirectOrigin)}`;
+window.location.href = loginUrl;
+
 const authRouter = express.Router();
 
 // Server Ping
@@ -352,11 +354,14 @@ authRouter.post('/record-win', async (req, res) => {
 // Social logins
 authRouter.get('/login/:provider', async (req, res) => {
   const { provider } = req.params;
+  const redirectOrigin = req.query.redirect_origin || 'https://auctasync.vercel.app';
+
+  const redirectTo = `${redirectOrigin}/callback`;
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${window.location.origin}/callback`,
+      redirectTo,
       scopes: 'email',
     },
   });
