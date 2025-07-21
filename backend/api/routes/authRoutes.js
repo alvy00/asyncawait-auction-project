@@ -350,12 +350,12 @@ authRouter.post('/record-win', async (req, res) => {
 });
 
 // Social logins
-authRouter.post('/login/:provider', async (req, res) => {
+authRouter.get('/login/:provider', async (req, res) => {
   const { provider } = req.params;
   const state = uuidv4();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: provider,
+    provider,
     options: {
       redirectTo: REDIRECT_TO,
       scopes: 'email',
