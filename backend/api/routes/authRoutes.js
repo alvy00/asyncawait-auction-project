@@ -10,39 +10,61 @@ authRouter.get('/ping', (req, res) => {
 
 // Get Current Logged IN User's Database Data
 authRouter.get('/getuser', async (req, res) => {
-    const authHeader = req.headers.authorization;
-  
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Missing or invalid Authorization header" });
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "Missing or invalid Authorization header" });
+  }
+
+  const token = authHeader.split(" ")[1];
+  //console.log("Authorization header:", req.headers.authorization);
+
+  try {
+    const { data: authData, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !authData?.user) {
+      console.error("Supabase auth error:", authError?.message);
+      return res.status(401).json({ message: "User not authenticated", data: authData });
     }
-  
-    const token = authHeader.split(" ")[1];
-    
-    try{
-      const { data: authData, error: authError } = await supabase.auth.getUser(token);
-      if (authError || !authData?.user) {
-        console.error("Supabase auth error:", authError?.message);
-        return res.status(401).json({ message: "User not authenticated", data: authData });
-      }
-    
-      const { data: userDatabaseData, error: dbError } = await supabase
+
+    const userId = authData.user.id;
+
+    let { data: userDatabaseData, error: dbError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (dbError && dbError.code === 'PGRST116') {
+      console.log("User not found in DB, creating new user...");
+
+      const { data: createdUser, error: insertError } = await supabase
         .from('users')
-        .select('*')
-        .eq('user_id', authData.user.id)
+        .insert({
+          user_id: userId,
+          email: authData.user.email,
+          name: authData.user.user_metadata?.full_name || authData.user.email,
+          username: authData.user.user_metadata?.full_name.toLowerCase(),
+        })
+        .select()
         .single();
-    
-      if (dbError || !userDatabaseData) {
-        console.error("Supabase DB error:", dbError?.message);
-        return res.status(404).json({ message: "User data not found", data: userDatabaseData });
+
+      if (insertError) {
+        console.error("Error creating user:", insertError);
+        return res.status(500).json({ message: "Failed to create user" });
       }
-    
-      //console.log(userDatabaseData);
-      return res.status(200).json(userDatabaseData);
-      
-    }catch(e){
-      console.error(e);
+
+      userDatabaseData = createdUser;
+    } else if (dbError) {
+      console.error("Supabase DB error:", dbError.message);
+      return res.status(500).json({ message: "Database error" });
     }
-    
+
+    return res.status(200).json(userDatabaseData);
+
+  } catch (e) {
+    console.error("Unexpected error:", e);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 });
 
 // Get User's DB Data w/ user_id
