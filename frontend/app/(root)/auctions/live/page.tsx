@@ -11,10 +11,11 @@ import { FaSpinner, FaSearch } from "react-icons/fa";
 import { motion } from "framer-motion";
 import AuctionCardPhantom from "../../../components/AuctionCardPhantom";
 import { useUser } from "../../../../lib/user-context";
-import toast from "react-hot-toast";
+import { useAuth } from "../../../../lib/auth-context";
 
 const LiveAuctionsPage = () => {
   const { user } = useUser();
+  const { loggedIn } = useAuth()
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [favAuctionIDs, setFavAuctionIDs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,47 +24,6 @@ const LiveAuctionsPage = () => {
   const [activeFilter, setActiveFilter] = useState("all");
 
   const categories = ["all", "electronics", "art", "vehicles", "fashion", "other"];
-
-  // Get User
-  // useEffect(() => {
-  //   const getUser = async () => {
-  //     const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
-  //     if (!token) {
-  //       setUser(undefined);
-  //       setFavAuctionIDs([]);
-  //       setIsFavsLoading(false);
-  //       return;
-  //     }
-
-  //     try {
-  //       const res = await fetch("https://asyncawait-auction-project.onrender.com/api/getuser", {
-  //         method: "GET",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       });
-
-  //       if (!res.ok) {
-  //         const err = await res.json();
-  //         console.error("Failed to fetch user:", err.message);
-  //         setUser(undefined);
-  //         setFavAuctionIDs([]);
-  //         setIsFavsLoading(false);
-  //         return;
-  //       }
-
-  //       const data = await res.json();
-  //       setUser(data);
-  //     } catch (e) {
-  //       console.error("Error fetching user:", e);
-  //       setUser(undefined);
-  //       setFavAuctionIDs([]);
-  //       setIsFavsLoading(false);
-  //     }
-  //   };
-  //   getUser();
-  // }, []);
 
   // Fetch All Live Auctions
   useEffect(() => {
@@ -295,6 +255,7 @@ const LiveAuctionsPage = () => {
                     auctionCreator={auction.creator}
                     isFavourited={auction.isFavorite}
                     user={user}
+                    loggedIn={loggedIn}
                   />
                 )}
                 {auction.auction_type === "blitz" && (
@@ -303,6 +264,7 @@ const LiveAuctionsPage = () => {
                     auction={auction} 
                     auctionCreator={auction.creator}
                     user={user}
+                    loggedIn={loggedIn}
                   />
                 )}
                 {auction.auction_type === "dutch" && (
@@ -311,6 +273,7 @@ const LiveAuctionsPage = () => {
                     auction={auction} 
                     auctionCreator={auction.creator}
                     user={user} 
+                    loggedIn={loggedIn}
                   />
                 )}
                 {auction.auction_type === "reverse" && (
@@ -319,6 +282,7 @@ const LiveAuctionsPage = () => {
                     auction={auction} 
                     auctionCreator={auction.creator}
                     user={user} 
+                    loggedIn={loggedIn}
                   />
                 )}
                 {auction.auction_type === "phantom" && (
@@ -327,6 +291,7 @@ const LiveAuctionsPage = () => {
                     auction={auction} 
                     auctionCreator={auction.creator}
                     user={user} 
+                    loggedIn={loggedIn}
                   />
                 )}
               </motion.div>

@@ -32,11 +32,12 @@ interface AuctionCardProps {
   auction: Auction;
   auctionCreator: string;
   user: User;
+  loggedIn: boolean;
 }
 
 const FIREY_PURPLE = "rgba(191, 85, 236, "; // vibrant purple (rgba base)
 
-const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreator, user }) => {
+const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreator, user, loggedIn }) => {
   const controls = useAnimation();
   const [isBidding, setIsBidding] = useState(false);
   const [winner, setWinner] = useState(null);
@@ -338,7 +339,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
 
       {/* Bid button area */}
       <div className="w-full mt-2 relative">
-        {!token ? (
+        {!loggedIn ? (
           <Button
             disabled
             className="w-full flex items-center justify-center gap-2 rounded-full bg-gray-800 border border-gray-700 text-gray-400 opacity-60 cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30"

@@ -4,7 +4,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   FaCheckCircle,
@@ -17,7 +16,7 @@ import { Button } from "../../../components/ui/button";
 import { useUser } from "../../../lib/user-context";
 import { Auction } from "../../../lib/interfaces";
 
-  const imageSrc = "/fallback.jpg";
+const imageSrc = "/fallback.jpg";
 
 interface Bid {
   is_highest_bidder: any;
