@@ -11,50 +11,51 @@ import PaymentMethods from "./_components/PaymentMethods";
 import NotificationSettings from "./_components/NotificationSettings";
 import SecuritySettings from "./_components/SecuritySettings";
 import DeleteAccountSection from "./_components/DeleteAccountSection";
+import { useUser } from "../../../lib/user-context";
 
 
 type TabType = "profile" | "payment" | "notifications" | "security";
 
 const SettingsPage = () => {
-  const [user, setUser] = useState<UserType>(null);
+  const { user } = useUser();
   const [activeTab, setActiveTab] = useState<TabType>("profile");
   const [isLoading, setIsLoading] = useState(false);
 
 
   // fetch User
-  useEffect(() => {
-    setIsLoading(true);
+  // useEffect(() => {
+  //   setIsLoading(true);
 
-    const getUser = async () => {
-      const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
-      if (!token) return
+  //   const getUser = async () => {
+  //     const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
+  //     if (!token) return
 
-      try {
-        const res = await fetch("https://asyncawait-auction-project.onrender.com/api/getuser", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+  //     try {
+  //       const res = await fetch("https://asyncawait-auction-project.onrender.com/api/getuser", {
+  //         method: "GET",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       });
 
-        if (!res.ok) {
-          const err = await res.json();
-          console.error("Failed to fetch user:", err.message);
-          setUser(undefined);
-          return;
-        }
+  //       if (!res.ok) {
+  //         const err = await res.json();
+  //         console.error("Failed to fetch user:", err.message);
+  //         setUser(undefined);
+  //         return;
+  //       }
 
-        const data = await res.json();
-        setUser(data);
-        setIsLoading(false);
-      } catch (e) {
-        console.error("Error fetching user:", e);
-        setUser(undefined);
-      }
-    };
-    getUser();
-  }, []);
+  //       const data = await res.json();
+  //       setUser(data);
+  //       setIsLoading(false);
+  //     } catch (e) {
+  //       console.error("Error fetching user:", e);
+  //       setUser(undefined);
+  //     }
+  //   };
+  //   getUser();
+  // }, []);
 
   // Simulate loading effect
   useState(() => {

@@ -32,11 +32,12 @@ interface AuctionCardProps {
   auction: Auction;
   auctionCreator: string;
   user: User;
+  loggedIn: boolean;
 }
 
 const FIREY_ORANGE = "#FF4500"; // Firey Orange (OrangeRed)
 
-const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreator, user }) => {
+const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreator, user, loggedIn }) => {
   const controls = useAnimation();
   const [winner, setWinner] = useState(null);
   const [isBidding, setIsBidding] = useState(false);
@@ -342,7 +343,7 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
 
       {/* Bid Now Area with Transition */}
       <div className="w-full mt-2 relative">
-        {!token ? (
+        {!loggedIn ? (
           <Button
             disabled
             className="w-full flex items-center justify-center gap-2 rounded-full bg-gray-900 border border-gray-700 text-gray-500 opacity-60 cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-700/50"

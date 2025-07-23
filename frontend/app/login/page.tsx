@@ -11,14 +11,13 @@ import { Checkbox } from "../../components/ui/checkbox";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useAuth } from "../../lib/auth-context";
-import { getSessionToken, clearSessionToken, isSessionExpired } from "../../lib/utils";
+import { getSessionToken, clearSessionToken, isSessionExpired, setSessionToken } from "../../lib/utils";
 import { FaEnvelope, FaFacebookF, FaGoogle, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { motion } from "framer-motion";
-import { createBrowserClient } from '@supabase/ssr';
 import { supabase } from "../../config/supabaseClient";
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, loggedIn, user } = useAuth();
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -27,18 +26,14 @@ export default function LoginPage() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-
-  
-
-  // Safe access to window.location.origin
   const redirectOrigin = typeof window !== "undefined" ? window.location.origin : "";
   
   const facebookLoginUrl = `https://asyncawait-auction-project.onrender.com/api/login/facebook?redirect_origin=${encodeURIComponent(redirectOrigin)}`;
 
   const handleLogin = async () => {
-    const redirectTo = `${window.location.origin}/auth/callback`;
+    const redirectTo = `https://auctasync.vercel.app/auth/callback`;
 
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo,
@@ -47,6 +42,7 @@ export default function LoginPage() {
 
     if (error) {
       console.error("OAuth login error:", error.message);
+      toast.error("Failed to start login: " + error.message);
     }
   };
 
@@ -56,23 +52,39 @@ export default function LoginPage() {
     toast.error("Session expired. Please log in again.");
   };
 
+  // session verification
   useEffect(() => {
-    try {
-      const token = getSessionToken();
-      const expired = isSessionExpired();
+    async function verifySession() {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        const session = data?.session;
 
-      if (!token || expired) {
+        if (error || !session) {
+          clearSessionToken();
+          setCheckingAuth(false);
+          return;
+        }
+
+        const expiresAtMs = session.expires_at ? session.expires_at * 1000 : 0;
+        const expired = Date.now() >= expiresAtMs;
+
+        if (expired) {
+          clearSessionToken();
+          setCheckingAuth(false);
+        } else {
+          router.push("/");
+        }
+      } catch (err) {
+        console.error("Error verifying session:", err);
         clearSessionToken();
         setCheckingAuth(false);
-      } else {
-        router.push("/");
       }
-    } catch (err) {
-      console.error("Storage access error:", err);
-      setCheckingAuth(false);
     }
+
+    verifySession();
   }, [router]);
 
+  // prefetch auction pages
   useEffect(() => {
     router.prefetch("/auctions/all");
     router.prefetch("/auctions/upcoming");
@@ -121,33 +133,23 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const data = new FormData(e.currentTarget);
-      const body = {
-        email: data.get("email"),
-        password: data.get("password"),
-      };
+      const formData = new FormData(e.currentTarget);
+      const email = formData.get("email")?.toString().trim() || "";
+      const password = formData.get("password")?.toString() || "";
 
-      const res = await fetch("https://asyncawait-auction-project.onrender.com/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      const result = await res.json();
-
-      if (!res.ok) {
-        toast.error(result?.message || "Login failed. Please check your credentials.");
+      if (!email || !password) {
+        toast.error("Please fill in all required fields.");
         return;
       }
 
-      if (result.token) {
-        login(result.token, rememberMe);
-        window.dispatchEvent(new Event("authChange"));
-        toast.success("Login successful!");
+      await login(email, password, rememberMe);
+      toast.success("Logged In!");
+      if (loggedIn && user) {
         router.push("/");
       }
-    } catch {
-      toast.error("Something went wrong. Please try again.");
+    } catch (err) {
+      console.error("Login failed:", err);
+      toast.error("Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }

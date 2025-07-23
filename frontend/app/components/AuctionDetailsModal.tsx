@@ -82,7 +82,7 @@ export default function AuctionDetailsModal({ open, onClose, auction }: AuctionD
 
         const data = await res.json();
         setTopBids(data);
-        console.log(data)
+        //console.log(data)
       } catch (e) {
         console.error('Failed to fetch top bids:', e);
       }
