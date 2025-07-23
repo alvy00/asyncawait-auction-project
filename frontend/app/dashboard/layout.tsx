@@ -119,9 +119,9 @@ export default function DashboardLayout({
       {/* CHANGED: This wrapper takes the remaining space and handles its own vertical scrolling */}
       <div className="flex-1 flex flex-col overflow-y-auto">
         {/* The Navbar from your original code now acts as a sticky header for the content */}
-        <header className="w-full z-10 sticky top-0">
+        {/* <header className="w-full z-10 sticky top-0">
           <Navbar />
-        </header>
+        </header> */}
 
         {/* Main content - flex-1 to push footer down */}
         <main className="flex-1">

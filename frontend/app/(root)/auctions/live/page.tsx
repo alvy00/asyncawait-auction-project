@@ -15,7 +15,7 @@ import { useAuth } from "../../../../lib/auth-context";
 
 const LiveAuctionsPage = () => {
   const { user } = useUser();
-  const { loggedIn } = useAuth()
+  const { loggedIn, isReady } = useAuth()
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [favAuctionIDs, setFavAuctionIDs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -134,6 +134,7 @@ const LiveAuctionsPage = () => {
     },
   };
 
+  if(!isReady) return;
   return (
     <section className="py-16 min-h-screen relative overflow-hidden">
       {/* Background Effects */}

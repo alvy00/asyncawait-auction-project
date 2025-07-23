@@ -254,14 +254,16 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator,
   >
     {/* Image container */}
     <div className={`${cardImageContainer} cursor-pointer rounded-t-2xl overflow-hidden`}>
-      <Image
-        src={imageSrc}
-        alt={auction.item_name}
-        fill
-        className={`object-cover ${cardImage}`}
-        priority
-        onClick={() => setDetailsOpen(true)}
-      />
+      <div className={`${cardImageContainer} cursor-pointer rounded-t-2xl overflow-hidden group relative`}>
+        <Image
+          src={imageSrc}
+          alt={auction.item_name}
+          fill
+          className={`object-cover transition-transform duration-500 ease-in-out group-hover:scale-105 ${cardImage}`}
+          priority
+          onClick={() => setDetailsOpen(true)}
+        />
+      </div>
       <div className={cardStatusBadge}>
         <StatusBadge type="blitz" status={auction.status} auctionId={auction.auction_id} participantCount={participants} />
       </div>

@@ -20,7 +20,7 @@ import { useUser } from "../../lib/user-context"
 export const Navbar = () => {
   const { user, refetchIndex, isLoading } = useUser()
   const [isScrolled, setIsScrolled] = useState(false)
-  const { loggedIn, logout } = useAuth();
+  const { loggedIn, logout, isReady } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [auctionsDropdownOpen, setAuctionsDropdownOpen] = useState(false)
   const [mobileAuctionsOpen, setMobileAuctionsOpen] = useState(false)
@@ -157,6 +157,7 @@ export const Navbar = () => {
     setHasLoaded(true);
   }, []);
 
+  if (!isReady) return null;
 
   return (
     <>
@@ -275,7 +276,7 @@ export const Navbar = () => {
                 <div className="w-8 h-8 rounded-full bg-white/10" />
                 <div className="w-8 h-8 rounded-full bg-white/10" />
               </div>
-            ) : loggedIn ? (
+            ) : isReady && loggedIn && user ? (
               // Authenticated user
               <motion.div
                 ref={avatarDropdownRef}
@@ -568,7 +569,7 @@ export const Navbar = () => {
 
                 {/* Actions */}
                 <div className="p-6 border-t border-white/10 space-y-3">
-                  {loggedIn ? (
+                  {isReady && loggedIn && user ? (
                     <div className="space-y-3">
                       <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center text-white font-semibold">

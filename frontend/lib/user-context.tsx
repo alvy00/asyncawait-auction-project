@@ -10,6 +10,7 @@ import {
 import supabase from "../lib/supabasebrowserClient";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { User } from "../lib/interfaces";
+import { useAuth } from "./auth-context";
 
 interface UserContextType {
   user: User | null;
@@ -23,68 +24,85 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
+  const { isReady } = useAuth();
   const [user, setUser] = useState<User | null>(null);
   const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [refetchIndex, setRefetchIndex] = useState(0);
 
   const refreshUser = useCallback(async () => {
+    if (!isReady) return;
     setIsLoading(true);
     try {
+      // Get current session
       const { data: sessionData, error } = await supabase.auth.getSession();
       const session = sessionData?.session;
 
-      if (error || !session || !session.access_token || !session.user) {
-        console.warn("🔒 No valid session found.");
+      if (error) {
+        console.warn("🔒 Supabase session error:", error.message);
         setUser(null);
         setSupabaseUser(null);
         return;
       }
 
-      const token = session.access_token;
-      const supaUser = session.user;
-      setSupabaseUser(supaUser);
+      // If no valid session or user, clear state & bail
+      if (!session || !session.access_token || !session.user) {
+        console.warn("🔒 No valid session or user found.");
+        setUser(null);
+        setSupabaseUser(null);
+        return;
+      }
 
-      const response = await fetch("https://asyncawait-auction-project.onrender.com/api/getuser", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      // Save Supabase user
+      setSupabaseUser(session.user);
+
+      // Fetch your app user from backend using Supabase JWT token
+      const response = await fetch(
+        "https://asyncawait-auction-project.onrender.com/api/getuser",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
-        console.error("❌ Error fetching app user:", await response.text());
+        const errorText = await response.text();
+        console.error("❌ Error fetching app user:", errorText);
         setUser(null);
       } else {
         const userData = await response.json();
         setUser(userData);
-        console.log(" App user loaded:", userData);
+        console.log("✅ App user loaded:", userData);
       }
     } catch (err) {
-      console.error(" Failed to fetch user:", err);
+      console.error("❌ Failed to fetch app user:", err);
       setUser(null);
     } finally {
       setIsLoading(false);
       setRefetchIndex((i) => i + 1);
     }
-  }, []);
+  }, [isReady]); // <---- added isReady here
 
+  // Run on mount and when refetchIndex changes, only if isReady is true
   useEffect(() => {
+    if (!isReady) return; // wait for auth context to be ready
     refreshUser();
 
+    // Subscribe to Supabase auth changes to refresh user accordingly
     const { data: listener } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log(" Auth state changed (UserProvider):", event);
+        console.log("🔄 Auth state changed (UserProvider):", event);
 
         if (session?.access_token && session.user) {
           setSupabaseUser(session.user);
-          refreshUser(); // Triggers backend user fetch
+          refreshUser(); // refetch app user on login/state change
         } else {
           setSupabaseUser(null);
           setUser(null);
         }
-
         setRefetchIndex((i) => i + 1);
       }
     );
@@ -92,7 +110,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       listener?.subscription?.unsubscribe();
     };
-  }, [refreshUser]);
+  }, [refreshUser, isReady]); // <---- added isReady here
 
   return (
     <UserContext.Provider
@@ -112,7 +130,6 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useUser = (): UserContextType => {
   const context = useContext(UserContext);
-  if (!context)
-    throw new Error("useUser must be used within a UserProvider");
+  if (!context) throw new Error("useUser must be used within a UserProvider");
   return context;
 };

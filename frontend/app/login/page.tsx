@@ -11,13 +11,25 @@ import { Checkbox } from "../../components/ui/checkbox";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useAuth } from "../../lib/auth-context";
-import { getSessionToken, clearSessionToken, isSessionExpired, setSessionToken } from "../../lib/utils";
-import { FaEnvelope, FaFacebookF, FaGoogle, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import {
+  getSessionToken,
+  clearSessionToken,
+  isSessionExpired,
+  setSessionToken,
+} from "../../lib/utils";
+import {
+  FaEnvelope,
+  FaFacebookF,
+  FaGoogle,
+  FaLock,
+  FaEye,
+  FaEyeSlash,
+} from "react-icons/fa";
 import { motion } from "framer-motion";
 import { supabase } from "../../config/supabaseClient";
 
 export default function LoginPage() {
-  const { login, loggedIn, user } = useAuth();
+  const { login, loggedIn, user, isReady } = useAuth();
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -26,9 +38,12 @@ export default function LoginPage() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const redirectOrigin = typeof window !== "undefined" ? window.location.origin : "";
-  
-  const facebookLoginUrl = `https://asyncawait-auction-project.onrender.com/api/login/facebook?redirect_origin=${encodeURIComponent(redirectOrigin)}`;
+  const redirectOrigin =
+    typeof window !== "undefined" ? window.location.origin : "";
+
+  const facebookLoginUrl = `https://asyncawait-auction-project.onrender.com/api/login/facebook?redirect_origin=${encodeURIComponent(
+    redirectOrigin
+  )}`;
 
   const handleLogin = async () => {
     const redirectTo = `${window.location.origin}/auth/callback`;
@@ -84,6 +99,13 @@ export default function LoginPage() {
     verifySession();
   }, [router]);
 
+  // redirect if already logged in
+  useEffect(() => {
+    if (isReady && loggedIn && user) {
+      router.push("/");
+    }
+  }, [isReady, loggedIn, user]);
+
   // prefetch auction pages
   useEffect(() => {
     router.prefetch("/auctions/all");
@@ -126,7 +148,7 @@ export default function LoginPage() {
     }
   }, [showLogoutModal]);
 
-  if (checkingAuth) return null;
+  if (!isReady || checkingAuth) return null;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -144,9 +166,6 @@ export default function LoginPage() {
 
       await login(email, password, rememberMe);
       toast.success("Logged In!");
-      if (loggedIn && user) {
-        router.push("/");
-      }
     } catch (err) {
       console.error("Login failed:", err);
       toast.error("Login failed. Please try again.");
@@ -157,13 +176,13 @@ export default function LoginPage() {
 
   return (
     <>
-      {/* Animated Gradient Background */}
+      {/* Animated Background */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-32 -left-32 w-[600px] h-[600px] bg-gradient-to-br from-orange-500 via-purple-600 to-blue-500 rounded-full filter blur-[120px] opacity-40 animate-pulse-slow" />
         <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-gradient-to-tr from-blue-500 via-orange-400 to-purple-500 rounded-full filter blur-[100px] opacity-30 animate-float" />
       </div>
 
-      {/* Centered Login Card */}
+      {/* Login Form */}
       <div className="min-h-screen flex items-center justify-center px-4 py-12 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -185,10 +204,8 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="w-full space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-300">
-                Email
-              </Label>
-              <div className="flex items-center bg-[#181F2F] border border-gray-700 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-orange-500 transition">
+              <Label htmlFor="email" className="text-gray-300">Email</Label>
+              <div className="flex items-center bg-[#181F2F] border border-gray-700 rounded-xl px-3 py-2">
                 <FaEnvelope className="text-orange-400 mr-3" />
                 <Input
                   id="email"
@@ -197,22 +214,19 @@ export default function LoginPage() {
                   placeholder="name@example.com"
                   required
                   autoFocus
-                  className="w-full bg-transparent border-0 text-white focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500"
+                  className="w-full bg-transparent border-0 text-white"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <Label htmlFor="password" className="text-gray-300">
-                  Password
-                </Label>
+                <Label htmlFor="password" className="text-gray-300">Password</Label>
                 <Link href="/forgot-password" className="text-sm text-orange-400 hover:text-orange-300">
                   Forgot password?
                 </Link>
               </div>
-
-              <div className="flex items-center bg-[#181F2F] border border-gray-700 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-orange-500 transition">
+              <div className="flex items-center bg-[#181F2F] border border-gray-700 rounded-xl px-3 py-2">
                 <FaLock className="text-orange-400 mr-3" />
                 <Input
                   id="password"
@@ -220,14 +234,13 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   required
-                  className="w-full bg-transparent border-0 text-white focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500"
+                  className="w-full bg-transparent border-0 text-white"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="ml-3 text-gray-500 hover:text-orange-400 focus:outline-none"
+                  className="ml-3 text-gray-500 hover:text-orange-400"
                   tabIndex={-1}
-                  aria-label="Toggle password visibility"
                 >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
@@ -248,21 +261,14 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-lg py-3 rounded-xl shadow-lg transition-all duration-300"
+              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-lg py-3 rounded-xl shadow-lg"
               disabled={isLoading}
             >
               {isLoading ? (
                 <div className="flex items-center justify-center">
-                  <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" viewBox="0 0 24 24" fill="none">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
+                    <path className="opacity-75" fill="currentColor"
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     />
                   </svg>
@@ -290,21 +296,21 @@ export default function LoginPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-                <Button
-                  variant="outline"
-                  className="w-full border-gray-700 bg-[#181F2F] text-white hover:bg-[#232B3E] transition"
-                  type="button"
-                  disabled={isLoading}
-                  onClick={handleLogin}
-                >
-                  <FaGoogle className="mr-2 h-5 w-5 text-orange-400" />
-                  Google
-                </Button>
+              <Button
+                variant="outline"
+                className="w-full border-gray-700 bg-[#181F2F] text-white hover:bg-[#232B3E]"
+                type="button"
+                disabled={isLoading}
+                onClick={handleLogin}
+              >
+                <FaGoogle className="mr-2 h-5 w-5 text-orange-400" />
+                Google
+              </Button>
 
               <a href={facebookLoginUrl} className="block w-full">
                 <Button
                   variant="outline"
-                  className="w-full border-gray-700 bg-[#181F2F] text-white hover:bg-[#232B3E] transition"
+                  className="w-full border-gray-700 bg-[#181F2F] text-white hover:bg-[#232B3E]"
                   onClick={() => toast("Facebook login coming soon!")}
                   type="button"
                   disabled={isLoading}
@@ -336,17 +342,28 @@ export default function LoginPage() {
         </div>
       )}
 
-      {/* Custom Animations */}
       <style jsx global>{`
         @keyframes float {
-          0% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
-          100% { transform: translateY(0px); }
+          0% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-20px);
+          }
+          100% {
+            transform: translateY(0px);
+          }
         }
         @keyframes pulse-slow {
-          0% { opacity: 0.5; }
-          50% { opacity: 0.7; }
-          100% { opacity: 0.5; }
+          0% {
+            opacity: 0.5;
+          }
+          50% {
+            opacity: 0.7;
+          }
+          100% {
+            opacity: 0.5;
+          }
         }
         .animate-float {
           animation: float 8s ease-in-out infinite;

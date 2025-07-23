@@ -9,6 +9,7 @@ import Image from "next/image";
 import { FaTag, FaBoxes, FaDollarSign, FaGavel, FaCalendarAlt, FaRegClock, FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { Tooltip, TooltipTrigger, TooltipContent } from "../../components/ui/tooltip";
+import { useRouter } from "next/navigation";
 
 interface AuctionDetailsModalProps {
   open: boolean;
@@ -64,6 +65,8 @@ const getAuctionTypeGradient = (type?: string) => {
 export default function AuctionDetailsModal({ open, onClose, auction }: AuctionDetailsModalProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [ topBids, setTopBids] = useState([]);
+
+  const router = useRouter();
   const images = auction.images || [];
 
   // get top bids
@@ -92,6 +95,11 @@ export default function AuctionDetailsModal({ open, onClose, auction }: AuctionD
       getTopBids();
     }
   }, [auction?.auction_id]);
+
+  const handleViewFullDetails = () => {
+    onClose();
+    router.push(`/auctions/${auction.auction_id}`);
+  };
 
   if (!auction) return null;
 
@@ -271,8 +279,23 @@ export default function AuctionDetailsModal({ open, onClose, auction }: AuctionD
                 <hr className="border-t border-white/15 mb-2" />
               </div>
             }
-
           </div>
+        </motion.div>
+
+        {/* Floating "View Full Details" button */}
+        <motion.div
+          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 20, scale: 0.95 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20"
+        >
+          <button
+            onClick={handleViewFullDetails}
+            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg font-semibold transition cursor-pointer"
+          >
+            View Full Details
+          </button>
         </motion.div>
 
         {/* Custom Scrollbar Styling */}
