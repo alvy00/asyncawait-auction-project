@@ -6,10 +6,11 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Auction } from "../../lib/interfaces";
 import Image from "next/image";
-import { FaTag, FaBoxes, FaDollarSign, FaGavel, FaCalendarAlt, FaRegClock, FaArrowRight, FaArrowLeft } from "react-icons/fa";
+import { FaTag, FaBoxes, FaDollarSign, FaGavel, FaCalendarAlt, FaRegClock, FaArrowRight, FaArrowLeft, FaBullhorn, FaShareAlt } from "react-icons/fa";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { Tooltip, TooltipTrigger, TooltipContent } from "../../components/ui/tooltip";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 interface AuctionDetailsModalProps {
   open: boolean;
@@ -95,6 +96,31 @@ export default function AuctionDetailsModal({ open, onClose, auction }: AuctionD
       getTopBids();
     }
   }, [auction?.auction_id]);
+
+  // handle share
+  const handleShare = async () => {
+    const url = `${window.location.origin}/auctions/${auction.auction_id}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: auction.item_name,
+          text: `Check out this auction: ${auction.item_name}`,
+          url,
+        });
+        toast.success("Shared successfully!");
+      } catch (error) {
+        toast.error("Sharing failed or canceled.");
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+        toast.success("Auction URL copied to clipboard!");
+      } catch {
+        toast.error("Failed to copy URL.");
+      }
+    }
+  };
 
   const handleViewFullDetails = () => {
     onClose();
@@ -282,20 +308,33 @@ export default function AuctionDetailsModal({ open, onClose, auction }: AuctionD
           </div>
         </motion.div>
 
-        {/* Floating "View Full Details" button */}
+        {/* Floating "View Full Details" and "Share" button */}
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.95 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
-          className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20"
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-3"
         >
-          <button
+          <motion.button
+            whileHover={{ scale: 1.1, transition: { duration: 0.15, ease: "easeInOut" } }}
+            whileTap={{ scale: 0.95, transition: { duration: 0.1 } }}
             onClick={handleViewFullDetails}
-            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg font-semibold transition cursor-pointer"
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg font-semibold text-base transition-colors duration-150 cursor-pointer flex items-center justify-center"
           >
-            View Full Details
-          </button>
+            View Details
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.1, transition: { duration: 0.15, ease: "easeInOut" } }}
+            whileTap={{ scale: 0.95, transition: { duration: 0.1 } }}
+            onClick={handleShare}
+            aria-label="Share auction"
+            className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full shadow-lg font-semibold text-base transition-colors duration-150 cursor-pointer flex items-center gap-1"
+          >
+            Share
+            <FaShareAlt className="w-4 h-4" />
+          </motion.button>
         </motion.div>
 
         {/* Custom Scrollbar Styling */}

@@ -3,14 +3,20 @@
 
 import { useEffect, useState } from "react";
 import { useUser } from "../../../../lib/user-context";
-import AuctionCard from "../../../components/AuctionCard";
 import { Auction, User } from "../../../../lib/interfaces";
 import toast from "react-hot-toast";
 import { motion } from "framer-motion";
 import { FaHeartBroken } from "react-icons/fa";
+import { useAuth } from "../../../../lib/auth-context";
+import AuctionCard from "../../../components/AuctionCard";
+import AuctionCardBlitz from "../../../components/AuctionCardBlitz";
+import AuctionCardDutch from "../../../components/AuctionCardDutch";
+import AuctionCardReverse from "../../../components/AuctionCardReverse";
+import AuctionCardPhantom from "../../../components/AuctionCardPhantom";
 
 const FavouritesPage = () => {
   const { user } = useUser();
+  const { loggedIn } = useAuth();
   const [favAuctionIds, setFavAuctionIds] = useState<string[]>([]);
   const [favAuctions, setFavAuctions] = useState<Auction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,14 +113,14 @@ const FavouritesPage = () => {
   }, [favAuctionIds]);
 
   return (
-    <section className="py-16 min-h-screen">
+    <section className="pt-25 py-16 min-h-screen">
       <div className="container mx-auto px-4">
         <motion.h1
           className="text-4xl font-bold text-white mb-8 text-center"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          Your Favourite Auctions
+          Your Favourited Auctions
         </motion.h1>
 
         {loading ? (
@@ -145,12 +151,52 @@ const FavouritesPage = () => {
                   show: { opacity: 1, y: 0 },
                 }}
               >
-                <AuctionCard
-                  auction={auction}
-                  auctionCreator={auction.creator}
-                  isFavourited={true}
-                  user={user}
-                />
+                {auction.auction_type === "classic" && (
+                  <AuctionCard
+                    key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
+                    auction={auction}
+                    auctionCreator={auction.creator}
+                    isFavourited={auction.isFavorite}
+                    user={user}
+                    loggedIn={loggedIn}
+                  />
+                )}
+                {auction.auction_type === "blitz" && (
+                  <AuctionCardBlitz 
+                    key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
+                    auction={auction} 
+                    auctionCreator={auction.creator}
+                    user={user}
+                    loggedIn={loggedIn}
+                  />
+                )}
+                {auction.auction_type === "dutch" && (
+                  <AuctionCardDutch 
+                    key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
+                    auction={auction} 
+                    auctionCreator={auction.creator}
+                    user={user} 
+                    loggedIn={loggedIn}
+                  />
+                )}
+                {auction.auction_type === "reverse" && (
+                  <AuctionCardReverse 
+                    key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
+                    auction={auction} 
+                    auctionCreator={auction.creator}
+                    user={user} 
+                    loggedIn={loggedIn}
+                  />
+                )}
+                {auction.auction_type === "phantom" && (
+                  <AuctionCardPhantom 
+                    key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
+                    auction={auction} 
+                    auctionCreator={auction.creator}
+                    user={user} 
+                    loggedIn={loggedIn}
+                  />
+                )}
               </motion.div>
             ))}
           </motion.div>
