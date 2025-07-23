@@ -232,7 +232,7 @@ export function AuctionTypesSection() {
               transition={{ duration: 0.5 }}
               className={`rounded-3xl p-0 md:p-2 shadow-2xl border border-white/10 bg-gradient-to-br ${activeType.accent} backdrop-blur-xl relative overflow-hidden`}
             >
-              <div className="absolute -inset-1 bg-gradient-to-tr from-orange-500/10 via-purple-500/5 to-blue-500/10 opacity-30 pointer-events-none" />
+              {/* <div className="absolute -inset-1 bg-gradient-to-tr from-orange-500/10 via-purple-500/5 to-blue-500/10 opacity-30 pointer-events-none" /> */}
               <div className="relative z-10 flex flex-col md:flex-row gap-0 md:gap-0 items-stretch">
                 {/* Left: Icon, animation, feature badges */}
                 <div className="flex flex-col items-center justify-center md:w-1/3 bg-white/5 bg-opacity-10 rounded-l-3xl p-8 md:p-12 border-r border-white/10 min-h-[400px]">

@@ -2,8 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { a } from 'framer-motion/dist/types.d-DDSxwf0n';
-import { Avatar } from '@radix-ui/react-avatar';
+import { Quote } from 'lucide-react';
 
 const testimonials = [
   {
@@ -14,7 +13,7 @@ const testimonials = [
     rating: 5,
     initials: "WB",
     bgColor: "#f0e68c",
-    avatar: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D"
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face&auto=format&q=80"
   },
   {
     id: 2,
@@ -24,17 +23,17 @@ const testimonials = [
     rating: 5,
     initials: "JM",
     bgColor: "#add8e6",
-    avatar: "https://images.unsplash.com/photo-1546961329-78bef0414d7c?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fHVzZXJ8ZW58MHx8MHx8fDA%3D"
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face&auto=format&q=80"
   },
   {
     id: 3,
     content: "The UI is clean and intuitive. Got my MacBook through an exciting auction. Loved the experience!",
-    author: "Carlos",
+    author: "Carlos Rodriguez",
     location: "Spain",
     rating: 4,
     initials: "CA",
     bgColor: "#e6e6fa",
-    avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fHVzZXJ8ZW58MHx8MHx8fDA%3D"
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face&auto=format&q=80"
   },
   {
     id: 4,
@@ -44,7 +43,7 @@ const testimonials = [
     rating: 5,
     initials: "ET",
     bgColor: "#ffc0cb",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D"
+    avatar: "https://plus.unsplash.com/premium_photo-1658527049634-15142565537a?q=80&w=688&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
   },
   {
     id: 5,
@@ -54,7 +53,7 @@ const testimonials = [
     rating: 4.5,
     initials: "HT",
     bgColor: "#98fb98",
-    avatar: "https://plus.unsplash.com/premium_photo-1664541336896-b3d5f7dec9a3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fHVzZXJ8ZW58MHx8MHx8fDA%3D"
+    avatar: "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=150&h=150&fit=crop&crop=face&auto=format&q=80"
   },
   {
     id: 6,
@@ -64,7 +63,7 @@ const testimonials = [
     rating: 5,
     initials: "SL",
     bgColor: "#ffb6c1",
-    avatar: "https://images.unsplash.com/photo-1530268729831-4b0b9e170218?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzJ8fHVzZXJ8ZW58MHx8MHx8fDA%3D"
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face&auto=format&q=80"
   },
 ];
 
@@ -104,8 +103,8 @@ const TestimonialsSection = () => {
           <svg key={i} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4">
             <defs>
               <linearGradient id={`halfStar-${i}`}>
-                <stop offset="50%" stopColor="#FFA500" />
-                <stop offset="50%" stopColor="#e5e7eb" />
+                <stop offset="50%" stopColor="#F59E0B" />
+                <stop offset="50%" stopColor="#E5E7EB" />
               </linearGradient>
             </defs>
             <path 
@@ -123,7 +122,7 @@ const TestimonialsSection = () => {
           key={i} 
           xmlns="http://www.w3.org/2000/svg" 
           viewBox="0 0 24 24" 
-          fill={i < rating ? "#FFA500" : "#e5e7eb"} 
+          fill={i < rating ? "#F59E0B" : "#374151"} 
           className="w-4 h-4"
         >
           <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
@@ -139,11 +138,26 @@ const TestimonialsSection = () => {
   };
   
   return (
-    <section className="py-16 bg-[#0a0a18] relative overflow-hidden">
+    <section className="py-16 relative overflow-hidden">
+      {/* Add consistent background */}
+      {/* <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0f1419] via-[#1a202c] to-[#2d3748]" />
+        <div className="absolute top-[10%] left-[-15%] w-[400px] h-[400px] bg-purple-500/8 rounded-full blur-[120px] animate-float" />
+        <div className="absolute bottom-[10%] right-[-15%] w-[350px] h-[350px] bg-orange-500/10 rounded-full blur-[100px] animate-pulse-slow" />
+        <div className="absolute top-[60%] left-[70%] w-[200px] h-[200px] bg-blue-500/8 rounded-full blur-[80px] animate-float-delayed" />
+      </div> */}
+
       <div className="container mx-auto px-4 relative z-10">
         {/* Header with left-aligned title and right-aligned navigation */}
         <div className="flex justify-center items-center mb-16">
-          <h2 className="text-3xl font-bold text-white text-center">What Our Clients Say?</h2>
+          <motion.h2 
+            className="text-3xl md:text-4xl lg:text-6xl font-bold text-white text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            What Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600">Clients</span> Say?
+          </motion.h2>
         </div>
         
         <div className="relative max-w-6xl mx-auto">
@@ -170,45 +184,72 @@ const TestimonialsSection = () => {
                 transition={{ duration: 0.5 }}
                 className="flex justify-center gap-6 md:gap-8"
               >
-                {getVisibleTestimonials().map((testimonial) => (
-                  <div
+                {getVisibleTestimonials().map((testimonial, index) => (
+                  <motion.div
                     key={testimonial.id}
                     className="relative flex-shrink-0 w-full max-w-xs z-20 mt-12"
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
                   >
                     {/* Avatar - positioned to be half over the card and half outside */}
-                    <div className="absolute left-1/2 -translate-x-1/2 -top-10 z-20">
-                      {/* <div 
-                        className="w-20 h-20 rounded-full overflow-hidden border-2 border-white shadow-lg flex items-center justify-center text-xl font-bold"
-                        style={{ backgroundColor: testimonial.bgColor }}
-                      >
-                        {testimonial.initials}
-                      </div> */}
-                      <Image src={testimonial.avatar} alt={testimonial.author} width={80} height={80} className="w-20 h-20 rounded-full overflow-hidden border-2 border-white shadow-lg" />
+                    <div className="absolute left-1/2 -translate-x-1/2 -top-1 z-20">
+                      <div className="relative">
+                        <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white/20 shadow-2xl bg-gradient-to-br from-orange-400/20 to-purple-600/20 backdrop-blur-sm">
+                          <Image 
+                            src={testimonial.avatar} 
+                            alt={testimonial.author} 
+                            width={96} 
+                            height={96} 
+                            className="w-full h-full object-cover rounded-full hover:scale-110 transition-transform duration-300" 
+                          />
+                        </div>
+                        {/* Glow effect */}
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-400/30 to-purple-600/30 blur-xl -z-10"></div>
+                      </div>
                     </div>
                     
                     {/* Card content */}
-                    <div className="bg-[#0f1729] rounded-xl overflow-hidden shadow-lg pt-14 pb-6 px-6 mt-10">
+                    <div className="relative bg-gradient-to-br from-[#1a2332]/80 to-[#0f1729]/80 backdrop-blur-xl rounded-2xl overflow-hidden shadow-2xl pt-16 pb-8 px-8 mt-12 border border-white/10 hover:border-orange-400/30 transition-all duration-300 group">
+                      {/* Background decoration */}
+                      <div className="absolute top-4 right-4 opacity-20 group-hover:opacity-30 transition-opacity duration-300">
+                        <Quote className="w-8 h-8 text-orange-400" />
+                      </div>
+                      
+                      {/* Subtle gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      
                       {/* Name and location */}
-                      <div className="text-center mb-3">
-                        <h3 className="text-white text-lg font-semibold">{testimonial.author}, {testimonial.location}</h3>
-                        <div className="flex justify-center mt-1 mb-3">
+                      <div className="text-center mb-4 relative z-10">
+                        <h3 className="text-white text-lg font-semibold mb-1">
+                          {testimonial.author}
+                        </h3>
+                        <p className="text-orange-400/80 text-sm font-medium">
+                          {testimonial.location}
+                        </p>
+                        <div className="flex justify-center mt-2 mb-4">
                           {renderStars(testimonial.rating)}
                         </div>
                       </div>
                       
                       {/* Testimonial content */}
-                      <p className="text-white text-center text-sm">
-                        {testimonial.content}
-                      </p>
+                      <div className="relative z-10">
+                        <p className="text-gray-300 text-center text-sm leading-relaxed">
+                          "{testimonial.content}"
+                        </p>
+                      </div>
+
+                      {/* Bottom accent line */}
+                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-orange-400 to-purple-600 rounded-full opacity-60 group-hover:opacity-100 group-hover:w-24 transition-all duration-300"></div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </motion.div>
             </AnimatePresence>
           </div>
           
           {/* Testimonial indicators */}
-          <div className="flex justify-center mt-8 space-x-2">
+          <div className="flex justify-center mt-12 space-x-3">
             {Array.from({ length: totalPages }).map((_, index) => (
               <button
                 key={index}
@@ -216,8 +257,10 @@ const TestimonialsSection = () => {
                   setDirection(index > current ? 1 : -1);
                   setCurrent(index);
                 }}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  index === current ? 'w-8 bg-white' : 'w-2 bg-white/30'
+                className={`h-2 rounded-full transition-all duration-300 hover:bg-orange-400/60 ${
+                  index === current 
+                    ? 'w-8 bg-gradient-to-r from-orange-400 to-orange-600' 
+                    : 'w-2 bg-white/30 hover:bg-white/50'
                 }`}
                 aria-label={`Go to testimonial page ${index + 1}`}
               />

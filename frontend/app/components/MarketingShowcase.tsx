@@ -4,13 +4,13 @@ import Link from "next/link";
 
 export function MarketingShowcase() {
   return (
-    <section className="relative py-20 px-4 md:px-0 bg-gradient-to-br from-[#0a1929] via-black to-[#1e3a52] overflow-hidden flex flex-col items-center justify-center">
+    <section className="relative py-20 px-4 md:px-0  overflow-hidden flex flex-col items-center justify-center">
       {/* Subtle colored glows */}
-      <motion.div
+      {/* <motion.div
         className="absolute top-[-10%] left-[-10%] w-[350px] h-[350px] bg-cyan-700/20 rounded-full filter blur-[100px] z-0"
         animate={{ scale: [1, 1.1, 1], opacity: [0.7, 1, 0.7] }}
         transition={{ repeat: Infinity, duration: 10 }}
-      />
+      /> */}
       <motion.div
         className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-orange-700/20 rounded-full filter blur-[120px] z-0"
         animate={{ scale: [1, 1.08, 1], opacity: [0.6, 1, 0.6] }}
