@@ -31,7 +31,7 @@ export default function LoginPage() {
   const facebookLoginUrl = `https://asyncawait-auction-project.onrender.com/api/login/facebook?redirect_origin=${encodeURIComponent(redirectOrigin)}`;
 
   const handleLogin = async () => {
-    const redirectTo = `https://auctasync.vercel.app/auth/callback`;
+    const redirectTo = `${window.location.origin}/auth/callback`;
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
