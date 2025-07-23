@@ -2,6 +2,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import { a } from 'framer-motion/dist/types.d-DDSxwf0n';
+import { Avatar } from '@radix-ui/react-avatar';
 
 const testimonials = [
   {
@@ -11,7 +13,8 @@ const testimonials = [
     location: "USA",
     rating: 5,
     initials: "WB",
-    bgColor: "#f0e68c", // Light yellow
+    bgColor: "#f0e68c",
+    avatar: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D"
   },
   {
     id: 2,
@@ -20,7 +23,8 @@ const testimonials = [
     location: "UK",
     rating: 5,
     initials: "JM",
-    bgColor: "#add8e6", // Light blue
+    bgColor: "#add8e6",
+    avatar: "https://images.unsplash.com/photo-1546961329-78bef0414d7c?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fHVzZXJ8ZW58MHx8MHx8fDA%3D"
   },
   {
     id: 3,
@@ -29,9 +33,9 @@ const testimonials = [
     location: "Spain",
     rating: 4,
     initials: "CA",
-    bgColor: "#e6e6fa", // Light lavender
+    bgColor: "#e6e6fa",
+    avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fHVzZXJ8ZW58MHx8MHx8fDA%3D"
   },
-  // Keep the rest of the testimonials but add initials and bgColor
   {
     id: 4,
     content: "Fantastic platform! I've been using it for months and never had any issues with payments or delivery.",
@@ -39,7 +43,8 @@ const testimonials = [
     location: "Canada",
     rating: 5,
     initials: "ET",
-    bgColor: "#ffc0cb", // Light pink
+    bgColor: "#ffc0cb",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D"
   },
   {
     id: 5,
@@ -48,7 +53,8 @@ const testimonials = [
     location: "Japan",
     rating: 4.5,
     initials: "HT",
-    bgColor: "#98fb98", // Light green
+    bgColor: "#98fb98",
+    avatar: "https://plus.unsplash.com/premium_photo-1664541336896-b3d5f7dec9a3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fHVzZXJ8ZW58MHx8MHx8fDA%3D"
   },
   {
     id: 6,
@@ -57,7 +63,8 @@ const testimonials = [
     location: "France",
     rating: 5,
     initials: "SL",
-    bgColor: "#ffb6c1", // Light pink
+    bgColor: "#ffb6c1",
+    avatar: "https://images.unsplash.com/photo-1530268729831-4b0b9e170218?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzJ8fHVzZXJ8ZW58MHx8MHx8fDA%3D"
   },
 ];
 
@@ -170,12 +177,13 @@ const TestimonialsSection = () => {
                   >
                     {/* Avatar - positioned to be half over the card and half outside */}
                     <div className="absolute left-1/2 -translate-x-1/2 -top-10 z-20">
-                      <div 
+                      {/* <div 
                         className="w-20 h-20 rounded-full overflow-hidden border-2 border-white shadow-lg flex items-center justify-center text-xl font-bold"
                         style={{ backgroundColor: testimonial.bgColor }}
                       >
                         {testimonial.initials}
-                      </div>
+                      </div> */}
+                      <Image src={testimonial.avatar} alt={testimonial.author} width={80} height={80} className="w-20 h-20 rounded-full overflow-hidden border-2 border-white shadow-lg" />
                     </div>
                     
                     {/* Card content */}

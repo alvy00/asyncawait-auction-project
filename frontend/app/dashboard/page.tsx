@@ -69,7 +69,7 @@ const Dashboard = () => {
 
   if (error || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#021f49] to-[#010915]">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="bg-[#040c16]/50 p-8 rounded-lg shadow-lg text-white max-w-md w-full">
           <h2 className="text-2xl font-bold mb-4">Error Loading Dashboard</h2>
           <p className="text-red-400">{error || 'Failed to load user data'}</p>
@@ -89,7 +89,7 @@ const Dashboard = () => {
     : 0;
 
   return (
-    <div className="mt-10 min-h-screen bg-gradient-to-b from-[#021f49] to-[#010915] text-white p-6 rounded-xl">
+    <div className="mt-10 min-h-screen  text-white p-6 rounded-xl">
       {/* Welcome Header */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
