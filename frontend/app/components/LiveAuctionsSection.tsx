@@ -11,13 +11,15 @@ import AuctionCardDutch from './AuctionCardDutch';
 import AuctionCardReverse from './AuctionCardReverse';
 import AuctionCardPhantom from './AuctionCardPhantom';
 import { useUser } from '../../lib/user-context';
+import { useAuth } from '../../lib/auth-context';
 
 const maxVisibleItems = 3;
 
 const LiveAuctionsSection = () => {
+  const { user } = useUser();
+  const { loggedIn } = useAuth();
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { user } = useUser();
   const [isLoading, setIsLoading] = useState(true);
 
   // fetch featured auctions
@@ -145,7 +147,8 @@ const LiveAuctionsSection = () => {
                     auction={auction}
                     auctionCreator={auction.creator}
                     isFavourited={auction.isFavorite}
-                    user={user}
+                    user={user} 
+                    loggedIn={loggedIn}                  
                   />
                 )}
                 {auction.auction_type === "blitz" && (
@@ -154,6 +157,7 @@ const LiveAuctionsSection = () => {
                     auction={auction} 
                     auctionCreator={auction.creator}
                     user={user} 
+                    loggedIn={loggedIn}  
                   />
                 )}
                 {auction.auction_type === "dutch" && (
@@ -161,7 +165,8 @@ const LiveAuctionsSection = () => {
                     key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
                     auction={auction} 
                     auctionCreator={auction.creator}
-                    user={user} 
+                    user={user}
+                    loggedIn={loggedIn}   
                   />
                 )}
                 {auction.auction_type === "reverse" && (
@@ -169,7 +174,8 @@ const LiveAuctionsSection = () => {
                     key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
                     auction={auction} 
                     auctionCreator={auction.creator}
-                    user={user} 
+                    user={user}
+                    loggedIn={loggedIn}   
                   />
                 )}
                 {auction.auction_type === "phantom" && (
@@ -177,7 +183,8 @@ const LiveAuctionsSection = () => {
                     key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
                     auction={auction} 
                     auctionCreator={auction.creator}
-                    user={user} 
+                    user={user}
+                    loggedIn={loggedIn}   
                   />
                 )}
               </motion.div>

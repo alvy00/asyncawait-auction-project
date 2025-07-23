@@ -196,7 +196,16 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
     >
     {/* Image container */}
     <div className={cardImageContainer} >
-      <Image src={imageSrc} alt={auction.item_name} fill className={cardImage} priority onClick={() => setDetailsOpen(true)}/>
+      <div className={`${cardImageContainer} group cursor-pointer overflow-hidden rounded-t-2xl relative`}>
+        <Image
+          src={imageSrc}
+          alt={auction.item_name}
+          fill
+          className={`object-cover transition-transform duration-500 ease-in-out group-hover:scale-105 ${cardImage}`}
+          priority
+          onClick={() => setDetailsOpen(true)}
+        />
+      </div>
       <div className={cardStatusBadge}>
         <StatusBadge type={"dutch"} status={auction.status} auctionId={auction.auction_id} participantCount={auction.participants} />
       </div>

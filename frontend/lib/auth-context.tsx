@@ -26,7 +26,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<any | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [refreshUserSignal, setRefreshUserSignal] = useState(0);
-
   const router = useRouter();
 
   const refreshUser = useCallback(() => {
@@ -36,14 +35,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = async (reason: "manual" | "expired" = "manual") => {
     try {
       const { error } = await supabase.auth.signOut();
-
       if (error) {
         console.error("Supabase signOut error:", error.message);
         toast.error("Logout failed: " + error.message);
         return;
       }
-
-      console.log("Supabase signOut successful");
 
       localStorage.removeItem("sessionToken");
       localStorage.removeItem("expiresAt");
@@ -57,13 +53,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       localStorage.setItem("authChange", Date.now().toString());
 
-      if (reason === "expired") {
-        toast.error("You were logged out due to inactivity.");
-      }
+      if (reason === "expired") toast.error("You were logged out due to inactivity.");
+      else toast.success("Logged out successfully");
 
-      if (typeof window !== "undefined" && window.location.pathname !== "/login") {
-        router.replace("/login");
-      }
+      setTimeout(() => {
+        if (window.location.pathname !== "/login") {
+          router.replace("/login");
+        }
+      }, 50);
     } catch (err) {
       console.error("Unexpected logout error:", err);
       toast.error("Unexpected logout error");
@@ -85,11 +82,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(session.user);
     setLoggedIn(true);
     refreshUser();
-
-    //toast.success("Login successful!");
     router.push("/");
   };
 
+  // Restore session on mount
   useEffect(() => {
     const restoreSession = async () => {
       try {
@@ -102,7 +98,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setToken(session.access_token);
             setUser(session.user);
             setLoggedIn(true);
-            console.log("Session restored");
           } else {
             await logout("expired");
           }
@@ -124,13 +119,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     restoreSession();
   }, []);
 
-  // check auth change
+  // Listen to Supabase auth changes
   useEffect(() => {
     const hasShownToast = { current: false };
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed:", event, session);
-
       if (session?.access_token) {
         setToken((prev) => {
           if (prev !== session.access_token) {
@@ -150,9 +143,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           if (prev !== undefined) {
             setLoggedIn(false);
             setUser(null);
-            console.log("User signed out or session expired");
             refreshUser();
-            hasShownToast.current = false; // reset toast flag on logout
+            hasShownToast.current = false;
             return undefined;
           }
           return prev;
@@ -165,6 +157,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [refreshUser]);
 
+  // Periodically check session expiry
   useEffect(() => {
     const interval = setInterval(async () => {
       const { data } = await supabase.auth.getSession();

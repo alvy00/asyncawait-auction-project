@@ -48,6 +48,15 @@ export interface Auction {
   }>;
 }
 
+export interface Bid {
+  bid_id?: number;
+  auction_id?: string;
+  user_id?: string;
+  item_name: string;
+  bid_amount: number;
+  created_at?: string;
+}
+
 export interface PastAuctionCardProps{
   auction: Auction;
 };

@@ -13,7 +13,8 @@ const StatusBadge = ({ type, status, auctionId, participantCount }) => {
           const res = await fetch("https://asyncawait-auction-project.onrender.com/api/auctions/updatestatus", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ auctionId, status: "ended" }),
+            
+            body: JSON.stringify({ auction_id: auctionId, status: "ended" }),
           });
 
           if (res.ok) {

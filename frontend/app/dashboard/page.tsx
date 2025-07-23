@@ -88,7 +88,7 @@ const Dashboard = () => {
     : 0;
 
   return (
-    <div className="mt-10 min-h-screen  text-white p-6 rounded-xl">
+    <div className="min-h-screen  text-white p-6 rounded-xl">
       {/* Welcome Header */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
