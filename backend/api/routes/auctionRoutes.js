@@ -596,7 +596,6 @@ auctionRouter.post('/bidhistory', async (req, res) => {
   return res.status(200).json(formatted);
 });
 
-
 // Get Top Bids
 auctionRouter.post('/topbids', async (req, res) => {
   const { auction_id } = req.body;

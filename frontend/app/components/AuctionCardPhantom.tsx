@@ -277,14 +277,16 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
       className={`${cardImageContainer} cursor-pointer rounded-t-2xl overflow-hidden`}
       
     >
-      <Image
-        onClick={() => setDetailsOpen(true)}
-        src={imageSrc}
-        alt={auction.item_name}
-        fill
-        className={`object-cover ${cardImage}`}
-        priority
-      />
+      <div className={`${cardImageContainer} group cursor-pointer overflow-hidden rounded-t-2xl relative`}>
+        <Image
+          src={imageSrc}
+          alt={auction.item_name}
+          fill
+          className={`object-cover transition-transform duration-500 ease-in-out group-hover:scale-105 ${cardImage}`}
+          priority
+          onClick={() => setDetailsOpen(true)}
+        />
+      </div>
       <div className={`${cardOverlay} bg-black/20`} />
       <div className={cardStatusBadge}>
         <StatusBadge

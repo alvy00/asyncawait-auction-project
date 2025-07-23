@@ -261,13 +261,15 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
   >
     {/* Image */}
     <div className={cardImageContainer}>
+      <div className="relative w-full h-full overflow-hidden group rounded-t-2xl cursor-pointer">
       <Image
         src={imageSrc}
         alt={auction.item_name}
         fill
         onClick={() => setDetailsOpen(true)}
-        className={cardImage}
+        className={`${cardImage} object-cover transform transition-transform duration-500 group-hover:scale-105`}
       />
+    </div>
       <div className={cardStatusBadge}>
         <StatusBadge type="classic" status={currentStatus} auctionId={auction.auction_id} participantCount={participants} />
       </div>

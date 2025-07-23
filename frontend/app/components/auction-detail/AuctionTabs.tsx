@@ -3,18 +3,10 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Star, StarHalf } from "lucide-react";
+import { Bid } from "../../../lib/interfaces";
 
 interface AuctionTabsProps {
-  description: string;
-  auctionHistory: {
-    bidder: {
-      name: string;
-      image: string;
-    };
-    amount: number;
-    date: string;
-    status: "current" | "outbid";
-  }[];
+  bidHistory: Bid[],
   reviews: {
     reviewer: {
       name: string;
@@ -26,33 +18,14 @@ interface AuctionTabsProps {
   }[];
 }
 
-const AuctionTabs = ({ description, auctionHistory, reviews }: AuctionTabsProps) => {
-  const [activeTab, setActiveTab] = useState("description");
+const AuctionTabs = ({bidHistory, reviews }: AuctionTabsProps) => {
+  const [activeTab, setActiveTab] = useState("reviews");
 
   return (
     <div className="mt-12">
       <div className="border-b border-gray-800">
         <div className="flex gap-8">
-          <button
-            className={`pb-2 font-medium ${
-              activeTab === "description"
-                ? "border-b-2 border-[#ef863f] text-[#ef863f]"
-                : "text-gray-400 hover:text-white"
-            }`}
-            onClick={() => setActiveTab("description")}
-          >
-            Description
-          </button>
-          <button
-            className={`pb-2 font-medium ${
-              activeTab === "auction-history"
-                ? "border-b-2 border-[#ef863f] text-[#ef863f]"
-                : "text-gray-400 hover:text-white"
-            }`}
-            onClick={() => setActiveTab("auction-history")}
-          >
-            Auction History
-          </button>
+
           <button
             className={`pb-2 font-medium ${
               activeTab === "reviews"
@@ -63,58 +36,50 @@ const AuctionTabs = ({ description, auctionHistory, reviews }: AuctionTabsProps)
           >
             Reviews
           </button>
+          <button
+            className={`pb-2 font-medium ${
+              activeTab === "bids-history"
+                ? "border-b-2 border-[#ef863f] text-[#ef863f]"
+                : "text-gray-400 hover:text-white"
+            }`}
+            onClick={() => setActiveTab("bids-history")}
+          >
+            Bids History
+          </button>
         </div>
       </div>
 
       <div className="mt-8">
-        {/* Description Tab */}
-        {activeTab === "description" && (
-          <div className="text-gray-300 space-y-4">
-            <p>{description}</p>
-          </div>
-        )}
-
         {/* Auction History Tab */}
-        {activeTab === "auction-history" && (
+        {activeTab === "bids-history" && (
           <div className="bg-[#010915] border border-gray-800 rounded-lg overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-900">
-                <tr>
-                  <th className="px-4 py-3 text-left">Bidder</th>
-                  <th className="px-4 py-3 text-left">Bid Amount</th>
-                  <th className="px-4 py-3 text-left">Date & Time</th>
-                  <th className="px-4 py-3 text-left">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-800">
-                {auctionHistory.map((bid, index) => (
-                  <tr key={index} className="hover:bg-gray-900/50">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full overflow-hidden">
-                          <Image
-                            src={bid.bidder.image}
-                            alt="Bidder"
-                            width={32}
-                            height={32}
-                          />
-                        </div>
-                        <span>{bid.bidder.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 font-medium">${bid.amount.toFixed(2)}</td>
-                    <td className="px-4 py-3 text-gray-400">{bid.date}</td>
-                    <td className="px-4 py-3">
-                      {bid.status === "current" ? (
-                        <span className="text-green-500">Current Highest</span>
-                      ) : (
-                        <span className="text-gray-400">Outbid</span>
-                      )}
-                    </td>
+            {bidHistory?.length > 0 ? (
+              <table className="w-full text-sm">
+                <thead className="bg-gray-900">
+                  <tr>
+                    <th className="px-4 py-3 text-left">Bidder</th>
+                    <th className="px-4 py-3 text-left">Bid Amount</th>
+                    <th className="px-4 py-3 text-left">Date & Time</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-800">
+                  {bidHistory.map((bid, index) => (
+                    <tr key={index} className="hover:bg-gray-900/50">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-700" />
+                          <span>{bid.user_id}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 font-medium">${bid.bid_amount.toFixed(2)}</td>
+                      <td className="px-4 py-3 text-gray-400">{bid.created_at}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="text-center text-gray-400 py-12 text-sm">No bids yet. Be the first to place a bid!</div>
+            )}
           </div>
         )}
 
