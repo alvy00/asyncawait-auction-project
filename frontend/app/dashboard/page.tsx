@@ -13,57 +13,56 @@ import WinRatioChart from './_components/WinRatioChart';
 import StatCard from './_components/StatCard';
 import ActionButton from './_components/ActionButton';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useUser } from '../../lib/user-context';
 
 const Dashboard = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, isLoading } = useUser();
   const [error, setError] = useState<string | null>(null);
   
   const router = useRouter();
 
   // fetch user
-  useEffect(() => {
-    const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
-    if (!token) {
-      console.error("No token found");
-      router.push("/login");
-      return;
-    }
+  // useEffect(() => {
+  //   const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
+  //   if (!token) {
+  //     console.error("No token found");
+  //     router.push("/login");
+  //     return;
+  //   }
 
-    const fetchCurrentUserData = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getUser', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+  //   const fetchCurrentUserData = async () => {
+  //     try {
+  //       setLoading(true);
+  //       const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getUser', {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       });
 
-        if (!res.ok) {
-          throw new Error(`Failed to fetch user: ${res.status}`);
-        }
+  //       if (!res.ok) {
+  //         throw new Error(`Failed to fetch user: ${res.status}`);
+  //       }
 
-        const userData = await res.json();
+  //       const userData = await res.json();
 
-        if (userData?.message) {
-          throw new Error(userData.message);
-        }
+  //       if (userData?.message) {
+  //         throw new Error(userData.message);
+  //       }
 
-        setUser(userData);
-        setUserId(userData.user_id);
-      } catch (e) {
-        console.error("Error fetching user:", e);
-        setError(e instanceof Error ? e.message : 'An unknown error occurred');
-      } finally {
-        setLoading(false);
-      }
-    };
+  //       //setUser(userData);
+  //       setUserId(userData.user_id);
+  //     } catch (e) {
+  //       console.error("Error fetching user:", e);
+  //       setError(e instanceof Error ? e.message : 'An unknown error occurred');
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    fetchCurrentUserData();
-  }, [router]);
+  //   fetchCurrentUserData();
+  // }, [router]);
 
-  if (loading) {
+  if (isLoading) {
     return <LoadingSpinner />;
   }
 

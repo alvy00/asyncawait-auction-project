@@ -21,9 +21,10 @@ interface AuctionCardProps {
   auctionCreator: string;
   isFavourited: boolean;
   user: User;
+  loggedIn: boolean;
 }
 
-const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFavourited, user })  => {
+const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFavourited, user, loggedIn })  => {
   const [winner, setWinner] = useState(null);
   const [ userMoney, setUserMoney] = useState(user?.money);
   const [ participants, setParticipants ] = useState(auction.participants);
@@ -88,7 +89,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
       const userId = auction?.highest_bidder_id;
 
       if (!userId) {
-        console.log("Missing highest_bidder_id");
+        //console.log("Missing highest_bidder_id");
         return;
       }
 
@@ -219,7 +220,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
 
             if (res.ok) {
               const json = await res.json();
-              console.log(json.message);
+              //console.log(json.message);
             } else {
               console.error('Failed to update auction status', res.status);
             }
@@ -308,7 +309,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
 
       {/* Bid Section */}
       <div className="w-full mt-2 relative">
-        {!token ? (
+        {!loggedIn ? (
           <Button disabled className="w-full flex items-center justify-center gap-2 rounded-full bg-gray-800 border border-gray-700 text-gray-400 opacity-60 cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30 font-semibold text-base md:text-lg">Login to bid</Button>
         ) : (
           !isEnded && <div className="w-full">

@@ -32,9 +32,10 @@ interface AuctionCardProps {
   auction: Auction;
   auctionCreator: string;
   user: User;
+  loggedIn: boolean;
 }
 
-const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction, auctionCreator, user }) => {
+const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction, auctionCreator, user, loggedIn }) => {
   const controls = useAnimation();
   const [auction, setAuction] = useState(initialAuction);
   const [isBidding, setIsBidding] = useState(false);
@@ -243,7 +244,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
       {/* Bid button area */}
       {!submittingBid && (
         <div className="w-full mt-2 flex flex-col items-end">
-          {!token ? (
+          {!loggedIn ? (
             <Button
               disabled
               className="w-full flex items-center justify-center gap-2 rounded-full bg-gray-800 border border-gray-700 text-gray-400 opacity-60 cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30"

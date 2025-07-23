@@ -15,12 +15,12 @@ import { FaArrowRightLong } from "react-icons/fa6"
 import { User } from "../../lib/interfaces"
 import toast from "react-hot-toast"
 import { useAuth } from "../../lib/auth-context"
+import { useUser } from "../../lib/user-context"
 
 export const Navbar = () => {
+  const { user, refetchIndex, isLoading } = useUser()
   const [isScrolled, setIsScrolled] = useState(false)
   const { loggedIn, logout } = useAuth();
-  const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState<User>()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [auctionsDropdownOpen, setAuctionsDropdownOpen] = useState(false)
   const [mobileAuctionsOpen, setMobileAuctionsOpen] = useState(false)
@@ -29,35 +29,6 @@ export const Navbar = () => {
   const router = useRouter()
 
   const avatarDropdownRef = useRef<HTMLDivElement>(null);
-  
-  // fetch user
-  useEffect(() => {
-    const getUser = async () => {
-      const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-      try {
-        const res = await fetch("https://asyncawait-auction-project.onrender.com/api/getuser", {
-          method: "GET",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) {
-          setLoading(false);
-          return;
-        }
-        const data = await res.json();
-        setUser(data);
-        //setLoggedIn(true);
-      } catch (error) {
-          console.log(error)
-      } finally {
-        setLoading(false);
-      }
-    };
-    getUser();
-  }, []);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10)
@@ -298,7 +269,7 @@ export const Navbar = () => {
 
           {/* Actions - desktop */}
           <div className="hidden lg:flex items-center gap-3">
-            {loading ? (
+            {isLoading ? (
               // Skeleton while loading
               <div className="flex items-center gap-3 animate-pulse">
                 <div className="w-8 h-8 rounded-full bg-white/10" />
