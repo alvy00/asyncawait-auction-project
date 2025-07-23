@@ -8,24 +8,23 @@ import Image from "next/image";
 import { Button } from "../../components/ui/button";
 import { Auction } from "../../lib/interfaces";
 import { ChevronLeft, ChevronRight, Clock, Zap } from "lucide-react";
+import clsx from "clsx"; // Using clsx for cleaner class management
 
-// Your AuctionCard component remains the same
 const AuctionCard = ({ auction, isActive }: { auction: Auction; isActive: boolean }) => {
   return (
     <div className="relative h-full w-full rounded-[2.5rem] p-[2px] overflow-hidden">
       <div
-        className={`absolute inset-0 rounded-[2.5rem] bg-gradient-to-br from-orange-500/80 via-purple-600/50 to-blue-500/80 transition-opacity duration-500 ${
-          isActive ? "opacity-100" : "opacity-0"
-        }`}
+        className={clsx(
+          "absolute inset-0 rounded-[2.5rem] bg-gradient-to-br from-orange-500/80 via-purple-600/50 to-blue-500/80 transition-opacity duration-500",
+          { "opacity-100": isActive, "opacity-0": !isActive }
+        )}
       />
       <div
         className="relative h-full w-full rounded-[calc(2.5rem-2px)] bg-black/70 shadow-[0_12px_48px_0_rgba(255,140,0,0.10),0_8px_32px_0_rgba(31,38,135,0.25)] border border-white/10 overflow-hidden"
         style={{ backdropFilter: "blur(24px)" }}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-80 pointer-events-none rounded-[calc(2.5rem-2px)]" />
-
         <div className="relative z-10 flex flex-col h-full px-5 sm:px-6 pt-5 sm:pt-6 pb-4 sm:pb-5">
           <div className="flex-shrink-0">
             <h3 className="text-white text-base sm:text-lg font-bold tracking-tight line-clamp-1">{auction.item_name}</h3>
@@ -33,22 +32,23 @@ const AuctionCard = ({ auction, isActive }: { auction: Auction; isActive: boolea
               <span className="bg-orange-500/80 text-white text-[10px] sm:text-xs px-2.5 py-1 rounded-full font-bold uppercase">{auction.auction_type}</span>
               <span className="bg-blue-500/70 text-white text-[10px] sm:text-xs px-2.5 py-1 rounded-full font-bold uppercase">{auction.category}</span>
               <span
-                className={`text-white text-[10px] sm:text-xs px-2.5 py-1 rounded-full font-bold uppercase ${
+                className={clsx(
+                  "text-white text-[10px] sm:text-xs px-2.5 py-1 rounded-full font-bold uppercase",
                   auction.condition === "new" ? "bg-green-600/80" : "bg-gray-500/80"
-                }`}
+                )}
               >
                 {auction.condition}
               </span>
             </div>
           </div>
-
           <div className="relative flex-grow flex items-center justify-center w-full my-3">
             {auction.images?.[0] ? (
               <>
                 <div
-                  className={`absolute inset-4 rounded-2xl bg-gradient-to-br from-orange-500/50 via-purple-700/30 to-blue-600/30 blur-3xl transition-opacity duration-500 ${
-                    isActive ? "opacity-100" : "opacity-0"
-                  }`}
+                  className={clsx(
+                    "absolute inset-4 rounded-2xl bg-gradient-to-br from-orange-500/50 via-purple-700/30 to-blue-600/30 blur-3xl transition-opacity duration-500",
+                    { "opacity-100": isActive, "opacity-0": !isActive }
+                  )}
                 />
                 <Image
                   src={auction.images[0]}
@@ -65,7 +65,6 @@ const AuctionCard = ({ auction, isActive }: { auction: Auction; isActive: boolea
               </div>
             )}
           </div>
-
           <div className="flex-shrink-0">
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-gray-200 text-xs sm:text-sm font-semibold mb-3">
               <div className="text-left">
@@ -83,7 +82,6 @@ const AuctionCard = ({ auction, isActive }: { auction: Auction; isActive: boolea
                 <Zap size={14} /> {auction.total_bids} bids
               </div>
             </div>
-
             <div className="flex justify-center mt-2">
               <Button
                 size="lg"
@@ -103,14 +101,12 @@ const AuctionCard = ({ auction, isActive }: { auction: Auction; isActive: boolea
   );
 };
 
-// AuctionCardDeck component remains the same as you provided before
-
-function AuctionCardDeck({ auctions }: { auctions: Auction[] }) {
+function AuctionCardDeck({ auctions, startAnimation }: { auctions: Auction[]; startAnimation: boolean }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const cardCount = auctions.length;
 
   function getCardProps(idx: number) {
-    const pos = ((idx - activeIndex + cardCount) % cardCount);
+    const pos = (idx - activeIndex + cardCount) % cardCount;
     let rel = pos;
     if (rel > Math.floor(cardCount / 2)) rel -= cardCount;
 
@@ -176,7 +172,13 @@ function AuctionCardDeck({ auctions }: { auctions: Auction[] }) {
   };
 
   return (
-    <div className="relative w-full flex flex-col items-center">
+    // FIXED: Using a simple div with CSS transition to prevent animation conflicts
+    <div
+      className={clsx(
+        "w-full flex flex-col items-center transition-opacity duration-700 ease-out",
+        { "opacity-100": startAnimation, "opacity-0": !startAnimation }
+      )}
+    >
       <div
         className="relative w-full max-w-[300px] h-[480px] sm:max-w-[360px] sm:h-[580px] md:max-w-[400px] md:h-[640px] flex items-center justify-center select-none"
         style={{ perspective: "2000px" }}
@@ -188,15 +190,15 @@ function AuctionCardDeck({ auctions }: { auctions: Auction[] }) {
         <AnimatePresence initial={false}>
           {auctions.map((auction, idx) => {
             const { x, scale, zIndex, rotateY, opacity, filter } = getCardProps(idx);
-            if (opacity === 0) return null;
+            if (opacity === 0 && idx !== activeIndex) return null; // Keep active card rendered even if briefly invisible
             return (
               <motion.div
                 key={auction.auction_id}
-                initial={{ opacity: 0, scale: 0.8 }}
+                initial={false} // Prevent initial animation on first render
                 animate={{ x, scale, zIndex, rotateY, opacity, filter }}
                 exit={{ opacity: 0, scale: 0.8, zIndex: zIndex - 2 }}
                 transition={{ type: "spring", stiffness: 220, damping: 35 }}
-                className={`absolute w-full h-full cursor-grab active:cursor-grabbing`}
+                className="absolute w-full h-full cursor-grab active:cursor-grabbing"
                 style={{ zIndex, transformStyle: "preserve-3d" }}
               >
                 <AuctionCard auction={auction} isActive={idx === activeIndex} />
@@ -229,9 +231,10 @@ function AuctionCardDeck({ auctions }: { auctions: Auction[] }) {
         {auctions.map((_, idx) => (
           <button
             key={idx}
-            className={`h-2 rounded-full transition-all duration-500 ease-in-out ${
-              idx === activeIndex ? "w-8 bg-gradient-to-r from-orange-500 to-orange-600" : "w-2 bg-white/20 hover:bg-white/40"
-            }`}
+            className={clsx(
+              "h-2 rounded-full transition-all duration-500 ease-in-out",
+              { "w-8 bg-gradient-to-r from-orange-500 to-orange-600": idx === activeIndex, "w-2 bg-white/20 hover:bg-white/40": idx !== activeIndex }
+            )}
             onClick={() => setActiveIndex(idx)}
             aria-label={`Go to card ${idx + 1}`}
           />
@@ -289,15 +292,15 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-16 sm:pt-24 md:pt-28 bg-[#19181c]">
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-16 sm:pt-24 md:pt-28 ">
+      {/* <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
         <div className="absolute top-[-10%] left-[-10%] w-[300px] h-[300px] md:w-[400px] md:h-[400px] bg-orange-500/30 rounded-full blur-[120px] animate-float" />
         <div className="absolute top-[-8%] right-[-8%] w-[220px] h-[220px] md:w-[320px] md:h-[320px] bg-purple-700/25 rounded-full blur-[100px] animate-float-delayed" />
         <div className="absolute bottom-[-10%] left-[5%] w-[180px] h-[180px] md:w-[260px] md:h-[260px] bg-blue-500/20 rounded-full blur-[80px] animate-float" />
         <div className="absolute bottom-[-8%] right-[10%] w-[140px] h-[140px] md:w-[200px] md:h-[200px] bg-teal-400/20 rounded-full blur-[60px] animate-float-delayed" />
         <div className="absolute inset-0 bg-grid-pattern opacity-5" />
-      </div>
+      </div> */}
 
       <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center px-6 md:px-10 pt-0">
         <motion.h1
@@ -316,27 +319,22 @@ export function HeroSection() {
 
         <motion.p
           initial={{ opacity: 0, y: 20 }}
-          animate={headingDone ? { opacity: 1, y: 0 } : {}}
+          animate={headingDone ? { opacity: 1, y: 0 } : { opacity: 0 }}
           transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
           className="text-sm sm:text-lg md:text-xl text-gray-400 text-center max-w-2xl mx-auto mb-6"
         >
           Join the next generation auction platform—discover rare finds, place real-time bids, and win exclusive items from anywhere.
         </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={headingDone ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, ease: "easeOut", delay: 0.4 }}
-          className="w-full flex flex-col items-center overflow-visible"
-        >
+        
+        <div className="w-full flex flex-col items-center overflow-visible">
           {loading ? (
             <div className="w-full max-w-[300px] h-[480px] sm:max-w-[360px] sm:h-[580px] md:max-w-[400px] md:h-[640px] flex items-center justify-center bg-white/5 rounded-[2.5rem] animate-pulse border border-white/10 shadow-2xl" />
           ) : featuredAuctions.length > 0 ? (
-            <AuctionCardDeck auctions={featuredAuctions} />
+            <AuctionCardDeck auctions={featuredAuctions} startAnimation={headingDone} />
           ) : (
             <div className="text-white/80 text-center py-8">No featured auctions available at the moment.</div>
           )}
-        </motion.div>
+        </div>
       </div>
     </section>
   );
