@@ -70,7 +70,7 @@ export function NewsletterSection() {
   };
 
   return (
-    <section className="py-24 relative overflow-hidden bg-[#0a0a18]">
+    <section className="py-24 relative overflow-hidden ">
       <div className="container mx-auto px-4 relative z-10 flex flex-col md:flex-row items-center gap-12">
         {/* Left: Headline, subheadline, benefits */}
         <div className="flex-1 flex flex-col items-start justify-center">

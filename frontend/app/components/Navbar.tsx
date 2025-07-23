@@ -170,7 +170,7 @@ export const Navbar = () => {
           left: "50%",
           transform: "translateX(-50%)",
           position: "fixed",
-          borderRadius: "1rem",
+          borderRadius: "0 0 1rem 1rem", // Only bottom corners rounded
           border: "1px solid rgba(255,255,255,0.1)",
           backdropFilter: "blur(10px)",
           boxShadow: "0 10px 20px rgba(0,0,0,0.4)",
@@ -477,7 +477,6 @@ export const Navbar = () => {
           </motion.button>
         </motion.div>
       </motion.header>
-
       {/* Mobile menu overlay */}
       <AnimatePresence>
         {mobileMenuOpen && (
