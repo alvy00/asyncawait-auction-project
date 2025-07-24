@@ -8,7 +8,7 @@ const AnimatedBackground = () => {
     <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
       {/* Orange/red gradient bubble - top right */}
       <motion.div 
-        className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-orange-500 rounded-full filter blur-[80px] opacity-30"
+        className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-orange-700 rounded-full filter blur-[80px] opacity-30"
         initial={{ x: 0, y: 0, scale: 1 }}
         animate={{
           x: [0, 30, -20, 10, 0],
@@ -25,7 +25,7 @@ const AnimatedBackground = () => {
       
       {/* Smaller orange accent - mid right */}
       <motion.div 
-        className="absolute top-[30%] right-[-5%] w-[300px] h-[300px] bg-orange-400 rounded-full filter blur-[60px] opacity-20"
+        className="absolute top-[30%] right-[-5%] w-[300px] h-[300px] bg-orange-700 rounded-full filter blur-[60px] opacity-20"
         initial={{ x: 0, y: 0, scale: 1 }}
         animate={{
           x: [0, -40, 20, -10, 0],
