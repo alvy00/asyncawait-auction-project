@@ -208,7 +208,7 @@ export const Navbar = () => {
               item.dropdown ? (
                 <div key={item.name} className="relative group">
                   <button
-                    className="px-4 py-2 rounded-full text-sm font-semibold text-white/90 hover:text-white transition-all duration-200 bg-white/0 hover:bg-white/10 focus:bg-white/10 focus:text-white outline-none flex items-center gap-1"
+                    className="px-4 py-2 rounded-full text-base font-semibold text-white/90 hover:text-white transition-all duration-200 bg-white/0 hover:bg-white/10 focus:bg-white/10 focus:text-white outline-none flex items-center gap-1"
                     onMouseEnter={() => setAuctionsDropdownOpen(true)}
                     onMouseLeave={() => setAuctionsDropdownOpen(false)}
                     onClick={() => setAuctionsDropdownOpen((v) => !v)}
@@ -258,7 +258,7 @@ export const Navbar = () => {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="px-4 py-2 rounded-full text-sm font-semibold text-white/90 hover:text-white transition-all duration-200 bg-white/0 hover:bg-white/10 focus:bg-white/10 focus:text-white outline-none"
+                  className="px-4 py-2 rounded-full text-base font-semibold text-white/90 hover:text-white transition-all duration-200 bg-white/0 hover:bg-white/10 focus:bg-white/10 focus:text-white outline-none"
                   style={{ fontWeight: idx === 0 ? 700 : 500 }}
                 >
                   {item.name}
