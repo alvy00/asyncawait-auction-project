@@ -172,11 +172,14 @@ function AuctionCardDeck({ auctions, startAnimation }: { auctions: Auction[]; st
   };
 
   return (
-    // FIXED: Using a simple div with CSS transition to prevent animation conflicts
+    // Added longer delay and smoother transition for card deck
     <div
       className={clsx(
-        "w-full flex flex-col items-center transition-opacity duration-700 ease-out",
-        { "opacity-100": startAnimation, "opacity-0": !startAnimation }
+        "w-full flex flex-col items-center transition-all duration-1000 ease-out transform",
+        { 
+          "opacity-100 translate-y-0": startAnimation, 
+          "opacity-0 translate-y-8": !startAnimation 
+        }
       )}
     >
       <div
@@ -248,6 +251,7 @@ export function HeroSection() {
   const [featuredAuctions, setFeaturedAuctions] = useState<Auction[]>([]);
   const [loading, setLoading] = useState(true);
   const [headingDone, setHeadingDone] = useState(false);
+  const [showCards, setShowCards] = useState(false); // New state for card delay
 
   useEffect(() => {
     async function fetchFeatured() {
@@ -265,6 +269,17 @@ export function HeroSection() {
     }
     fetchFeatured();
   }, []);
+
+  // Add delay for showing cards after heading and subtitle are done
+  useEffect(() => {
+    if (headingDone) {
+      const timer = setTimeout(() => {
+        setShowCards(true);
+      }, 800); // 800ms delay after heading animation completes
+      
+      return () => clearTimeout(timer);
+    }
+  }, [headingDone]);
 
   const words = [
     { text: "Bid.", style: "" },
@@ -292,16 +307,7 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-16 sm:pt-24 md:pt-28 ">
-      {/* <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
-        <div className="absolute top-[-10%] left-[-10%] w-[300px] h-[300px] md:w-[400px] md:h-[400px] bg-orange-500/30 rounded-full blur-[120px] animate-float" />
-        <div className="absolute top-[-8%] right-[-8%] w-[220px] h-[220px] md:w-[320px] md:h-[320px] bg-purple-700/25 rounded-full blur-[100px] animate-float-delayed" />
-        <div className="absolute bottom-[-10%] left-[5%] w-[180px] h-[180px] md:w-[260px] md:h-[260px] bg-blue-500/20 rounded-full blur-[80px] animate-float" />
-        <div className="absolute bottom-[-8%] right-[10%] w-[140px] h-[140px] md:w-[200px] md:h-[200px] bg-teal-400/20 rounded-full blur-[60px] animate-float-delayed" />
-        <div className="absolute inset-0 bg-grid-pattern opacity-5" />
-      </div> */}
-
+    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-16 sm:pt-24 md:pt-28">
       <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center px-6 md:px-10 pt-0">
         <motion.h1
           variants={containerVariants}
@@ -320,7 +326,7 @@ export function HeroSection() {
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={headingDone ? { opacity: 1, y: 0 } : { opacity: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
           className="text-sm sm:text-lg md:text-xl text-gray-400 text-center max-w-2xl mx-auto mb-6"
         >
           Join the next generation auction platform—discover rare finds, place real-time bids, and win exclusive items from anywhere.
@@ -328,11 +334,25 @@ export function HeroSection() {
         
         <div className="w-full flex flex-col items-center overflow-visible">
           {loading ? (
-            <div className="w-full max-w-[300px] h-[480px] sm:max-w-[360px] sm:h-[580px] md:max-w-[400px] md:h-[640px] flex items-center justify-center bg-white/5 rounded-[2.5rem] animate-pulse border border-white/10 shadow-2xl" />
+            // Show loading state immediately when heading is done
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={headingDone ? { opacity: 1, y: 0 } : { opacity: 0 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+              className="w-full max-w-[300px] h-[480px] sm:max-w-[360px] sm:h-[580px] md:max-w-[400px] md:h-[640px] flex items-center justify-center bg-white/5 rounded-[2.5rem] animate-pulse border border-white/10 shadow-2xl" 
+            />
           ) : featuredAuctions.length > 0 ? (
-            <AuctionCardDeck auctions={featuredAuctions} startAnimation={headingDone} />
+            // Pass showCards instead of headingDone for better timing control
+            <AuctionCardDeck auctions={featuredAuctions} startAnimation={showCards} />
           ) : (
-            <div className="text-white/80 text-center py-8">No featured auctions available at the moment.</div>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={showCards ? { opacity: 1, y: 0 } : { opacity: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-white/80 text-center py-8"
+            >
+              No featured auctions available at the moment.
+            </motion.div>
           )}
         </div>
       </div>

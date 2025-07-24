@@ -14,12 +14,26 @@ import { Button } from "../../components/ui/button";
 import { motion } from "framer-motion";
 // NEW: Import clsx for cleaner conditional classes
 import clsx from "clsx";
+import Image from "next/image";
 
-// A good practice is to have a logo or brand name in the sidebar header
+// Updated sidebar header with logo
 const SidebarHeader = () => (
   <div className="p-4 h-[64px] flex items-center justify-center border-b border-white/10">
-    <Link href="/dashboard" className="text-xl font-bold text-white">
-      User Dashboard
+    <Link href="/" className="flex items-center group">
+      <motion.div
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      >
+        <Image
+          src="/logo.svg"
+          alt="AuctaSync Logo"
+          width={140}
+          height={35}
+          className="transition-all duration-300 group-hover:brightness-125"
+          priority
+        />
+      </motion.div>
     </Link>
   </div>
 );
@@ -52,17 +66,85 @@ export default function DashboardLayout({
   ];
 
   return (
-    // CHANGED: The main container is now a horizontal flexbox filling the screen height
-    <div className="flex h-screen w-full bg-[#040c16] text-gray-200">
-      <AnimatedBackground />
+    <div className="flex h-screen w-full bg-[#040c16] text-gray-200 relative overflow-hidden">
+      {/* Enhanced Animated Background */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        {/* Base gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#040c16] via-[#0a1929] to-[#1a202c]" />
+        
+        {/* Enhanced animated blobs */}
+        <motion.div
+          className="absolute top-[-20%] left-[-15%] w-[500px] h-[500px] bg-gradient-to-r from-orange-500/15 to-pink-500/10 rounded-full filter blur-[120px]"
+          animate={{ 
+            scale: [1, 1.2, 1], 
+            opacity: [0.6, 0.8, 0.6],
+            x: [0, 30, 0],
+            y: [0, -20, 0]
+          }}
+          transition={{ 
+            repeat: Infinity, 
+            duration: 15,
+            ease: "easeInOut"
+          }}
+        />
+        
+        <motion.div
+          className="absolute bottom-[-20%] right-[-15%] w-[600px] h-[600px] bg-gradient-to-l from-purple-500/12 to-blue-500/8 rounded-full filter blur-[130px]"
+          animate={{ 
+            scale: [1, 1.1, 1], 
+            opacity: [0.4, 0.7, 0.4],
+            x: [0, -40, 0],
+            y: [0, 30, 0]
+          }}
+          transition={{ 
+            repeat: Infinity, 
+            duration: 18,
+            ease: "easeInOut"
+          }}
+        />
+        
+        <motion.div
+          className="absolute top-[30%] right-[20%] w-[300px] h-[300px] bg-gradient-to-br from-teal-400/10 to-cyan-500/8 rounded-full filter blur-[80px]"
+          animate={{ 
+            scale: [1, 1.3, 1], 
+            opacity: [0.3, 0.6, 0.3],
+            rotate: [0, 180, 360]
+          }}
+          transition={{ 
+            repeat: Infinity, 
+            duration: 20,
+            ease: "linear"
+          }}
+        />
+        
+        <motion.div
+          className="absolute bottom-[40%] left-[10%] w-[250px] h-[250px] bg-gradient-to-tr from-yellow-400/8 to-orange-500/12 rounded-full filter blur-[70px]"
+          animate={{ 
+            scale: [1, 0.8, 1], 
+            opacity: [0.5, 0.8, 0.5],
+            x: [0, 50, 0]
+          }}
+          transition={{ 
+            repeat: Infinity, 
+            duration: 12,
+            ease: "easeInOut"
+          }}
+        />
+        
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-5" />
+        
+        {/* Noise texture overlay */}
+        <div className="absolute inset-0 bg-noise opacity-10" />
+      </div>
 
       {/* Sidebar - Full height, fixed width */}
       <motion.aside
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, ease: "easeInOut" }}
-        // CHANGED: The sidebar is now a flex column taking the full screen height.
-        className="w-64 flex-shrink-0 bg-gradient-to-b from-[#040c16]/70 to-[#040c16]/50 backdrop-blur-md flex flex-col z-20 border-r border-white/10"
+        // Enhanced backdrop blur and border
+        className="w-64 flex-shrink-0 bg-gradient-to-b from-[#040c16]/80 to-[#040c16]/60 backdrop-blur-xl flex flex-col z-20 border-r border-white/20 shadow-2xl"
       >
         <SidebarHeader />
 
@@ -116,8 +198,7 @@ export default function DashboardLayout({
       </motion.aside>
 
       {/* Main Content Area */}
-      {/* CHANGED: This wrapper takes the remaining space and handles its own vertical scrolling */}
-      <div className="flex-1 flex flex-col overflow-y-auto">
+      <div className="flex-1 flex flex-col overflow-y-auto relative z-10">
         {/* The Navbar from your original code now acts as a sticky header for the content */}
         {/* <header className="w-full z-10 sticky top-0">
           <Navbar />
