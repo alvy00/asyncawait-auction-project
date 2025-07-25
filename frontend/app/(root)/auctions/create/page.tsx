@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useUser } from "../../../../lib/user-context";
+import { useAuth } from "../../../../lib/auth-context";
 import Image from "next/image";
 
 const auctionTypes = [
@@ -37,13 +38,13 @@ const LoadingSpinner = () => (
 
 export default function AuctionCreationForm() {
   const { user } = useUser();
-  const [startTime, setStartTime] = useState("");
+  const { token } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const [currentUser, setCurrentUser] = useState<any>(null);
   const [selectedType, setSelectedType] = useState(auctionTypes[0]);
   const [newAuctionTitle, setNewAuctionTitle] = useState<string>("");
+  const [ auctionID, setAuctionID] = useState('');
   const [formStep, setFormStep] = useState(0);
   const [formData, setFormData] = useState({
     item_name: '',
@@ -75,32 +76,7 @@ export default function AuctionCreationForm() {
   const router = useRouter();
 
   // Construct share URL based on new auction title
-  const shareUrl = `https://auctasync.vercel.app/auctions/live?search=${encodeURIComponent(newAuctionTitle)}`;
-
-  // fetch user
-  useEffect(() => {
-    const fetchUser = async () => {
-      const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
-      if (!token) {
-        console.warn("No session token found");
-        return;
-      }
-      try {
-        const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getUser', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) {
-          console.error("Failed to fetch user");
-          return;
-        }
-        const userData = await res.json();
-        setCurrentUser(userData);
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      }
-    };
-    fetchUser();
-  }, []);
+  const shareUrl = `https://auctasync.vercel.app/auctions/${auctionID}`;
 
   // Stepper steps
   const steps = [
@@ -188,7 +164,6 @@ export default function AuctionCreationForm() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
       if (!token) {
         toast.error("No session token found");
         setIsLoading(false);
@@ -209,7 +184,7 @@ export default function AuctionCreationForm() {
       if (endTime < now) status = "ended";
       else if (startTime <= now) status = "live";
       const auctionBody = {
-        creator: currentUser.name,
+        creator: user.name,
         item_name: formData.item_name,
         description: formData.description,
         category: formData.category,
@@ -229,8 +204,11 @@ export default function AuctionCreationForm() {
       });
       const result = await res.json();
       if (res.ok) {
+        const { auction } = result;
+
         toast.success("Auction created successfully");
         setNewAuctionTitle(auctionBody.item_name);
+        setAuctionID(auction.auction_id);
         setIsDialogOpen(true);
       } else {
         toast.error(result.message || "Failed to create auction");
@@ -242,7 +220,6 @@ export default function AuctionCreationForm() {
       setIsLoading(false);
     }
   };
-
 
   // Responsive hero/intro section
   const HeroSection = (

@@ -33,9 +33,10 @@ interface AuctionCardProps {
   auctionCreator: string;
   user: User;
   loggedIn: boolean;
+  token: string;
 }
 
-const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction, auctionCreator, user, loggedIn }) => {
+const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction, auctionCreator, user, loggedIn, token }) => {
   const controls = useAnimation();
   const [auction, setAuction] = useState(initialAuction);
   const [isBidding, setIsBidding] = useState(false);
@@ -47,10 +48,6 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
   const [detailsOpen, setDetailsOpen] = useState(false);
 
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : "/fallback.jpg";
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken")
-      : null;
 
   // fetch user
   // useEffect(() => {

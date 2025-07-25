@@ -33,11 +33,12 @@ interface AuctionCardProps {
   auctionCreator: string;
   user: User;
   loggedIn: boolean;
+  token: string;
 }
 
 const FIREY_ORANGE = "#FF4500"; // Firey Orange (OrangeRed)
 
-const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreator, user, loggedIn }) => {
+const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreator, user, loggedIn,token }) => {
   const controls = useAnimation();
   const [winner, setWinner] = useState(null);
   const [isBidding, setIsBidding] = useState(false);
@@ -51,7 +52,6 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
   const [shake, setShake] = useState(false);
 
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : "/fallback.jpg";
-  const token = typeof window !== "undefined"? localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken") : null;
 
   const accent = getCardAccent("phantom");
 
