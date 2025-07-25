@@ -22,9 +22,10 @@ interface AuctionCardProps {
   isFavourited: boolean;
   user: User;
   loggedIn: boolean;
+  token: string;
 }
 
-const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFavourited, user, loggedIn })  => {
+const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFavourited, user, loggedIn, token })  => {
   const [winner, setWinner] = useState(null);
   const [ userMoney, setUserMoney] = useState(user?.money);
   const [ participants, setParticipants ] = useState(auction.participants);
@@ -47,41 +48,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
   const [shake, setShake] = useState(false);
 
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : FALLBACK_IMAGE;
-  const token = typeof window !== "undefined" ? localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken") : null;
   const accent = getCardAccent("classic");
-
-  // fetch user
-  // useEffect(() => {
-  //   const getUser = async () => {
-  //     const token = localStorage.getItem('sessionToken') || sessionStorage.getItem('sessionToken');
-  //     if (!token) {
-  //       console.warn('No token found');
-  //       return;
-  //     }
-
-  //     try {
-  //       const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getuser', {
-  //         method: 'GET',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //           'Authorization': `Bearer ${token}`,
-  //         },
-  //       });
-
-  //       if (!res.ok) {
-  //         const err = await res.json();
-  //         console.error('Failed to fetch user:', err.message);
-  //         return;
-  //       }
-
-  //       const data = await res.json();
-  //       setUser(data);
-  //     } catch (e) {
-  //       console.error('Error fetching user:', e);
-  //     }
-  //   };
-  //   getUser();
-  // }, []);
 
   // get highest bidder
   useEffect(() => {
