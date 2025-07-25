@@ -33,11 +33,12 @@ interface AuctionCardProps {
   auctionCreator: string;
   user: User;
   loggedIn: boolean;
+  token: string;
 }
 
 const FIREY_PURPLE = "rgba(191, 85, 236, "; // vibrant purple (rgba base)
 
-const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreator, user, loggedIn }) => {
+const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreator, user, loggedIn, token }) => {
   const controls = useAnimation();
   const [isBidding, setIsBidding] = useState(false);
   const [winner, setWinner] = useState(null);
@@ -53,7 +54,6 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
 
 
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : "/fallback.jpg";
-  const token = typeof window !== "undefined"? localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken") : null;
   
   // fetch user
   // useEffect(() => {

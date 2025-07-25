@@ -15,7 +15,8 @@ import {
 } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { Button } from "../../../components/ui/button";
-import { User } from "../../../lib/interfaces";
+import { useUser } from "../../../lib/user-context";
+import { useAuth } from "../../../lib/auth-context";
 
 interface Transaction {
   id: string;
@@ -78,7 +79,7 @@ const SAMPLE_TRANSACTIONS: Transaction[] = [
 ];
 
 const WalletPage = () => {
-  const [user, setUser] = useState<User>(null);
+  const { user } = useUser();
   const [balance, setBalance] = useState(0);
   const [totalDeposits, setTotalDeposits] = useState(0);
   const [withdrawals, setWithdrawals] = useState(0);
@@ -92,44 +93,7 @@ const WalletPage = () => {
   const [depositAmount, setDepositAmount] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
 
-  // fetch user
-  useEffect(() => {
-    const getUser = async () => {
-      const token =
-        localStorage.getItem("sessionToken") ||
-        sessionStorage.getItem("sessionToken");
-      if (!token) {
-        console.warn("No token found");
-        return;
-      }
-
-      try {
-        const res = await fetch(
-          "https://asyncawait-auction-project.onrender.com/api/getuser",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!res.ok) {
-          const err = await res.json();
-          console.error("Failed to fetch user:", err.message);
-          return;
-        }
-
-        const data = await res.json();
-        setUser(data);
-      } catch (e) {
-        console.error("Error fetching user:", e);
-      }
-    };
-    getUser();
-  }, []);
-
+  
   // Loading check
   useEffect(() => {
     if (!user) {

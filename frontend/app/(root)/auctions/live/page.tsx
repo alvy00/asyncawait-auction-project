@@ -15,7 +15,7 @@ import { useAuth } from "../../../../lib/auth-context";
 
 const LiveAuctionsPage = () => {
   const { user } = useUser();
-  const { loggedIn, isReady } = useAuth()
+  const { loggedIn, isReady, token } = useAuth()
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [favAuctionIDs, setFavAuctionIDs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -256,7 +256,8 @@ const LiveAuctionsPage = () => {
                     auctionCreator={auction.creator}
                     isFavourited={auction.isFavorite}
                     user={user}
-                    loggedIn={loggedIn}
+                    loggedIn={loggedIn} 
+                    token={token}                  
                   />
                 )}
                 {auction.auction_type === "blitz" && (
@@ -266,6 +267,7 @@ const LiveAuctionsPage = () => {
                     auctionCreator={auction.creator}
                     user={user}
                     loggedIn={loggedIn}
+                    token={token}
                   />
                 )}
                 {auction.auction_type === "dutch" && (
@@ -275,6 +277,7 @@ const LiveAuctionsPage = () => {
                     auctionCreator={auction.creator}
                     user={user} 
                     loggedIn={loggedIn}
+                    token={token}
                   />
                 )}
                 {auction.auction_type === "reverse" && (
@@ -284,6 +287,7 @@ const LiveAuctionsPage = () => {
                     auctionCreator={auction.creator}
                     user={user} 
                     loggedIn={loggedIn}
+                    token={token}
                   />
                 )}
                 {auction.auction_type === "phantom" && (
@@ -293,6 +297,7 @@ const LiveAuctionsPage = () => {
                     auctionCreator={auction.creator}
                     user={user} 
                     loggedIn={loggedIn}
+                    token={token}
                   />
                 )}
               </motion.div>
