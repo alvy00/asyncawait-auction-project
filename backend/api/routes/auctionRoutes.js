@@ -11,16 +11,16 @@ const auctionRouter = express.Router();
 
 // Deduct from wallet
 auctionRouter.post('/paywallet', async (req, res) => {
-  const { user_id, amount } = req.body;
+  const { user_id, amount, auction_id } = req.body;
 
-  if (!user_id || !amount) {
-    return res.status(400).json({ message: "Missing user_id or amount" });
+  if (!user_id || !amount || !auction_id) {
+    return res.status(400).json({ message: "Missing user_id, amount or auction_id" });
   }
 
   try {
     const { data: user, error: fetchError } = await supabase
       .from('users')
-      .select('money')
+      .select('money, spent_on_bids')
       .eq('user_id', user_id)
       .single();
 
@@ -32,16 +32,27 @@ auctionRouter.post('/paywallet', async (req, res) => {
       return res.status(400).json({ message: "Insufficient balance" });
     }
 
-    const { error: updateError } = await supabase
+    const { error: updateUserError } = await supabase
       .from('users')
       .update({
         money: user.money - amount,
-        spent_on_bids: user.spent_on_bids ? user.spent_on_bids + amount : amount,
+        spent_on_bids: (user.spent_on_bids ?? 0) + amount,
       })
       .eq('user_id', user_id);
 
-    if (updateError) {
-      return res.status(500).json({ message: "Failed to update balance", error: updateError.message });
+    if (updateUserError) {
+      return res.status(500).json({ message: "Failed to update user balance", error: updateUserError.message });
+    }
+
+    const { error: updateAuctionError } = await supabase
+      .from('auctions')
+      .update({
+        payment_status: 'paid'
+      })
+      .eq('auction_id', auction_id);
+
+    if (updateAuctionError) {
+      return res.status(500).json({ message: "Failed to update auction payment status", error: updateAuctionError.message });
     }
 
     return res.status(200).json({ message: "Payment successful" });

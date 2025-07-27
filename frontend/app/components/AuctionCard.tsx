@@ -236,22 +236,21 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
       if (!res.ok) {
         console.error("Payment failed:", data.message);
         toast.error(data.message || "Payment failed");
-        return;
+        throw new Error(data.message || "Payment failed");
       }
 
       toast.success("Payment successful!");
       setShowPayNowModal(false);
-      // Optionally refresh balance or trigger other updates:
       setRefresh(prev => !prev);
 
     } catch (error) {
       console.error("Error during wallet payment:", error);
-      toast.error("An unexpected error occurred");
+      throw error;
     }
   };
 
-  function handleSSLCOMMERZPayment(): void {
-    throw new Error("Function not implemented.");
+  const handleSSLCOMMERZPayment = async () => {
+    toast.success("Function not implemented.");
   }
 
   return (
