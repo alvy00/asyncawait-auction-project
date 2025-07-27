@@ -242,6 +242,31 @@ auctionRouter.get('/:id', async (req, res) => {
   }
 });
 
+// Fetch All unpaid Auctions (User)
+auctionRouter.post('/unpaid', async (req, res) => {
+  try {
+    const { user_id } = req.body;
+
+    const now = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from('auctions')
+      .select('*')
+      .eq('highest_bidder_id', user_id)
+      .eq('payment_status', 'unpaid')
+      .lt('end_time', now);
+
+    if (error) {
+      return res.status(500).json({ message: error.message });
+    }
+
+    res.status(200).json(data);
+  } catch (e) {
+    console.error("Error fetching unpaid auctions:", e);
+    res.status(500).json({ message: "Server error while fetching unpaid auctions." });
+  }
+});
+
 // Favourite Auctions
 auctionRouter.post('/favourite', async (req, res) => {
     try{

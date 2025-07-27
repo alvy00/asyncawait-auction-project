@@ -25,6 +25,7 @@ const FIREY_ORANGE = "#FF4500";
 const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator, user, loggedIn, token }) => {
   const controls = useAnimation();
   const [winner, setWinner] = useState(null);
+  const [isEnded, setIsEnded] = useState(false);
   const [ participants, setParticipants ] = useState(auction?.participants);
   const [isBidding, setIsBidding] = useState(false);
   const [submittingBid, setSubmittingBid] = useState(false);
@@ -40,43 +41,11 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator,
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : "/fallback.jpg";
   const accent = getCardAccent("blitz");
 
-  // fetch user
-  // useEffect(() => {
-  //   const getUser = async () => {
-  //     const token =
-  //       localStorage.getItem("sessionToken") ||
-  //       sessionStorage.getItem("sessionToken");
-  //     if (!token) {
-  //       console.warn("No token found");
-  //       return;
-  //     }
-
-  //     try {
-  //       const res = await fetch(
-  //         "https://asyncawait-auction-project.onrender.com/api/getuser",
-  //         {
-  //           method: "GET",
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //         }
-  //       );
-
-  //       if (!res.ok) {
-  //         const err = await res.json();
-  //         console.error("Failed to fetch user:", err.message);
-  //         return;
-  //       }
-
-  //       const data = await res.json();
-  //       setUser(data);
-  //     } catch (e) {
-  //       console.error("Error fetching user:", e);
-  //     }
-  //   };
-  //   getUser();
-  // }, []);
+  // sets isEnded
+  useEffect(() => {
+    const hasEnded = new Date(auction.end_time) <= new Date();
+    setIsEnded(hasEnded);
+  }, [auction.end_time]);
 
   // submit bid
   const handleBidSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -166,48 +135,6 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator,
     getHighestBidder();
   }, [auction?.highest_bidder_id, refresh]);
 
-  // Status Badge component
-  // const StatusBadge = ({ status, auctionId }) => {
-  //   useEffect(() => {
-  //     if (status.toLowerCase() === "ended") {
-  //       const updateStatusEnd = async () => {
-  //         try {
-  //           const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/updatestatus', {
-  //             method: 'POST',
-  //             headers: { 'Content-Type': 'application/json' },
-  //             body: JSON.stringify({ auctionId, status: "ended" }),
-  //           });
-
-  //           if (res.ok) {
-  //             const json = await res.json();
-  //             console.log(json.message);
-  //           } else {
-  //             console.error("Failed to update auction status", res.status);
-  //           }
-  //         } catch (error) {
-  //           console.error("Error updating auction status:", error);
-  //         }
-  //       };
-
-  //       updateStatusEnd();
-  //     }
-  //   }, [status, auctionId]);
-
-  //   let bgClasses = "";
-  //   let text = "";
-  //   let Icon = null;
-
-  //   return (
-  //     <motion.div
-  //       animate={status.toLowerCase() === "live" ? controls : { scale: 1 }}
-  //       className={`${bgClasses} text-white text-xs font-bold px-4 py-1 z-10 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm absolute top-4 left-4`}
-  //     >
-  //       {Icon && <Icon className="text-white" />}
-  //       <span>{text}</span>
-  //     </motion.div>
-  //   );
-  // };
-
   // Live Badge Animation
   useEffect(() => {
     if (auction.status === "live") {
@@ -294,7 +221,7 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator,
 
         <div className={cardFooter + " flex items-center justify-between"}>
           <div className={cardCountdown}>
-            <Countdown endTime={auction.end_time} />
+            <Countdown endTime={auction.end_time} onComplete={() => setIsEnded(true)} />
           </div>
           <div className={`${cardCreatorBadge} text-orange-400 font-semibold flex items-center`}>
             {auctionCreator}
@@ -329,28 +256,42 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator,
                     isBidding ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100 pointer-events-auto"
                   }`}
                 >
-                  {auction?.user_id !== user?.user_id ? (
-                    <button
-                      onClick={() => {
-                        setIsBidding(true);
-                        setShake(true);
-                        setTimeout(() => setShake(false), 600);
-                      }}
-                      disabled={auction.status === "upcoming"}
-                      type="button"
-                      className={`
-                        w-full py-2 px-4 rounded-full
-                        bg-gradient-to-r from-orange-600 to-orange-800
-                        border border-orange-700 text-white font-bold shadow-lg
-                        hover:from-orange-700 hover:to-orange-900 hover:border-orange-600
-                        transition duration-300
-                        cursor-pointer disabled:cursor-not-allowed disabled:opacity-50
-                      `}
-                    >
-                      {auction.status === "upcoming" ? "Coming Soon" : "Place Bid"}
-                    </button>
+                  {auction?.user_id !== user?.user_id ? (!isEnded ? 
+                    (
+                      <motion.button
+                        onClick={() => {
+                          setIsBidding(true);
+                          setShake(true);
+                          setTimeout(() => setShake(false), 600);
+                        }}
+                        disabled={auction.status === "upcoming"}
+                        className={`
+                          w-full py-2 px-4 rounded-full
+                          bg-gradient-to-r from-orange-600 to-orange-800
+                          border border-orange-700 text-white font-bold shadow-lg
+                          hover:from-orange-700 hover:to-orange-900 hover:border-orange-600
+                          transition duration-300
+                          cursor-pointer disabled:cursor-not-allowed disabled:opacity-50
+                        `}
+                      >
+                        {auction.status === "upcoming" ? "Coming Soon" : "Place Bid"}
+                      </motion.button>
+                      ):(
+                      <motion.button
+                        className={`
+                          w-full py-2 px-4 rounded-full
+                          bg-gradient-to-r from-orange-600 to-orange-800
+                          border border-orange-700 text-white font-bold shadow-lg
+                          hover:from-orange-700 hover:to-orange-900 hover:border-orange-600
+                          transition duration-300
+                          cursor-pointer disabled:cursor-not-allowed disabled:opacity-50
+                        `}
+                      >
+                        Pay Now
+                      </motion.button>
+                    )
                   ) : (
-                    <div className="w-full flex items-center justify-center rounded-full border border-gray-600 bg-gray-900 text-gray-400 font-medium cursor-not-allowed shadow-inner text-sm">
+                    <div className="w-full py-2 px-4 font-semibold rounded-full text-white border border-gray-500 shadow-md flex items-center justify-center rounded-full border border-gray-500 bg-gray-800 text-gray-300 font-medium cursor-not-allowed shadow-inner text-xs md:text-sm">
                       You created this auction
                     </div>
                   )}

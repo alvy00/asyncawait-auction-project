@@ -42,7 +42,7 @@ const StatusBadge = ({ type, status, auctionId, participantCount }) => {
   switch (normalizedStatus) {
     case "live":
       bgClasses = "bg-gradient-to-r from-green-700 to-green-500";
-      text = "CLASSIC | LIVE";
+      text = "CLASSIC | LIVE ";
       Icon = FaBolt;
       tooltipText = "The highest bidder wins";
       break;

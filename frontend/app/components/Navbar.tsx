@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { HiOutlineUserAdd } from "react-icons/hi"
 import { CiLogin } from "react-icons/ci"
-import { MdDashboard, MdOutlineCreateNewFolder } from "react-icons/md";
+import { MdOutlineAdminPanelSettings, MdDashboard, MdOutlineCreateNewFolder, MdOutlinePayment } from "react-icons/md";
 import { FaArrowRightLong } from "react-icons/fa6"
 import { User } from "../../lib/interfaces"
 import toast from "react-hot-toast"
@@ -77,7 +77,7 @@ export const Navbar = () => {
 
   const handleLogOut = () => {
     logout();
-    toast.success('Logged out successfully')
+    toast.success('Logged out!')
     router.push('/');
   };
 
@@ -297,10 +297,10 @@ export const Navbar = () => {
                   </Button>
                 </Link>
 
-                {/* Settings */}
-                <Link href="/dashboard/settings">
+                {/* Due-payment */}
+                <Link href="/due-payment">
                   <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 cursor-pointer">
-                    <Settings className="w-4 h-4" />
+                    <MdOutlinePayment className="w-4 h-4" />
                   </Button>
                 </Link>
                 
@@ -358,7 +358,7 @@ export const Navbar = () => {
                               className="flex items-center gap-2 px-4 py-2 text-white hover:bg-[#162a3d]/70 hover:text-orange-400 text-sm transition-all duration-200"
                               onClick={() => setAvatarDropdownOpen(false)}
                             >
-                              <Settings size={16} />
+                              <MdOutlineAdminPanelSettings size={16} />
                               Admin
                             </Link>
                           </motion.div>
@@ -372,6 +372,17 @@ export const Navbar = () => {
                           >
                             <MdOutlineCreateNewFolder className="text-lg" />
                             Create Auction
+                          </Link>
+                        </motion.div>
+
+                        <motion.div variants={menuItemVariants}>
+                          <Link
+                            href="/dashboard/settings"
+                            className="flex items-center gap-2 px-4 py-2 text-white hover:bg-[#162a3d]/70 hover:text-orange-400 text-sm transition-all duration-200"
+                            onClick={() => setAvatarDropdownOpen(false)}
+                          >
+                            <Settings size={16} />
+                            Settings
                           </Link>
                         </motion.div>
 
