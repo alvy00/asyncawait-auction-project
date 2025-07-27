@@ -7,6 +7,52 @@ import { getUser } from '../controllers/authController.js';
 const auctionRouter = express.Router();
 
 
+// -------------------------------------- USERS ----------------------------------------------------
+
+// Deduct from wallet
+auctionRouter.post('/paywallet', async (req, res) => {
+  const { user_id, amount } = req.body;
+
+  if (!user_id || !amount) {
+    return res.status(400).json({ message: "Missing user_id or amount" });
+  }
+
+  try {
+    const { data: user, error: fetchError } = await supabase
+      .from('users')
+      .select('money')
+      .eq('user_id', user_id)
+      .single();
+
+    if (fetchError || !user) {
+      return res.status(500).json({ message: "User not found", error: fetchError?.message });
+    }
+
+    if (user.money < amount) {
+      return res.status(400).json({ message: "Insufficient balance" });
+    }
+
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({
+        money: user.money - amount,
+        spent_on_bids: user.spent_on_bids ? user.spent_on_bids + amount : amount,
+      })
+      .eq('user_id', user_id);
+
+    if (updateError) {
+      return res.status(500).json({ message: "Failed to update balance", error: updateError.message });
+    }
+
+    return res.status(200).json({ message: "Payment successful" });
+
+  } catch (err) {
+    console.error("Error in /paywallet:", err);
+    return res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+
 // -------------------------------------- AUCTIONS -------------------------------------------------
 
 // Get All Auctions
@@ -193,7 +239,6 @@ auctionRouter.post('/updatestatus', async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 });
-
 
 // Fetch Auction Details by ID
 auctionRouter.post('/aucdetails', async (req, res) => {

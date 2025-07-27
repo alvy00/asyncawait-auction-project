@@ -210,6 +210,32 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
     }
   }, [shake]);
 
+  const updateStatus = async () => {
+    try {
+      const res = await fetch("https://asyncawait-auction-project.onrender.com/api/auctions/updatestatus", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          auction_id: auction.auction_id,
+          status: "ended",
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        console.error("Failed to update status:", error.message);
+      } else {
+        console.log("Auction status successfully updated to 'ended'");
+        setIsEnded(true);
+        setCurrentStatus("ended");
+      }
+    } catch (error) {
+      console.error("Error updating auction status:", error);
+    }
+  }
+
   return (
   <motion.div
     onMouseEnter={() => setIsHovered(true)}
@@ -291,31 +317,7 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
           <div className={cardCountdown}>
             <Countdown 
               endTime={auction.end_time} 
-              onComplete={async () => {
-                try {
-                  const res = await fetch("https://asyncawait-auction-project.onrender.com/api/auctions/updatestatus", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                      auction_id: auction.auction_id,
-                      status: "ended",
-                    }),
-                  });
-
-                  if (!res.ok) {
-                    const error = await res.json();
-                    console.error("Failed to update status:", error.message);
-                  } else {
-                    console.log("Auction status successfully updated to 'ended'");
-                    setIsEnded(true);
-                    setCurrentStatus("ended");
-                  }
-                } catch (error) {
-                  console.error("Error updating auction status:", error);
-                }
-              }} 
+              onComplete={updateStatus} 
             />
           </div>
           <div className={`${cardCreatorBadge} font-semibold flex items-center`}>

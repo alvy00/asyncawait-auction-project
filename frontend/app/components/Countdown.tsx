@@ -10,6 +10,10 @@ export const Countdown = ({
   const [timeLeft, setTimeLeft] = useState("");
   const called = useRef(false);
 
+  useEffect(() => {
+    called.current = false;
+  }, [endTime]);
+
   const updateCountdown = () => {
     const now = new Date();
     const end = new Date(endTime);
