@@ -265,6 +265,7 @@ const LiveAuctionsPage = () => {
                     key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
                     auction={auction} 
                     auctionCreator={auction.creator}
+                    isFavourited={auction.isFavorite}
                     user={user}
                     loggedIn={loggedIn}
                     token={token}
@@ -275,6 +276,7 @@ const LiveAuctionsPage = () => {
                     key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
                     auction={auction} 
                     auctionCreator={auction.creator}
+                    isFavourited={auction.isFavorite}
                     user={user} 
                     loggedIn={loggedIn}
                     token={token}
@@ -285,6 +287,7 @@ const LiveAuctionsPage = () => {
                     key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
                     auction={auction} 
                     auctionCreator={auction.creator}
+                    isFavourited={auction.isFavorite}
                     user={user} 
                     loggedIn={loggedIn}
                     token={token}
@@ -295,6 +298,7 @@ const LiveAuctionsPage = () => {
                     key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
                     auction={auction} 
                     auctionCreator={auction.creator}
+                    isFavourited={auction.isFavorite}
                     user={user} 
                     loggedIn={loggedIn}
                     token={token}

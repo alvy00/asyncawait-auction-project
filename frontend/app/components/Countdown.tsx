@@ -1,8 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
-
-export const Countdown = ({ endTime, onComplete }: { endTime: string; onComplete?: () => void }) => {
+export const Countdown = ({
+  endTime,
+  onComplete,
+}: {
+  endTime: string;
+  onComplete?: () => void;
+}) => {
   const [timeLeft, setTimeLeft] = useState("");
+  const called = useRef(false);
 
   const updateCountdown = () => {
     const now = new Date();
@@ -11,7 +17,10 @@ export const Countdown = ({ endTime, onComplete }: { endTime: string; onComplete
 
     if (diff <= 0) {
       setTimeLeft("Ended");
-      onComplete?.();
+      if (!called.current) {
+        called.current = true;
+        onComplete?.();
+      }
       return;
     }
 
@@ -20,13 +29,15 @@ export const Countdown = ({ endTime, onComplete }: { endTime: string; onComplete
     const seconds = Math.floor((diff % 60000) / 1000);
 
     setTimeLeft(
-      `${hours.toString().padStart(2, "0")}h ${minutes.toString().padStart(2, "0")}m ${seconds.toString().padStart(2, "0")}s`
+      `${hours.toString().padStart(2, "0")}h ${minutes
+        .toString()
+        .padStart(2, "0")}m ${seconds.toString().padStart(2, "0")}s`
     );
   };
 
   useEffect(() => {
     updateCountdown();
-    const interval = setInterval(updateCountdown, 1000); 
+    const interval = setInterval(updateCountdown, 1000);
     return () => clearInterval(interval);
   }, [endTime]);
 
