@@ -27,7 +27,8 @@ const DuePayment = () => {
       setIsLoading(true);
       try {
         // https://asyncawait-auction-project.onrender.com/api/auctions/unpaid
-        const res = await fetch("http://localhost:8000/api/auctions/unpaid", {
+        // http://localhost:8000/api/auctions/unpaid
+        const res = await fetch("https://asyncawait-auction-project.onrender.com/api/auctions/unpaid", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

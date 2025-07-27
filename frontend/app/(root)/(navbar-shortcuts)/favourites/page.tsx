@@ -33,6 +33,7 @@ const FavouritesPage = () => {
     },
   };
 
+  // fetch favourited auctions
   useEffect(() => {
     const fetchFavourites = async () => {
       if (!user?.user_id) return;
@@ -61,6 +62,7 @@ const FavouritesPage = () => {
     fetchFavourites();
   }, [user?.user_id]);
 
+  // fetch auction details
   useEffect(() => {
     const fetchAuctionDetails = async () => {
       try {
@@ -73,7 +75,8 @@ const FavouritesPage = () => {
         );
 
         const results = await Promise.all(auctionPromises);
-        setFavAuctions(results);
+        const liveFavAucs = results.filter((auction) => auction.status !== 'ended');
+        setFavAuctions(liveFavAucs);
       } catch (e) {
         console.error("Error fetching auction details:", e);
       } finally {
@@ -192,7 +195,8 @@ const FavouritesPage = () => {
                     auctionCreator={auction.creator}
                     user={user}
                     loggedIn={loggedIn}
-                    token={token}
+                    token={token} 
+                    isFavourited={true}                  
                   />
                 )}
                 {auction.auction_type === "dutch" && (
@@ -202,6 +206,7 @@ const FavouritesPage = () => {
                     user={user}
                     loggedIn={loggedIn}
                     token={token}
+                    isFavourited={true}
                   />
                 )}
                 {auction.auction_type === "reverse" && (
@@ -211,6 +216,7 @@ const FavouritesPage = () => {
                     user={user}
                     loggedIn={loggedIn}
                     token={token}
+                    isFavourited={true}
                   />
                 )}
                 {auction.auction_type === "phantom" && (
@@ -220,6 +226,7 @@ const FavouritesPage = () => {
                     user={user}
                     loggedIn={loggedIn}
                     token={token}
+                    isFavourited={true}
                   />
                 )}
               </motion.div>

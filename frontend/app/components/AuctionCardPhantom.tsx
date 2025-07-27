@@ -32,13 +32,14 @@ interface AuctionCardProps {
   auction: Auction;
   auctionCreator: string;
   user: User;
+  isFavourited: boolean;
   loggedIn: boolean;
   token: string;
 }
 
 const FIREY_ORANGE = "#FF4500"; // Firey Orange (OrangeRed)
 
-const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreator, user, loggedIn,token }) => {
+const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreator, user, isFavourited, loggedIn,token }) => {
   const controls = useAnimation();
   const [winner, setWinner] = useState(null);
   const [isEnded, setIsEnded] = useState(false);
@@ -48,6 +49,12 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
   const [highestBid, setHighestBid] = useState(auction.highest_bid);
   const [totalBids, setTotalBids] = useState(auction.total_bids);
   const [isHovered, setIsHovered] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState<"upcoming" | "live" | "ended">(() => {
+    const now = new Date();
+    if (now < new Date(auction.start_time)) return "upcoming";
+    if (now <= new Date(auction.end_time)) return "live";
+    return "ended";
+  });
   const [refresh, setRefresh] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [shake, setShake] = useState(false);
@@ -173,6 +180,26 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
     }
   }, [auction.status, controls, refresh]);
 
+  // updates currentStatus every min
+  useEffect(() => {
+    const updateStatus = () => {
+      const now = new Date();
+      if (now < new Date(auction.start_time)) {
+        setCurrentStatus("upcoming");
+      } else if (now <= new Date(auction.end_time)) {
+        setCurrentStatus("live");
+      } else {
+        setCurrentStatus("ended");
+      }
+    };
+
+    updateStatus();
+
+    const interval = setInterval(updateStatus, 60000);
+
+    return () => clearInterval(interval);
+  }, [auction.start_time, auction.end_time, refresh, auction.auction_id]);
+
   // shake effect
   useEffect(() => {
     if (shake) {
@@ -218,7 +245,7 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
       <div className={cardStatusBadge}>
         <StatusBadge
           type="phantom"
-          status={auction.status}
+          status={currentStatus}
           auctionId={auction.auction_id}
           participantCount={auction.participants}
         />
@@ -227,7 +254,7 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
         <FavoriteBadge
           userId={user?.user_id}
           auctionId={auction.auction_id}
-          initialFavorited={auction.isFavorite}
+          initialFavorited={isFavourited}
           isHovered={isHovered}
         />
       </div>
@@ -262,7 +289,34 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
           className={`${cardFooter} flex items-center justify-between text-yellow-300`}
         >
           <div className={cardCountdown}>
-            <Countdown endTime={auction.end_time} onComplete={() => setIsEnded(true)} />
+            <Countdown 
+              endTime={auction.end_time} 
+              onComplete={async () => {
+                try {
+                  const res = await fetch("https://asyncawait-auction-project.onrender.com/api/auctions/updatestatus", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      auction_id: auction.auction_id,
+                      status: "ended",
+                    }),
+                  });
+
+                  if (!res.ok) {
+                    const error = await res.json();
+                    console.error("Failed to update status:", error.message);
+                  } else {
+                    console.log("Auction status successfully updated to 'ended'");
+                    setIsEnded(true);
+                    setCurrentStatus("ended");
+                  }
+                } catch (error) {
+                  console.error("Error updating auction status:", error);
+                }
+              }} 
+            />
           </div>
           <div className={`${cardCreatorBadge} font-semibold flex items-center`}>
             {auctionCreator}

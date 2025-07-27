@@ -145,7 +145,7 @@ auctionRouter.delete('/delete', async (req, res) => {
   }
 });
 
-// Update Auction Status and update spent_on_bids if ended (also deducts from money)
+// Update Auction Status
 auctionRouter.post('/updatestatus', async (req, res) => {
   const { auction_id, status } = req.body;
 
@@ -154,12 +154,12 @@ auctionRouter.post('/updatestatus', async (req, res) => {
   }
 
   try {
-    // Update auction status and get highest_bid and highest_bidder_id
-    const { data: auction, error: updateError } = await supabase
+    // Update auction status
+    const { data: updatedAuction, error: updateError } = await supabase
       .from('auctions')
       .update({ status })
       .eq('auction_id', auction_id)
-      .select('highest_bid, highest_bidder_id')
+      .select('auction_id, status, highest_bid, highest_bidder_id')
       .single();
 
     if (updateError) {
@@ -169,29 +169,31 @@ auctionRouter.post('/updatestatus', async (req, res) => {
       });
     }
 
-    // If auction ended and there's a highest bidder & bid, call RPC
-    if (status === 'ended' && auction?.highest_bidder_id && auction?.highest_bid) {
-      const { highest_bid, highest_bidder_id } = auction;
+    // If auction just ended and has a winner, update their stats
+    if (status === "ended" && updatedAuction?.highest_bidder_id) {
+      const { error: userUpdateError } = await supabase
+        .from("users")
+        .update({
+          auctions_won: supabase.raw("auctions_won + 1"),
+          spent_on_bids: supabase.raw(`spent_on_bids + ${updatedAuction.highest_bid}`),
+        })
+        .eq("user_id", updatedAuction.highest_bidder_id);
 
-      const { error: rpcError } = await supabase.rpc('increment_user_spent_on_bids', {
-        user_uuid: highest_bidder_id,
-        spent_amount: highest_bid, // <-- Correct RPC param name
-      });
-
-      if (rpcError) {
-        return res.status(400).json({
-          message: "Auction status updated but failed to increment user's spent_on_bids",
-          error: rpcError,
-        });
+      if (userUpdateError) {
+        console.warn("Auction status updated, but failed to update winner stats", userUpdateError);
       }
     }
 
-    return res.status(200).json({ message: "Auction status updated successfully" });
+    return res.status(200).json({ 
+      message: "Auction status updated successfully", 
+      updatedAuction 
+    });
   } catch (err) {
     console.error("Unexpected error in /updatestatus:", err);
     return res.status(500).json({ message: "Internal server error" });
   }
 });
+
 
 // Fetch Auction Details by ID
 auctionRouter.post('/aucdetails', async (req, res) => {
