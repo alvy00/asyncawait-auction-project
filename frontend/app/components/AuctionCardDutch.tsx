@@ -35,9 +35,10 @@ interface AuctionCardProps {
   isFavourited: boolean;
   loggedIn: boolean;
   token: string;
+  onPaymentSuccess?: () => void;
 }
 
-const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction, auctionCreator, isFavourited, user, loggedIn, token }) => {
+const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction, auctionCreator, isFavourited, user, loggedIn, token, onPaymentSuccess }) => {
   const controls = useAnimation();
   const [auction, setAuction] = useState(initialAuction);
   const [isBidding, setIsBidding] = useState(false);

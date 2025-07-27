@@ -35,11 +35,12 @@ interface AuctionCardProps {
   isFavourited: boolean;
   loggedIn: boolean;
   token: string;
+  onPaymentSuccess?: () => void;
 }
 
-const FIREY_PURPLE = "rgba(191, 85, 236, "; // vibrant purple (rgba base)
+const FIREY_PURPLE = "rgba(191, 85, 236, ";
 
-const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreator, user, isFavourited, loggedIn, token }) => {
+const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreator, user, isFavourited, loggedIn, token, onPaymentSuccess }) => {
   const controls = useAnimation();
   const [isBidding, setIsBidding] = useState(false);
   const [winner, setWinner] = useState(null);
