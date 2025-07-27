@@ -13,6 +13,7 @@ import { FaBolt, FaBullhorn, FaClock, FaFlagCheckered, FaGavel } from "react-ico
 import FavoriteBadge from "./FavouriteBadge";
 import StatusBadge from "./StatusBadge";
 import { cardBase, cardImageContainer, cardImage, cardOverlay, cardStatusBadge, cardFavoriteBadge, cardContent, cardTitle, cardLabel, cardPrice, cardCountdown, cardFooter, cardCreatorBadge, cardBidButton, getCardAccent } from "./auction-detail/CardStyleSystem";
+import PayNowModal from "./PayNowModal";
 
 const FALLBACK_IMAGE = "/fallback.jpg";
 
@@ -44,6 +45,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
   });
   const [favourited, setFavourited] = useState(isFavourited);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [showPayNowModal, setShowPayNowModal] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [shake, setShake] = useState(false);
 
@@ -213,6 +215,14 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
     }
   }, [shake]);
 
+  function handleWalletPayment(): void {
+    throw new Error("Function not implemented.");
+  }
+
+  function handleSSLCOMMERZPayment(): void {
+    throw new Error("Function not implemented.");
+  }
+
   return (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -267,7 +277,34 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
             ? winner
               ? <span className="text-green-400 font-bold animate-pulse">🎉 {winner} won!</span>
               : <span className="text-red-400 font-semibold">❌ Expired</span>
-            : <Countdown endTime={auction.end_time} onComplete={() => setIsEnded(true)} />}
+            : <Countdown 
+                endTime={auction.end_time} 
+                onComplete={async () => {
+                  try {
+                    const res = await fetch("https://asyncawait-auction-project.onrender.com/api/auctions/updatestatus", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        auction_id: auction.auction_id,
+                        status: "ended",
+                      }),
+                    });
+
+                    if (!res.ok) {
+                      const error = await res.json();
+                      console.error("Failed to update status:", error.message);
+                    } else {
+                      console.log("Auction status successfully updated to 'ended'");
+                      setIsEnded(true);
+                      setCurrentStatus("ended");
+                    }
+                  } catch (error) {
+                    console.error("Error updating auction status:", error);
+                  }
+                }} 
+              />}
         </div>
         { auctionCreator && 
           <div className="text-emerald-400 text-xs md:text-sm cursor-pointer">
@@ -343,6 +380,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
               ):(
               <div className="w-full">
                   <motion.button
+                    onClick={() => setShowPayNowModal(true)}
                     className={`
                       w-full py-2 px-4 font-semibold rounded-full text-white
                       transition-all duration-500 ease-in-out
@@ -356,10 +394,19 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
             )) 
         )}
       </div>
+
+
     </div>
 
     <AuctionDetailsModal open={detailsOpen} onClose={() => setDetailsOpen(false)} auction={auction} />
-
+    <PayNowModal
+      open={showPayNowModal}
+      onClose={() => setShowPayNowModal(false)}
+      onWalletPay={handleWalletPayment}
+      onSSLCOMMERZPay={handleSSLCOMMERZPayment}
+      userBalance={user.money}
+      amount={auction.highest_bid}
+    />
     <style>{`
       @keyframes gentle-shake {
         0%, 100% { transform: translateX(0); }
