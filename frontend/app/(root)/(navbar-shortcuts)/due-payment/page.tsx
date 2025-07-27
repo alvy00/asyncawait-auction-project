@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useUser } from "../../../../lib/user-context";
 import { useAuth } from "../../../../lib/auth-context";
 import { Auction } from "../../../../lib/interfaces";
@@ -15,46 +15,44 @@ import { FaSpinner, FaExclamationTriangle } from "react-icons/fa";
 const DuePayment = () => {
   const { user } = useUser();
   const { loggedIn, token, isReady } = useAuth();
-
   const [unpaidAuctions, setUnpaidAuctions] = useState<Auction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
-  // fetch unpaid auctions
-  useEffect(() => {
+  const [refresh, setRefresh] = useState(false);
+
+  const fetchDuePayments = useCallback(async () => {
     if (!user?.user_id || !isReady) return;
 
-    const fetchDuePayments = async () => {
-      setIsLoading(true);
-      try {
-        // https://asyncawait-auction-project.onrender.com/api/auctions/unpaid
-        // http://localhost:8000/api/auctions/unpaid
-        const res = await fetch("https://asyncawait-auction-project.onrender.com/api/auctions/unpaid", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ user_id: user.user_id }),
-        });
+    setIsLoading(true);
+    try {
+      const res = await fetch("https://asyncawait-auction-project.onrender.com/api/auctions/unpaid", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user_id: user.user_id }),
+      });
 
-        if (!res.ok) {
-          const err = await res.json();
-          console.error(err.message || "Failed to fetch won auctions.");
-          setUnpaidAuctions([]);
-          return;
-        }
-
-        const data = await res.json();
-        setUnpaidAuctions(data);
-      } catch (err) {
-        console.error("Error fetching due payments:", err);
+      if (!res.ok) {
+        const err = await res.json();
+        console.error(err.message || "Failed to fetch won auctions.");
         setUnpaidAuctions([]);
-      } finally {
-        setIsLoading(false);
+        return;
       }
-    };
 
-    fetchDuePayments();
+      const data = await res.json();
+      setUnpaidAuctions(data);
+    } catch (err) {
+      console.error("Error fetching due payments:", err);
+      setUnpaidAuctions([]);
+    } finally {
+      setIsLoading(false);
+    }
   }, [user?.user_id, isReady]);
+
+  // Fetch on mount and when refresh toggles
+  useEffect(() => {
+    fetchDuePayments();
+  }, [fetchDuePayments, refresh]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -68,7 +66,7 @@ const DuePayment = () => {
     },
   };
 
-  if (!isReady) return;
+  if (!isReady) return null;
 
   return (
     <section className="py-16 min-h-screen relative overflow-hidden">
@@ -138,26 +136,67 @@ const DuePayment = () => {
           >
             {unpaidAuctions.map((auction, index) => (
               <motion.div
-                key={auction.auction_id}
+                key={auction.auction_id + "-" + (refresh ? "refresh-true" : "refresh-false")}
                 className="hover:scale-105 transform transition-all duration-300 ease-in-out"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.25 }}
               >
                 {auction.auction_type === "classic" && (
-                  <AuctionCard auction={auction} auctionCreator={auction.creator} user={user} loggedIn={loggedIn} token={token} isFavourited={false} />
+                  <AuctionCard
+                    key={auction.auction_id + "-" + (refresh ? "refresh-true" : "refresh-false")}
+                    auction={auction}
+                    auctionCreator={auction.creator}
+                    user={user}
+                    loggedIn={loggedIn}
+                    token={token}
+                    isFavourited={auction.isFavorite}
+                    onPaymentSuccess={() => setRefresh(prev => !prev)}
+                  />
                 )}
                 {auction.auction_type === "blitz" && (
-                  <AuctionCardBlitz auction={auction} auctionCreator={auction.creator} user={user} loggedIn={loggedIn} token={token} />
+                  <AuctionCardBlitz 
+                    key={auction.auction_id + "-" + (refresh ? "refresh-true" : "refresh-false")} 
+                    auction={auction} 
+                    auctionCreator={auction.creator} 
+                    user={user} 
+                    loggedIn={loggedIn} 
+                    token={token} 
+                    isFavourited={auction.isFavorite}
+                    onPaymentSuccess={() => setRefresh(prev => !prev)} />
                 )}
                 {auction.auction_type === "dutch" && (
-                  <AuctionCardDutch auction={auction} auctionCreator={auction.creator} user={user} loggedIn={loggedIn} token={token} />
+                  <AuctionCardDutch 
+                    key={auction.auction_id + "-" + (refresh ? "refresh-true" : "refresh-false")} 
+                    auction={auction} 
+                    auctionCreator={auction.creator} 
+                    user={user} 
+                    loggedIn={loggedIn} 
+                    token={token} 
+                    isFavourited={auction.isFavorite}
+                    onPaymentSuccess={() => setRefresh(prev => !prev)} />
                 )}
                 {auction.auction_type === "reverse" && (
-                  <AuctionCardReverse auction={auction} auctionCreator={auction.creator} user={user} loggedIn={loggedIn} token={token} />
+                  <AuctionCardReverse 
+                    key={auction.auction_id + "-" + (refresh ? "refresh-true" : "refresh-false")} 
+                    auction={auction} 
+                    auctionCreator={auction.creator} 
+                    user={user} 
+                    loggedIn={loggedIn} 
+                    token={token} 
+                    isFavourited={auction.isFavorite}
+                    onPaymentSuccess={() => setRefresh(prev => !prev)} />
                 )}
                 {auction.auction_type === "phantom" && (
-                  <AuctionCardPhantom auction={auction} auctionCreator={auction.creator} user={user} loggedIn={loggedIn} token={token} />
+                  <AuctionCardPhantom 
+                    key={auction.auction_id + "-" + (refresh ? "refresh-true" : "refresh-false")} 
+                    auction={auction} 
+                    auctionCreator={auction.creator} 
+                    user={user} 
+                    loggedIn={loggedIn} 
+                    token={token} 
+                    isFavourited={auction.isFavorite}
+                    onPaymentSuccess={() => setRefresh(prev => !prev)} />
                 )}
               </motion.div>
             ))}

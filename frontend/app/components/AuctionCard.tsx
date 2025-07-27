@@ -24,9 +24,10 @@ interface AuctionCardProps {
   user: User;
   loggedIn: boolean;
   token: string;
+  onPaymentSuccess?: () => void;
 }
 
-const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFavourited, user, loggedIn, token })  => {
+const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFavourited, user, loggedIn, token, onPaymentSuccess })  => {
   const [winner, setWinner] = useState(null);
   const [ userMoney, setUserMoney] = useState(user?.money);
   const [ participants, setParticipants ] = useState(auction.participants);
@@ -227,6 +228,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
         },
         body: JSON.stringify({
           user_id: user.user_id,
+          auction_id: auction.auction_id,
           amount: auction.highest_bid,
         }),
       });
@@ -234,7 +236,6 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
       const data = await res.json();
 
       if (!res.ok) {
-        console.error("Payment failed:", data.message);
         toast.error(data.message || "Payment failed");
         throw new Error(data.message || "Payment failed");
       }
@@ -242,6 +243,10 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
       toast.success("Payment successful!");
       setShowPayNowModal(false);
       setRefresh(prev => !prev);
+
+      if (onPaymentSuccess) {
+        onPaymentSuccess();
+      }
 
     } catch (error) {
       console.error("Error during wallet payment:", error);
