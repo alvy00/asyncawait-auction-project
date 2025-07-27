@@ -8,6 +8,52 @@ authRouter.get('/ping', (req, res) => {
   return res.status(200).json({ message: "Server is active" });
 });
 
+// Server maintenance ( status update on supabase )
+authRouter.get('/maintenance', async (req, res) => {
+  try {
+    const now = new Date().toISOString();
+
+    // ended
+    const { error: endedError } = await supabase
+      .from('auctions')
+      .update({ status: 'ended' })
+      .lt('end_time', now);
+
+    if (endedError) {
+      console.error("Error updating ended auctions:", endedError);
+      return res.status(500).json({ message: "Failed to update ended auctions", error: endedError });
+    }
+
+    // live
+    const { error: liveError } = await supabase
+      .from('auctions')
+      .update({ status: 'live' })
+      .gte('start_time', now)
+      .lt('end_time', now);
+
+    if (liveError) {
+      console.error("Error updating live auctions:", liveError);
+      return res.status(500).json({ message: "Failed to update live auctions", error: liveError });
+    }
+
+    // upcoming
+    const { error: upcomingError } = await supabase
+      .from('auctions')
+      .update({ status: 'upcoming' })
+      .gt('start_time', now);
+
+    if (upcomingError) {
+      console.error("Error updating upcoming auctions:", upcomingError);
+      return res.status(500).json({ message: "Failed to update upcoming auctions", error: upcomingError });
+    }
+
+    res.status(200).json({ message: "Auction statuses updated successfully" });
+  } catch (e) {
+    console.error("Server error:", e);
+    res.status(500).json({ message: "Server error during maintenance" });
+  }
+});
+
 // Get Current Logged IN User's Database Data
 authRouter.get('/getuser', async (req, res) => {
   const authHeader = req.headers.authorization;

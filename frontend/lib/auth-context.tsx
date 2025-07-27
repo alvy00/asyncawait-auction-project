@@ -54,7 +54,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       localStorage.setItem("authChange", Date.now().toString());
 
       if (reason === "expired") toast.error("You were logged out due to inactivity.");
-      else toast.success("Logged out successfully");
 
       setTimeout(() => {
         if (window.location.pathname !== "/login") {
@@ -130,7 +129,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setLoggedIn(true);
             setUser(session.user);
             if (!hasShownToast.current) {
-              toast.success("Logged in!");
+              //toast.success("Logged in!");
               hasShownToast.current = true;
             }
             refreshUser();

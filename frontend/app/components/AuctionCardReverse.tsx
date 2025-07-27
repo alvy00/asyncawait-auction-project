@@ -42,6 +42,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
   const controls = useAnimation();
   const [isBidding, setIsBidding] = useState(false);
   const [winner, setWinner] = useState(null);
+  const [isEnded, setIsEnded] = useState(false);
   const [submittingBid, setSubmittingBid] = useState(false);
   const [bidAmount, setBidAmount] = useState(
     auction.highest_bid ? auction.highest_bid - 2 : auction.starting_price
@@ -55,43 +56,11 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
 
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : "/fallback.jpg";
   
-  // fetch user
-  // useEffect(() => {
-  //   const getUser = async () => {
-  //     const token =
-  //       localStorage.getItem("sessionToken") ||
-  //       sessionStorage.getItem("sessionToken");
-  //     if (!token) {
-  //       console.warn("No token found");
-  //       return;
-  //     }
-
-  //     try {
-  //       const res = await fetch(
-  //         "https://asyncawait-auction-project.onrender.com/api/getuser",
-  //         {
-  //           method: "GET",
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //         }
-  //       );
-
-  //       if (!res.ok) {
-  //         const err = await res.json();
-  //         console.error("Failed to fetch user:", err.message);
-  //         return;
-  //       }
-
-  //       const data = await res.json();
-  //       setUser(data);
-  //     } catch (e) {
-  //       console.error("Error fetching user:", e);
-  //     }
-  //   };
-  //   getUser();
-  // }, []);
+  // sets isEnded
+  useEffect(() => {
+    const hasEnded = new Date(auction.end_time) <= new Date();
+    setIsEnded(hasEnded);
+  }, [auction.end_time]);
 
   // submit bid
   const handleBidSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -326,7 +295,7 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
         </span>
         <div className={cardFooter}>
           <div className={cardCountdown}>
-            <Countdown endTime={auction.end_time} />
+            <Countdown endTime={auction.end_time} onComplete={() => setIsEnded(true)} />
           </div>
           {auctionCreator && (
             <div className="text-purple-400 text-xs md:text-sm flex items-center">
@@ -368,8 +337,9 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
                       : "opacity-100 scale-100 pointer-events-auto"
                   }`}
                 >
-                  {auction?.user_id !== user?.user_id ? (
-                    <button
+                  {auction?.user_id !== user?.user_id ? (!isEnded? 
+                  (
+                    <motion.button
                       onClick={() => {
                         setIsBidding(true);
                         setShake(true);
@@ -384,12 +354,21 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
                           : "bg-purple-700 hover:bg-purple-600 cursor-pointer"
                         }
                       `}
-                      type="button"
                     >
                       {auction.status === "upcoming" ? "Coming Soon" : "Place Lower Bid"}
-                    </button>
+                    </motion.button>
+                    ):(
+                    <motion.button
+                      className={`
+                        w-full py-2 px-4 font-semibold rounded-full text-white transition-all duration-500 ease-in-out
+                        border border-purple-600 shadow-md
+                      `}
+                    >
+                      Pay Now
+                    </motion.button>
+                  )
                   ) : (
-                    <div className="w-full flex items-center justify-center rounded-full border border-gray-500 bg-gray-800 text-gray-300 font-medium cursor-not-allowed shadow-inner text-sm">
+                    <div className="w-full py-2 px-4 font-semibold rounded-full text-white border border-gray-500 shadow-md flex items-center justify-center rounded-full border border-gray-500 bg-gray-800 text-gray-300 font-medium cursor-not-allowed shadow-inner text-xs md:text-sm">
                       You created this auction
                     </div>
                   )}

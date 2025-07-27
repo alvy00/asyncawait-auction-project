@@ -15,41 +15,48 @@ import { MarketingShowcase } from '../components/MarketingShowcase';
 
 
 export default function Home() {
+
+  // webapp start-up server warmup
   useEffect(() => {
     const hasPinged = sessionStorage.getItem('hasPingedServer');
 
+    // Inject animation styles
     const style = document.createElement('style');
     style.innerHTML = `
       .animation-delay-1000 { animation-delay: 1s; }
       .animation-delay-2000 { animation-delay: 2s; }
       .animation-delay-3000 { animation-delay: 3s; }
       .animation-delay-4000 { animation-delay: 4s; }
+
       @keyframes blob {
         0%   { transform: translate(0px, 0px) scale(1); }
         33%  { transform: translate(30px, -50px) scale(1.1); }
         66%  { transform: translate(-20px, 20px) scale(0.9); }
         100% { transform: translate(0px, 0px) scale(1); }
       }
+
       .animate-blob { animation: blob 25s infinite; }
     `;
-
-    document.documentElement.style.scrollBehavior = 'smooth';
     document.head.appendChild(style);
 
+    // Enable smooth scrolling
+    document.documentElement.style.scrollBehavior = 'smooth';
+
+    // Cold-start ping
     if (!hasPinged) {
-      const coldStartBreak = async () => {
+      (async () => {
         try {
-          const res = await fetch('https://asyncawait-auction-project.onrender.com/api/ping');
-          const data = await res.json();
-          console.log(data);
+          const ping = await fetch('https://asyncawait-auction-project.onrender.com/api/ping');
+          const maintenance = await fetch('https://asyncawait-auction-project.onrender.com/api/maintenance');
+
           sessionStorage.setItem('hasPingedServer', 'true');
         } catch (err) {
-          console.error('Ping failed', err);
+          console.error('Server cold start or maintenance ping failed:', err);
         }
-      };
-      coldStartBreak();
+      })();
     }
 
+    // Cleanup
     return () => {
       document.documentElement.style.scrollBehavior = '';
       if (style.parentNode) {
@@ -57,6 +64,7 @@ export default function Home() {
       }
     };
   }, []);
+
   
   return (
     <>

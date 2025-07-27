@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useUser } from "../../../../lib/user-context";
-import { Auction, User } from "../../../../lib/interfaces";
+import { Auction } from "../../../../lib/interfaces";
 import toast from "react-hot-toast";
 import { motion } from "framer-motion";
-import { FaHeartBroken } from "react-icons/fa";
+import { FaHeartBroken, FaSpinner } from "react-icons/fa";
 import { useAuth } from "../../../../lib/auth-context";
 import AuctionCard from "../../../components/AuctionCard";
 import AuctionCardBlitz from "../../../components/AuctionCardBlitz";
@@ -16,45 +16,23 @@ import AuctionCardPhantom from "../../../components/AuctionCardPhantom";
 
 const FavouritesPage = () => {
   const { user } = useUser();
-  const { loggedIn } = useAuth();
+  const { loggedIn, token } = useAuth();
   const [favAuctionIds, setFavAuctionIds] = useState<string[]>([]);
   const [favAuctions, setFavAuctions] = useState<Auction[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // fetch user
-  // useEffect(() => {
-  //   const getUser = async () => {
-  //     const token = localStorage.getItem('sessionToken') || sessionStorage.getItem('sessionToken');
-  //     if (!token) {
-  //       console.warn('No token found');
-  //       return;
-  //     }
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+        when: "beforeChildren",
+      },
+    },
+  };
 
-  //     try {
-  //       const res = await fetch('https://asyncawait-auction-project.onrender.com/api/getuser', {
-  //         method: 'GET',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //           'Authorization': `Bearer ${token}`,
-  //         },
-  //       });
-
-  //       if (!res.ok) {
-  //         const err = await res.json();
-  //         console.error('Failed to fetch user:', err.message);
-  //         return;
-  //       }
-
-  //       const data = await res.json();
-  //       setUser(data);
-  //     } catch (e) {
-  //       console.error('Error fetching user:', e);
-  //     }
-  //   };
-  //   getUser();
-  // }, []);
-
-  // fetch favorite auction IDs
   useEffect(() => {
     const fetchFavourites = async () => {
       if (!user?.user_id) return;
@@ -74,28 +52,22 @@ const FavouritesPage = () => {
 
         const data = await res.json();
         setFavAuctionIds(data);
-        console.log("Fetched favourite IDs:", data);
       } catch (err) {
         console.error(err);
         toast.error("Could not load your favorites.");
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchFavourites();
   }, [user?.user_id]);
 
-  // fetch auction details by ID
   useEffect(() => {
     const fetchAuctionDetails = async () => {
       try {
         const auctionPromises = favAuctionIds.map((auction_id) =>
           fetch("https://asyncawait-auction-project.onrender.com/api/auctions/aucdetails", {
             method: "POST",
-            headers: {
-              "Content-type": "application/json",
-            },
+            headers: { "Content-type": "application/json" },
             body: JSON.stringify({ auction_id }),
           }).then((res) => res.json())
         );
@@ -104,97 +76,150 @@ const FavouritesPage = () => {
         setFavAuctions(results);
       } catch (e) {
         console.error("Error fetching auction details:", e);
+      } finally {
+        setLoading(false);
       }
     };
 
     if (favAuctionIds.length > 0) {
       fetchAuctionDetails();
+    } else {
+      setLoading(false);
     }
   }, [favAuctionIds]);
 
   return (
-    <section className="pt-25 py-16 min-h-screen">
-      <div className="container mx-auto px-4">
-        <motion.h1
-          className="text-4xl font-bold text-white mb-8 text-center"
+    <section className="py-16 min-h-screen relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-pink-500/10 rounded-full filter blur-[120px] animate-pulse-slow"></div>
+        <div className="absolute bottom-[20%] left-[5%] w-[300px] h-[300px] bg-purple-500/5 rounded-full filter blur-[80px] animate-float"></div>
+        <div className="absolute top-[30%] left-[10%] w-[200px] h-[200px] bg-blue-500/5 rounded-full filter blur-[60px] animate-float-delayed"></div>
+        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+      </div>
+
+      <div className="container mx-auto px-4 relative z-10">
+        {/* Title */}
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
         >
-          Your Favourited Auctions
-        </motion.h1>
+          <motion.h1
+            className="mt-10 text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            Your Favourite{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600">
+              Auctions
+            </span>
+          </motion.h1>
 
+          <motion.p
+            className="text-gray-300 text-lg md:text-xl max-w-3xl mx-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            Explore the auctions you&apos;ve loved. Ready to place your winning bid?
+          </motion.p>
+        </motion.div>
+
+        {/* Content */}
         {loading ? (
-          <p className="text-center text-gray-400">Loading favourites...</p>
-        ) : favAuctions.length === 0 ? (
-          <div className="text-center text-gray-400 py-20">
-            <FaHeartBroken className="mx-auto text-4xl mb-4" />
-            <p>No favourites yet. Start browsing and add some!</p>
+          <div className="flex flex-col items-center justify-center py-20">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+              className="text-pink-500 mb-4"
+            >
+              <FaSpinner className="animate-spin h-12 w-12" />
+            </motion.div>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-gray-300 text-lg"
+            >
+              Loading your favourited auctions...
+            </motion.p>
           </div>
+        ) : favAuctions.length === 0 ? (
+          <motion.div
+            className="text-center py-20"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="inline-block p-6 rounded-full bg-white/5 backdrop-blur-md mb-6">
+              <FaHeartBroken className="h-12 w-12 text-gray-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-2">No favourites yet</h3>
+            <p className="text-gray-400">Start browsing and add some favourites!</p>
+          </motion.div>
         ) : (
           <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 ml-7 mr-7"
+            variants={containerVariants}
             initial="hidden"
             animate="show"
-            variants={{
-              hidden: { opacity: 0 },
-              show: {
-                opacity: 1,
-                transition: { staggerChildren: 0.1 },
-              },
-            }}
           >
-            {favAuctions.map((auction) => (
+            {favAuctions.map((auction, index) => (
               <motion.div
                 key={auction.auction_id}
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  show: { opacity: 1, y: 0 },
-                }}
+                className="hover:scale-105 transform transition-all duration-300 ease-in-out"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.25 }}
               >
                 {auction.auction_type === "classic" && (
                   <AuctionCard
-                    key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
                     auction={auction}
                     auctionCreator={auction.creator}
-                    isFavourited={auction.isFavorite}
+                    isFavourited={true}
                     user={user}
                     loggedIn={loggedIn}
+                    token={token}
                   />
                 )}
                 {auction.auction_type === "blitz" && (
-                  <AuctionCardBlitz 
-                    key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
-                    auction={auction} 
+                  <AuctionCardBlitz
+                    auction={auction}
                     auctionCreator={auction.creator}
                     user={user}
                     loggedIn={loggedIn}
+                    token={token}
                   />
                 )}
                 {auction.auction_type === "dutch" && (
-                  <AuctionCardDutch 
-                    key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
-                    auction={auction} 
+                  <AuctionCardDutch
+                    auction={auction}
                     auctionCreator={auction.creator}
-                    user={user} 
+                    user={user}
                     loggedIn={loggedIn}
+                    token={token}
                   />
                 )}
                 {auction.auction_type === "reverse" && (
-                  <AuctionCardReverse 
-                    key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
-                    auction={auction} 
+                  <AuctionCardReverse
+                    auction={auction}
                     auctionCreator={auction.creator}
-                    user={user} 
+                    user={user}
                     loggedIn={loggedIn}
+                    token={token}
                   />
                 )}
                 {auction.auction_type === "phantom" && (
-                  <AuctionCardPhantom 
-                    key={`${auction.auction_id}-${auction.isFavorite ? "fav" : "no-fav"}`}
-                    auction={auction} 
+                  <AuctionCardPhantom
+                    auction={auction}
                     auctionCreator={auction.creator}
-                    user={user} 
+                    user={user}
                     loggedIn={loggedIn}
+                    token={token}
                   />
                 )}
               </motion.div>

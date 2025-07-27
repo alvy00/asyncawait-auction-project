@@ -40,6 +40,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
   const controls = useAnimation();
   const [auction, setAuction] = useState(initialAuction);
   const [isBidding, setIsBidding] = useState(false);
+  const [isEnded, setIsEnded] = useState(false);
   const [submittingBid, setSubmittingBid] = useState(false);
   const [currentPrice, setCurrentPrice] = useState(initialAuction.starting_price);
   const [shake, setShake] = useState(false);
@@ -49,32 +50,11 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
 
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : "/fallback.jpg";
 
-  // fetch user
-  // useEffect(() => {
-  //   const getUser = async () => {
-  //     const token =
-  //       localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
-  //     if (!token) return;
-
-  //     try {
-  //       const res = await fetch("https://asyncawait-auction-project.onrender.com/api/getuser", {
-  //         method: "GET",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       });
-
-  //       if (res.ok) {
-  //         const data = await res.json();
-  //         setUser(data);
-  //       }
-  //     } catch (e) {
-  //       console.error("Error fetching user:", e);
-  //     }
-  //   };
-  //   getUser();
-  // }, []);
+  // sets isEnded
+  useEffect(() => {
+    const hasEnded = new Date(auction.end_time) <= new Date();
+    setIsEnded(hasEnded);
+  }, [auction.end_time]);
 
   // handle bid
   const submitBid = async () => {
@@ -235,7 +215,7 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
 
       <div onClick={() => setDetailsOpen(true)} className={cardFooter}>
         <div className={cardCountdown}>
-          <Countdown endTime={auction.end_time} />
+          <Countdown endTime={auction.end_time} onComplete={() => setIsEnded(true)} />
         </div>
         {auctionCreator && (
           <div className="text-blue-300 text-xs md:text-sm flex items-center">
@@ -260,25 +240,38 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
               </svg>
               <span className="text-sm">Login to bid</span>
             </Button>
-          ) : auction?.user_id !== user?.user_id ? (
-            <motion.button
-              onClick={handleAcceptClick}
-              whileTap={{ scale: 0.95 }}
-              disabled={showConfirmModal}
-              className={`
-                px-6 py-3 font-bold text-white rounded-full
-                focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-400
-                border border-blue-500 transition-all duration-300
-                ${showConfirmModal
-                  ? "bg-blue-400 cursor-not-allowed opacity-60"
-                  : "bg-blue-500 hover:bg-blue-600 hover:shadow-md cursor-pointer"
-                }
-              `}
-            >
-              {showConfirmModal ? "Coming Soon" : "Accept Price"}
-            </motion.button>
+          ) : auction?.user_id !== user?.user_id ? (!isEnded ? 
+            (
+              <motion.button
+                  onClick={handleAcceptClick}
+                  whileTap={{ scale: 0.95 }}
+                  disabled={showConfirmModal}
+                  className={`
+                    px-6 py-3 font-bold text-white rounded-full
+                    focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-400
+                    border border-blue-500 transition-all duration-300
+                    ${showConfirmModal
+                      ? "bg-blue-400 cursor-not-allowed opacity-60"
+                      : "bg-blue-500 hover:bg-blue-600 hover:shadow-md cursor-pointer"
+                    }
+                  `}
+                >
+                  {showConfirmModal ? "Coming Soon" : "Accept Price"}
+                </motion.button>
+                ):(
+                  <motion.button
+                  className={`
+                    px-6 py-3 font-bold text-white rounded-full
+                    focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-400
+                    border border-blue-500 transition-all duration-300
+                  `}
+                >
+                  Pay Now
+                </motion.button>
+            )
+
           ) : (
-            <div className="w-full flex items-center justify-center rounded-full border border-gray-500 bg-gray-800 text-gray-300 font-medium cursor-not-allowed shadow-inner text-sm">
+            <div className="w-full py-2 px-4 font-semibold rounded-full text-white border border-gray-500 shadow-md flex items-center justify-center rounded-full border border-gray-500 bg-gray-800 text-gray-300 font-medium cursor-not-allowed shadow-inner text-xs md:text-sm">
               You created this auction
             </div>
           )}
