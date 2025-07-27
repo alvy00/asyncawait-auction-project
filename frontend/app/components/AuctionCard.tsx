@@ -164,7 +164,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
 
   // updates currentStatus every min
   useEffect(() => {
-    const interval = setInterval(() => {
+    const updateStatus = () => {
       const now = new Date();
       if (now < new Date(auction.start_time)) {
         setCurrentStatus("upcoming");
@@ -172,38 +172,15 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
         setCurrentStatus("live");
       } else {
         setCurrentStatus("ended");
-
-        const updateStatusEnd = async () => {
-          const data = {
-            auction_id: auction.auction_id,
-            status: "ended"
-          };
-          try {
-            const res = await fetch('https://asyncawait-auction-project.onrender.com/api/auctions/updatestatus', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(data),
-            });
-
-            if (res.ok) {
-              const json = await res.json();
-              //console.log(json.message);
-            } else {
-              console.error('Failed to update auction status', res.status);
-            }
-          } catch (e) {
-            console.error(e);
-          }
-        };
-        updateStatusEnd();
       }
-    }, 60000);
+    };
+
+    updateStatus();
+
+    const interval = setInterval(updateStatus, 60000);
 
     return () => clearInterval(interval);
   }, [auction.start_time, auction.end_time, refresh, auction.auction_id]);
-
 
   // shake effect
   useEffect(() => {
@@ -215,9 +192,63 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
     }
   }, [shake]);
 
-  function handleWalletPayment(): void {
-    throw new Error("Function not implemented.");
+  const updateStatus = async () => {
+    try {
+      const res = await fetch("https://asyncawait-auction-project.onrender.com/api/auctions/updatestatus", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          auction_id: auction.auction_id,
+          status: "ended",
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        console.error("Failed to update status:", error.message);
+      } else {
+        console.log("Auction status successfully updated to 'ended'");
+        setIsEnded(true);
+        setCurrentStatus("ended");
+      }
+    } catch (error) {
+      console.error("Error updating auction status:", error);
+    }
   }
+
+  const handleWalletPayment = async () => {
+    try {
+      const res = await fetch("https://asyncawait-auction-project.onrender.com/api/auctions/paywallet", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: user.user_id,
+          amount: auction.highest_bid,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error("Payment failed:", data.message);
+        toast.error(data.message || "Payment failed");
+        return;
+      }
+
+      toast.success("Payment successful!");
+      setShowPayNowModal(false);
+      // Optionally refresh balance or trigger other updates:
+      setRefresh(prev => !prev);
+
+    } catch (error) {
+      console.error("Error during wallet payment:", error);
+      toast.error("An unexpected error occurred");
+    }
+  };
 
   function handleSSLCOMMERZPayment(): void {
     throw new Error("Function not implemented.");
@@ -279,31 +310,7 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
               : <span className="text-red-400 font-semibold">❌ Expired</span>
             : <Countdown 
                 endTime={auction.end_time} 
-                onComplete={async () => {
-                  try {
-                    const res = await fetch("https://asyncawait-auction-project.onrender.com/api/auctions/updatestatus", {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify({
-                        auction_id: auction.auction_id,
-                        status: "ended",
-                      }),
-                    });
-
-                    if (!res.ok) {
-                      const error = await res.json();
-                      console.error("Failed to update status:", error.message);
-                    } else {
-                      console.log("Auction status successfully updated to 'ended'");
-                      setIsEnded(true);
-                      setCurrentStatus("ended");
-                    }
-                  } catch (error) {
-                    console.error("Error updating auction status:", error);
-                  }
-                }} 
+                onComplete={updateStatus} 
               />}
         </div>
         { auctionCreator && 
@@ -404,8 +411,8 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
       onClose={() => setShowPayNowModal(false)}
       onWalletPay={handleWalletPayment}
       onSSLCOMMERZPay={handleSSLCOMMERZPayment}
-      userBalance={user.money}
-      amount={auction.highest_bid}
+      userBalance={user?.money}
+      amount={auction?.highest_bid}
     />
     <style>{`
       @keyframes gentle-shake {
