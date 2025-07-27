@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { Dialog, DialogContent } from "../../components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "../../components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaWallet, FaCreditCard, FaTimes, FaCheckCircle } from "react-icons/fa";
 import { useState } from "react";
@@ -61,6 +61,7 @@ export default function PayNowModal({
         className="max-w-md w-full p-6 bg-zinc-900 text-white rounded-xl shadow-lg border border-white/10"
         hideClose
       >
+        <DialogTitle></DialogTitle>
         <AnimatePresence mode="wait">
           <motion.div
             key={paymentSuccess ? "success" : "form"}
@@ -91,7 +92,7 @@ export default function PayNowModal({
                 <p className="text-lg font-semibold text-white/90">Thank you! Your payment was successful.</p>
                 <button
                   onClick={handleClose}
-                  className="mt-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full font-medium transition"
+                  className="mt-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full font-medium transition cursor-pointer"
                 >
                   Close
                 </button>
@@ -119,7 +120,7 @@ export default function PayNowModal({
                   {loadingMethod === "wallet" ? (
                     <span className="text-sm font-mono animate-pulse">Processing...</span>
                   ) : (
-                    <span className="text-sm font-mono">Balance: ${userBalance.toFixed(2)}</span>
+                    <span className="text-sm font-mono">Balance: ${userBalance?.toFixed(2)}</span>
                   )}
                 </motion.button>
 
