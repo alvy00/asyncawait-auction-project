@@ -19,11 +19,12 @@ interface AuctionCardProps {
   isFavourited: boolean;
   loggedIn: boolean;
   token: string;
+  onPaymentSuccess?: () => void;
 }
 
 const FIREY_ORANGE = "#FF4500";
 
-const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator, user, isFavourited, loggedIn, token }) => {
+const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator, user, isFavourited, loggedIn, token, onPaymentSuccess }) => {
   const controls = useAnimation();
   const [winner, setWinner] = useState(null);
   const [isEnded, setIsEnded] = useState(false);
