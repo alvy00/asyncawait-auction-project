@@ -437,7 +437,7 @@ adminRouter.post('/order', async (req, res) => {
 
   try {
     const apiResponse = await sslcz.init(data);
-    //console.log(apiResponse);
+    console.log(apiResponse);
     const GatewayPageURL = apiResponse.GatewayPageURL;
 
     if (GatewayPageURL) {
