@@ -275,8 +275,44 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
   };
 
   const handleSSLCOMMERZPayment = async () => {
-    toast.success("Function not implemented.");
-  }
+    try {
+      // https://asyncawait-auction-project.onrender.com/api/admin/order
+      // http://localhost:8000/api/admin/order
+      const res = await fetch('https://asyncawait-auction-project.onrender.com/api/admin/order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          auction_id: auction.auction_id,
+          item_name: auction.item_name,
+          name: user.name,
+          email: user.email,
+          category: auction.category,
+          payment: auction.highest_bid,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error('Payment initiation failed:', data.message || data);
+        alert('Failed to initiate payment. Please try again.');
+        return;
+      }
+
+      console.log(data);
+      if (data?.GatewayPageURL) {
+        window.location.href = data.GatewayPageURL;
+      } else {
+        console.error('GatewayPageURL not found in response:', data);
+        alert('Payment URL missing. Please contact support.');
+      }
+    } catch (error) {
+      console.error('Error initiating payment:', error);
+      alert('Something went wrong while initiating payment.');
+    }
+  };
 
   return (
   <motion.div
