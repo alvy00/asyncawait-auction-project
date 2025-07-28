@@ -1,6 +1,7 @@
 import supabase from '../../config/supabaseClient.js';
 import express from 'express'
 import dotenv from 'dotenv'
+import { v4 as uuidv4 } from 'uuid';
 import SSLCommerzPayment from 'sslcommerz-lts'
 
 dotenv.config();
@@ -389,47 +390,89 @@ adminRouter.post('/webhook', async (req, res) => {
   }
 })
 
-// SSLCommerz
-// adminRouter.get('/init', async (req, res) => {
-//   try{
-//     const store_id = process.env.STORE_ID;
-//     const store_passwd = process.env.STORE_PASSWS;
-//     const is_live = false;
+//SSLCommerz
+adminRouter.post('/order', async (req, res) => {
+  
+  const store_id = process.env.STORE_ID;
+  const store_passwd = process.env.STORE_PASSWD;
+  const is_live = false;
 
-//     const data = {
-//         total_amount: 100,
-//         currency: 'BDT',
-//         tran_id: 'REF123',
-//         success_url: 'http://localhost:3030/success',
-//         fail_url: 'http://localhost:3030/fail',
-//         cancel_url: 'http://localhost:3030/cancel',
-//         ipn_url: 'http://localhost:3030/ipn',
-//         shipping_method: 'Courier',
-//         product_name: 'Computer.',
-//         product_category: 'Electronic',
-//         product_profile: 'general',
-//         cus_name: 'Customer Name',
-//         cus_email: 'customer@example.com',
-//         cus_add1: 'Dhaka',
-//         cus_add2: 'Dhaka',
-//         cus_city: 'Dhaka',
-//         cus_state: 'Dhaka',
-//         cus_postcode: '1000',
-//         cus_country: 'Bangladesh',
-//         cus_phone: '01711111111',
-//         cus_fax: '01711111111',
-//         ship_name: 'Customer Name',
-//         ship_add1: 'Dhaka',
-//         ship_add2: 'Dhaka',
-//         ship_city: 'Dhaka',
-//         ship_state: 'Dhaka',
-//         ship_postcode: 1000,
-//         ship_country: 'Bangladesh',
-//     } = req.body;
+  const { auction_id, item_name, name, email, category, payment } = req.body;
+  const trans_id = `txn_${uuidv4().replace(/-/g, '').slice(0, 24)}`;
 
-//   }catch(e){
-    
-//   }
-// })
+  const data = {
+    total_amount: payment,
+    currency: 'USD',
+    tran_id: trans_id,
+    success_url: `https://asyncawait-auction-project.onrender.com/api/admin/success/${auction_id}`,
+    fail_url: '--',
+    cancel_url: '--',
+    ipn_url: '--',
+    shipping_method: 'Courier',
+    product_name: item_name,
+    product_category: category,
+    product_profile: '--',
+    cus_name: name,
+    cus_email: email,
+    cus_add1: '--',
+    cus_add2: '--',
+    cus_city: '--',
+    cus_state: '--',
+    cus_postcode: '--',
+    cus_country: 'Bangladesh',
+    cus_phone: '017...11',
+    cus_fax: '017...11',
+    ship_name: name,
+    ship_add1: 'Dhaka',
+    ship_add2: 'Dhaka',
+    ship_city: 'Dhaka',
+    ship_state: 'Dhaka',
+    ship_postcode: 1000,
+    ship_country: 'Bangladesh',
+  }
+
+  //console.log(data);
+
+  const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
+
+  try {
+    const apiResponse = await sslcz.init(data);
+    //console.log(apiResponse);
+    const GatewayPageURL = apiResponse.GatewayPageURL;
+
+    if (GatewayPageURL) {
+      return res.status(200).json({ GatewayPageURL });
+    } else {
+      //console.error('Payment initiation failed:', apiResponse);
+      return res.status(500).json({ error: 'Failed to initiate payment' });
+    }
+  } catch (error) {
+    //console.error('SSLCommerz error:', error);
+    return res.status(500).json({ error: 'Something went wrong' });
+  }
+})
+
+// Completes the payment w DB update
+adminRouter.post('/success/:auction_id', async (req, res) => {
+  const { auction_id } = req.params;
+
+  try {
+    const { error: updateAuctionError } = await supabase
+      .from('auctions')
+      .update({ payment_status: 'paid' })
+      .eq('auction_id', auction_id);
+
+    if (updateAuctionError) {
+      console.error('Supabase update error:', updateAuctionError);
+      return res.status(500).json({ error: 'Payment Failed' });
+    }
+
+    return res.status(200).json({ message: 'Payment Successful!' });
+  } catch (e) {
+    console.error('Unexpected error:', e);
+    return res.status(500).json({ error: 'Server error while completing payment.' });
+  }
+});
+
 
 export default adminRouter;
