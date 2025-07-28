@@ -27,6 +27,7 @@ import {
   cardBidButton,
   getCardAccent
 } from "./auction-detail/CardStyleSystem";
+import PayNowModal from "./PayNowModal";
 
 interface AuctionCardProps {
   auction: Auction;
@@ -58,6 +59,7 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
   });
   const [refresh, setRefresh] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [showPayNowModal, setShowPayNowModal] = useState(false);
   const [shake, setShake] = useState(false);
 
   const imageSrc = auction.images?.[0]?.trim() ? auction.images[0] : "/fallback.jpg";
@@ -237,6 +239,81 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
     }
   }
 
+  const handleWalletPayment = async () => {
+    try {
+      const res = await fetch("https://asyncawait-auction-project.onrender.com/api/auctions/paywallet", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: user.user_id,
+          auction_id: auction.auction_id,
+          amount: auction.highest_bid,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.message || "Payment failed");
+        throw new Error(data.message || "Payment failed");
+      }
+
+      toast.success("Payment successful!");
+      setShowPayNowModal(false);
+      setRefresh(prev => !prev);
+
+      if (onPaymentSuccess) {
+        onPaymentSuccess();
+      }
+
+    } catch (error) {
+      console.error("Error during wallet payment:", error);
+      throw error;
+    }
+  };
+
+  const handleSSLCOMMERZPayment = async () => {
+    try {
+      // https://asyncawait-auction-project.onrender.com/api/admin/order
+      // http://localhost:8000/api/admin/order
+      const res = await fetch('https://asyncawait-auction-project.onrender.com/api/admin/order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          auction_id: auction.auction_id,
+          item_name: auction.item_name,
+          name: user.name,
+          email: user.email,
+          category: auction.category,
+          payment: auction.highest_bid,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error('Payment initiation failed:', data.message || data);
+        alert('Failed to initiate payment. Please try again.');
+        return;
+      }
+
+      console.log(data);
+      if (data?.GatewayPageURL) {
+        window.location.href = data.GatewayPageURL;
+      } else {
+        console.error('GatewayPageURL not found in response:', data);
+        alert('Payment URL missing. Please contact support.');
+      }
+    } catch (error) {
+      console.error('Error initiating payment:', error);
+      alert('Something went wrong while initiating payment.');
+    }
+  };
+
   return (
   <motion.div
     onMouseEnter={() => setIsHovered(true)}
@@ -384,6 +461,7 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
                     </motion.button>
                     ):(
                       <motion.button
+                        onClick={() => setShowPayNowModal(true)}
                         className={`
                           w-full py-2 px-4 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-700 border border-yellow-600
                           text-white font-bold shadow-lg
@@ -455,6 +533,15 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
         setDetailsOpen(false);
       }}
       auction={auction}
+    />
+
+    <PayNowModal
+      open={showPayNowModal}
+      onClose={() => setShowPayNowModal(false)}
+      onWalletPay={handleWalletPayment}
+      onSSLCOMMERZPay={handleSSLCOMMERZPayment}
+      userBalance={user?.money}
+      amount={auction?.highest_bid}
     />
 
     {/* Shake animation styles */}
