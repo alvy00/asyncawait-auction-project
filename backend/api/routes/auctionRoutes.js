@@ -211,7 +211,6 @@ auctionRouter.post('/updatestatus', async (req, res) => {
   }
 
   try {
-    // Update auction status
     const { data: updatedAuction, error: updateError } = await supabase
       .from('auctions')
       .update({ status })
@@ -226,25 +225,37 @@ auctionRouter.post('/updatestatus', async (req, res) => {
       });
     }
 
-    // If auction just ended and has a winner, update their stats
     if (status === "ended" && updatedAuction?.highest_bidder_id) {
-      const { error: userUpdateError } = await supabase
+      // Fetch current user stats
+      const { data: userData, error: fetchUserError } = await supabase
         .from("users")
-        .update({
-          auctions_won: supabase.raw("auctions_won + 1"),
-          spent_on_bids: supabase.raw(`spent_on_bids + ${updatedAuction.highest_bid}`),
-        })
-        .eq("user_id", updatedAuction.highest_bidder_id);
+        .select("auctions_won, spent_on_bids")
+        .eq("user_id", updatedAuction.highest_bidder_id)
+        .single();
 
-      if (userUpdateError) {
-        console.warn("Auction status updated, but failed to update winner stats", userUpdateError);
+      if (fetchUserError || !userData) {
+        console.warn("Failed to fetch winner's user data", fetchUserError);
+      } else {
+        const { error: userUpdateError } = await supabase
+          .from("users")
+          .update({
+            auctions_won: userData.auctions_won + 1,
+            spent_on_bids: userData.spent_on_bids + updatedAuction.highest_bid,
+          })
+          .eq("user_id", updatedAuction.highest_bidder_id);
+
+        if (userUpdateError) {
+          console.warn("Auction status updated, but failed to update winner stats", userUpdateError);
+        }
       }
     }
 
+    // Step 3: Respond with success
     return res.status(200).json({ 
       message: "Auction status updated successfully", 
       updatedAuction 
     });
+
   } catch (err) {
     console.error("Unexpected error in /updatestatus:", err);
     return res.status(500).json({ message: "Internal server error" });
