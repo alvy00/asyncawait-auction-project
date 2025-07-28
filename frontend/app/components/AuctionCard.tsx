@@ -308,14 +308,10 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
 
       <div onClick={() => setDetailsOpen(true)} className={`${cardFooter} mt-[-0.03rem] flex items-center justify-between text-green-300`}>
         <div className={cardCountdown}>
-          {isEnded
-            ? winner
-              ? <span className="text-green-400 font-bold animate-pulse">🎉 {winner} won!</span>
-              : <span className="text-red-400 font-semibold">❌ Expired</span>
-            : <Countdown 
-                endTime={auction.end_time} 
-                onComplete={updateStatus} 
-              />}
+          <Countdown 
+            endTime={auction.end_time} 
+            onComplete={updateStatus} 
+          />
         </div>
         { auctionCreator && 
           <div className="text-emerald-400 text-xs md:text-sm cursor-pointer">

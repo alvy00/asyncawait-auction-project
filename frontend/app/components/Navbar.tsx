@@ -5,6 +5,13 @@ import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "../../components/ui/button"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../../components/ui/tooltip";
+
 import { Menu, X, Bell, ChevronDown, LogOut, Settings, Heart } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
@@ -285,24 +292,48 @@ export const Navbar = () => {
                 transition={{ delay: 0.2 }}
                 className="relative flex items-center gap-3"
               >
-                {/* Notification Button */}
-                <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 cursor-pointer">
-                  <Bell className="w-4 h-4" />
-                </Button>
+                <TooltipProvider>
+                  {/* Notification Button */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 cursor-pointer">
+                        <Bell className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p>Notifications</p>
+                    </TooltipContent>
+                  </Tooltip>
 
-                {/* Favorites */}
-                <Link href="/favourites">
-                  <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 cursor-pointer">
-                    <Heart className="w-4 h-4" />
-                  </Button>
-                </Link>
+                  {/* Favorites */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Link href="/favourites">
+                        <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 cursor-pointer">
+                          <Heart className="w-4 h-4" />
+                        </Button>
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p>Favourites</p>
+                    </TooltipContent>
+                  </Tooltip>
 
-                {/* Due-payment */}
-                <Link href="/due-payment">
-                  <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 cursor-pointer">
-                    <MdOutlinePayment className="w-4 h-4" />
-                  </Button>
-                </Link>
+                  {/* Due-payment */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Link href="/due-payment">
+                        <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 cursor-pointer">
+                          <MdOutlinePayment className="w-4 h-4" />
+                        </Button>
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p>Due Payment</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
                 
                 {/* Avatar Button */}
                 <button
