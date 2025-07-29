@@ -196,13 +196,13 @@ adminRouter.post('/newsletter', async (req, res) => {
 
 // Chatbot
 adminRouter.post('/chatbot', async (req, res) => {
-  const { messages } = req.body;
+  const { messages, user } = req.body;
   const BASE_SYSTEM_PROMPT = `
-    You are AuctasyncBot, the official AI assistant for AuctAsync, a fast-paced real-time auction web application.
+    You are AuctasyncBot, the official AI assistant for AuctaSync, a fast-paced real-time auction web application.
 
     💡 Platform Overview:
-    - AuctAsync allows users to join auctions, place bids, and win items across 4 main formats: Classic, Dutch, Reverse, and Blitz.
-    - All users start with a balance of $1000 which is a sign up bonus by auctasync.
+    - AuctaSync allows users to join auctions, place bids, and win items across 5 main formats: Classic, Dutch, Reverse, Blitz, And Phantom.
+    - All users start with a balance of $1000 which is a sign up bonus by AuctaSync.
     - Users can register, deposit funds, view bid history, track stats, and win rate.
 
     🎯 Auction Types:
@@ -234,6 +234,13 @@ adminRouter.post('/chatbot', async (req, res) => {
       - First to accept wins instantly.
       - No further bids after acceptance.
 
+    5. **Phantom Auctions**:
+    - Phantom Auction is a secretive bidding arena where bids are invisible and tactics reign. No one sees the top bid — only the boldest win.
+    - Bidders enter a concealed auction.
+    - Place hidden bids without knowing others' offers.
+    - Wait until time runs out.
+    - The top bid is revealed. One winner emerges.
+
     🧠 User Features:
     - Users can favorite auctions and filter by categories.
     - Real-time countdowns, leaderboards, and animated badges enhance engagement.
@@ -253,10 +260,10 @@ adminRouter.post('/chatbot', async (req, res) => {
     Your job is to help users understand how the platform works. Do not hallucinate answers. Respond concisely, in friendly tone, short informative answers, and use bullet points if needed.
   `;
   const AUCTASYNC_ROADMAP = `
-  # AuctAsync Feature Roadmap
+  # AuctaSync Feature Roadmap
 
   ## Overview
-  AuctAsync is a real-time auction platform supporting classic, dutch, reverse, and blitz auctions. Users bid, win items, and track performance.
+  AuctaSync is a real-time auction platform supporting classic, dutch, reverse, blitz, and phantom auctions. Users bid, win items, and track performance.
 
   ## Pages & Features
   - **Login Page**: Allows users to securely sign in using their email and password. [Login](https://auctasync.vercel.app/login)
@@ -270,6 +277,16 @@ adminRouter.post('/chatbot', async (req, res) => {
 
   Use this knowledge to help users understand what pages do what, how auctions work, short informative answers, and where actions happen.
   `;
+  const userContext = user ? `
+    User Context:
+    - Username: ${user.name}
+    - Email: ${user.email}
+    - Wallet Balance: $${user.money}
+    - Auctions Won: ${user.auctions_won}
+    - Win Rate: ${user.win_rate}%
+    - Role: ${user.is_admin ? 'admin' : 'user'}
+    - Suspended: ${user.is_suspended ? 'Yes' : 'No'}`.trim() : ''
+  ;
 
   try {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -281,10 +298,11 @@ adminRouter.post('/chatbot', async (req, res) => {
       body: JSON.stringify({
         model: 'llama3-8b-8192',
         messages: [
-          { role: 'system', content: BASE_SYSTEM_PROMPT},
+          { role: 'system', content: BASE_SYSTEM_PROMPT },
           { role: 'system', content: AUCTASYNC_ROADMAP },
-          ...messages.filter(m => m.role !== 'system')
-        ]
+          ...(userContext ? [{ role: 'system', content: userContext }] : []),
+          ...messages.filter(m => m.role !== 'system'),
+        ],
       }),
     });
 
@@ -298,7 +316,7 @@ adminRouter.post('/chatbot', async (req, res) => {
     const reply = data.choices[0].message.content;
     return res.json({ reply });
 
-  } catch (error) {
+  }catch(error){
     console.error('Chatbot error:', error);
     return res.status(500).json({ reply: "Sorry, I couldn't get a response." });
   }
