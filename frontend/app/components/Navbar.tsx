@@ -12,6 +12,12 @@ import {
   TooltipTrigger,
 } from "../../components/ui/tooltip";
 
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "../../components/ui/popover";
+
 import { Menu, X, Bell, ChevronDown, LogOut, Settings, Heart } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
@@ -24,6 +30,7 @@ import toast from "react-hot-toast"
 import { useAuth } from "../../lib/auth-context"
 import { useUser } from "../../lib/user-context"
 
+
 export const Navbar = () => {
   const { user, refetchIndex, isLoading } = useUser()
   const [isScrolled, setIsScrolled] = useState(false)
@@ -32,9 +39,12 @@ export const Navbar = () => {
   const [auctionsDropdownOpen, setAuctionsDropdownOpen] = useState(false)
   const [mobileAuctionsOpen, setMobileAuctionsOpen] = useState(false)
   const [avatarDropdownOpen, setAvatarDropdownOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [open, setOpen] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
   const router = useRouter()
 
+  const unreadCount = notifications.filter((n) => !n.read).length;
   const avatarDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -293,23 +303,75 @@ export const Navbar = () => {
                 className="relative flex items-center gap-3"
               >
                 <TooltipProvider>
+                  
                   {/* Notification Button */}
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 cursor-pointer">
-                        <Bell className="w-4 h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom">
-                      <p>Notifications</p>
-                    </TooltipContent>
-                  </Tooltip>
+                  <Popover open={open} onOpenChange={setOpen}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className={`text-white relative cursor-pointer ${
+                              open ? 'bg-white/10' : 'hover:text-white hover:bg-white/10'
+                            }`}
+                            title="Notifications"
+                          >
+                            <Bell className="w-4 h-4" />
+                            {unreadCount > 0 && (
+                              <span className="absolute top-0 right-0 bg-red-500 w-2.5 h-2.5 rounded-full animate-ping" />
+                            )}
+                          </Button>
+                        </PopoverTrigger>
+                      </TooltipTrigger>
+
+                      <TooltipContent side="bottom" align="center">
+                        Notifications
+                      </TooltipContent>
+                    </Tooltip>
+
+                    <PopoverContent
+                      side="bottom"
+                      align="center"
+                      className="
+                        w-80 p-4 
+                        bg-black/30 
+                        backdrop-blur-md 
+                        border border-white/20 
+                        text-white 
+                        shadow-lg 
+                        rounded-lg
+                        max-h-60
+                        overflow-y-auto
+                      "
+                    >
+                      <div className="font-semibold text-sm mb-2">Recent Notifications</div>
+                      <ul className="space-y-1">
+                        {notifications.length === 0 ? (
+                          <li className="text-sm text-gray-300 p-2">No notifications</li>
+                        ) : (
+                          notifications.map((n) => (
+                            <li
+                              key={n.id}
+                              className={`text-sm p-2 rounded-md cursor-pointer ${
+                                n.read
+                                  ? 'bg-white/10 text-gray-300'
+                                  : 'bg-purple-700/50 font-semibold text-white'
+                              } transition-colors hover:bg-purple-600/70`}
+                            >
+                              {n.message}
+                            </li>
+                          ))
+                        )}
+                      </ul>
+                    </PopoverContent>
+                  </Popover>
 
                   {/* Favorites */}
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Link href="/favourites">
-                        <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 cursor-pointer">
+                        <Button variant="ghost" size="sm" className="text-white hover:text-white hover:bg-white/10 cursor-pointer">
                           <Heart className="w-4 h-4" />
                         </Button>
                       </Link>
@@ -323,7 +385,7 @@ export const Navbar = () => {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Link href="/due-payment">
-                        <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 cursor-pointer">
+                        <Button variant="ghost" size="sm" className="text-white hover:text-white hover:bg-white/10 cursor-pointer">
                           <MdOutlinePayment className="w-4 h-4" />
                         </Button>
                       </Link>
@@ -332,8 +394,8 @@ export const Navbar = () => {
                       <p>Due Payment</p>
                     </TooltipContent>
                   </Tooltip>
-                </TooltipProvider>
 
+                </TooltipProvider>
                 
                 {/* Avatar Button */}
                 <button
