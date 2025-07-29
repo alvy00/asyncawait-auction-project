@@ -326,8 +326,8 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
     whileHover={{
       scale: 1.02,
       boxShadow: "0 0 8px 2px rgba(255, 215, 0, 0.5)",
-      transition: { duration: 0.35, ease: "easeOut" },
     }}
+    transition={{ duration: 0.35, ease: "easeOut" }}
     className={`${cardBase} relative rounded-2xl bg-[rgba(80, 65, 10, 0.3)] backdrop-blur-md border border-yellow-600 shadow-lg bg-gradient-to-br from-[#5a4a00]/40 via-[#7c6800]/30 to-[#5a4a00]/40 text-white`}
   >
     {/* Image container */}
@@ -460,13 +460,18 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({ auction, auctionCreato
                       {auction.status === "upcoming" ? "Coming Soon" : "Place Bid"}
                     </motion.button>
                     ):(
-                      <motion.button
-                        onClick={() => setShowPayNowModal(true)}
-                        className={`
-                          w-full py-2 px-4 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-700 border border-yellow-600
-                          text-white font-bold shadow-lg
-                          transition duration-300
-                        `}
+                    <motion.button
+                      onClick={() => setShowPayNowModal(true)}
+                      whileHover={{
+                        scale: 1.02,
+                        filter: 'brightness(1.1)',
+                      }}
+                      transition={{ type: 'spring', stiffness: 260, damping: 15 }}
+                      className={`
+                        w-full py-2 px-4 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-700 border border-yellow-600
+                        text-white font-bold shadow-lg
+                        transition duration-300 cursor-pointer
+                      `}
                     >
                       Pay Now
                     </motion.button>
