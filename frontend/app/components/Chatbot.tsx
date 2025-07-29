@@ -53,14 +53,14 @@ export default function FloatingChatbot() {
       },
       {
         role: 'assistant',
-        content: `Hi ${user.name} I'm AuctaSyncBot.  
-          I can help you:
-          - Understand different auction types  
-          - Track your bidding performance  
-          - Explain your balance or history  
-          - Or guide you to the right page
-
-          Ask me anything about AuctaSync! 🚀`
+        content: `Hi ${user.name} \n` +
+          `I'm AuctaSyncBot.\n` +
+          `I can help you:\n` +
+          `- Understand different auction types\n` +
+          `- Track your bidding performance\n` +
+          `- Explain your balance or history\n` +
+          `- Or guide you to the right page\n\n` +
+          `Ask me anything about AuctaSync! 🚀`
       }
     ];
 
