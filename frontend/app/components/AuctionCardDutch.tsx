@@ -299,8 +299,8 @@ const AuctionCardDutch: React.FC<AuctionCardProps> = ({ auction: initialAuction,
     whileHover={{
       scale: 1.02,
       boxShadow: "0 0 8px 2px rgba(0, 140, 255, 0.5)",
-      transition: { duration: 0.35, ease: "easeOut" },
     }}
+    transition={{ duration: 0.35, ease: "easeOut" }}
     onMouseEnter={() => setIsHovered(true)}
     onMouseLeave={() => setIsHovered(false)}
     className={`${cardBase} bg-gradient-to-br from-cyan-800/90 to-cyan-800/50 backdrop-blur-xl border border-emerald-700/30 rounded-2xl shadow-inner shadow-emerald-900/20 transition-all duration-300`}

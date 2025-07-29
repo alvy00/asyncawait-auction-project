@@ -302,8 +302,8 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
     whileHover={{
       scale: 1.02,
       boxShadow: "0 0 8px 2px rgba(0, 255, 170, 0.5)",
-      transition: { duration: 0.35, ease: "easeOut" },
     }}
+    transition={{ duration: 0.35, ease: "easeOut" }}
     className={`${cardBase} bg-gradient-to-br from-emerald-900/40 to-emerald-800/20 backdrop-blur-xl border-2 border-green-300 rounded-2xl shadow-inner shadow-emerald-900/20 transition-all duration-300`}
     onMouseEnter={() => setIsHovered(true)}
     onMouseLeave={handleMouseLeave}

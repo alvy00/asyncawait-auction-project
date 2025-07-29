@@ -1,18 +1,14 @@
 "use client";
 
 import type React from "react";
-import { Navbar } from "../components/Navbar"; // This will now be the header for the main content
 import Footer from "../components/Footer";
 import Link from "next/link";
-// NEW: Import usePathname to track the current route
 import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, LogOut, Settings, ShoppingBag, Wallet, Heart } from "lucide-react";
-import { AnimatedBackground } from "../components/AnimatedBackground";
 import toast from "react-hot-toast";
 import { useAuth } from "../../lib/auth-context";
 import { Button } from "../../components/ui/button";
 import { motion } from "framer-motion";
-// NEW: Import clsx for cleaner conditional classes
 import clsx from "clsx";
 import Image from "next/image";
 
@@ -45,7 +41,6 @@ export default function DashboardLayout({
 }) {
   const { logout } = useAuth();
   const router = useRouter();
-  // NEW: Get the current path to determine the active link
   const pathname = usePathname();
 
   const handleLogOut = () => {
@@ -180,21 +175,26 @@ export default function DashboardLayout({
             <Link
               key={item.name}
               href={item.href}
-              className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-white/10 hover:text-white rounded-lg transition-all duration-300"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300"
             >
-              {item.icon}
-              <span>{item.name}</span>
+              <span className="h-5 w-5 flex items-center justify-center">{item.icon}</span>
+              <span className="text-sm font-medium">{item.name}</span>
             </Link>
           ))}
+
           <Button
             onClick={handleLogOut}
-            variant="ghost" // Using a ghost variant for better semantics
-            className="w-full flex items-center justify-start gap-3 px-4 py-3 text-gray-300 hover:bg-red-500/20 hover:text-white rounded-lg transition-all duration-300"
+            variant="ghost"
+            aria-label="Logout"
+            className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white hover:bg-red-500/20 transition-all duration-300  cursor-pointer"
           >
-            <LogOut className="h-5 w-5" />
-            <span>Logout</span>
-          </Button>
+            <span className="h-5 w-5 flex items-center justify-center">
+              <LogOut className="h-5 w-5" />
+            </span>
+            <span className="text-sm font-medium">Log Out</span>
+          </Button> 
         </div>
+
       </motion.aside>
 
       {/* Main Content Area */}

@@ -334,8 +334,8 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
     whileHover={{
       scale: 1.02,
       boxShadow: "0 0 8px 2px rgba(168, 85, 247, 0.5)",
-      transition: { duration: 0.35, ease: "easeOut" },
     }}
+    transition={{ duration: 0.35, ease: "easeOut" }}
     className={`flex flex-col ${cardBase} bg-gradient-to-br from-purple-900/40 to-purple-800/20 backdrop-blur-xl border border-purple-700/30 shadow-inner shadow-purple-900/20 transition-all duration-300`}
   >
     {/* Image container */}
@@ -452,8 +452,12 @@ const AuctionCardReverse: React.FC<AuctionCardProps> = ({ auction, auctionCreato
                     <motion.button
                       onClick={() => setShowPayNowModal(true)}
                       className={`
-                        w-full py-2 px-4 font-semibold rounded-full text-white transition-all duration-500 ease-in-out
-                        border border-purple-600 shadow-md
+                        w-full py-2 px-4 font-semibold rounded-full text-white
+                        bg-gradient-to-r from-purple-600 to-fuchsia-600
+                        transition-all duration-200 ease-in-out
+                        border border-purple-500 shadow-sm cursor-pointer
+                        hover:opacity-90 hover:scale-[1.02]
+                        focus:outline-none focus:ring-1 focus:ring-fuchsia-500/40
                       `}
                     >
                       Pay Now
