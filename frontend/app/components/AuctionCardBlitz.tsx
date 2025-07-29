@@ -307,8 +307,8 @@ const AuctionCardBlitz: React.FC<AuctionCardProps> = ({ auction, auctionCreator,
     whileHover={{
       scale: 1.02,
       boxShadow: "0 0 8px 2px rgba(255, 85, 0, 0.5)",
-      transition: { duration: 0.35, ease: "easeOut" },
     }}
+    transition={{ duration: 0.35, ease: "easeOut" }}
     className={`${cardBase} relative rounded-2xl bg-[rgba(30,10,5,0.3)] backdrop-blur-md border border-orange-700 shadow-lg bg-gradient-to-br from-[#3a0c00]/40 via-[#5b1900]/25 to-[#3a0c00]/40 text-white`}
   >
     {/* Image container */}

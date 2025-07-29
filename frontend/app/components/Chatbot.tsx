@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BsChatDots } from 'react-icons/bs';
 import { IoClose } from 'react-icons/io5';
-import { IoMdChatboxes } from "react-icons/io";
+import { IoMdChatboxes } from 'react-icons/io';
 import { useUser } from './../../lib/user-context';
 
 export default function FloatingChatbot() {
@@ -53,14 +53,7 @@ export default function FloatingChatbot() {
       },
       {
         role: 'assistant',
-        content: `Hi ${user.name} \n` +
-          `I'm AuctaSyncBot.\n` +
-          `I can help you:\n` +
-          `- Understand different auction types\n` +
-          `- Track your bidding performance\n` +
-          `- Explain your balance or history\n` +
-          `- Or guide you to the right page\n\n` +
-          `Ask me anything about AuctaSync! 🚀`
+        content: `Hi ${user.name}! I'm AuctaSyncBot. I can help with auctions, bids, or guide you around. Ask me anything about AuctaSync! 🚀`
       }
     ];
 
@@ -73,7 +66,7 @@ export default function FloatingChatbot() {
     }
   }, [messages, open]);
 
-  // handle mouse clicks
+  // handle mouse clicks outside to close chat
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -115,6 +108,33 @@ export default function FloatingChatbot() {
     }
   };
 
+  const TypingIndicator = () => {
+    const [dots, setDots] = useState('');
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setDots(d => (d.length >= 3 ? '' : d + '.'));
+      }, 500);
+      return () => clearInterval(interval);
+    }, []);
+    return (
+      <div className="
+        inline-block
+        bg-white/10
+        backdrop-blur-sm
+        rounded-xl
+        px-6
+        py-2.5
+        text-fuchsia-300
+        italic
+        text-sm
+        select-none
+        shadow
+        max-w-max
+      ">
+        Typing{dots}
+      </div>
+    );
+  }
   return (
     <>
       {/* Floating button */}
@@ -144,7 +164,18 @@ export default function FloatingChatbot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.97 }}
             transition={{ duration: 0.28 }}
-            className="fixed bottom-0 right-0 left-0 sm:bottom-20 sm:right-6 sm:left-auto z-50 w-full sm:w-[95vw] sm:max-w-[390px] min-h-[60vh] max-h-[90vh] sm:min-h-[500px] sm:max-h-[600px] flex flex-col rounded-t-3xl sm:rounded-3xl shadow-xl border border-white/10 bg-gradient-to-br from-[#0f0c29]/90 via-[#302b63]/90 to-[#24243e]/90 backdrop-blur-md overflow-hidden"
+            className="
+              fixed bottom-4 right-4 sm:bottom-20 sm:right-6 sm:left-auto
+              z-50
+              w-[clamp(280px,80vw,390px)]
+              h-[clamp(300px,70vh,600px)]
+              flex flex-col
+              rounded-t-3xl sm:rounded-3xl
+              shadow-xl border border-white/10
+              bg-gradient-to-br from-[#0f0c29]/90 via-[#302b63]/90 to-[#24243e]/90
+              backdrop-blur-md
+              overflow-hidden
+            "
             style={{ boxShadow: '0 12px 40px rgba(0, 0, 0, 0.3), 0 2px 10px rgba(255, 0, 150, 0.08)' }}
           >
             {/* Header */}
@@ -172,34 +203,37 @@ export default function FloatingChatbot() {
             {/* Chat body */}
             <div className="relative flex-1 flex flex-col z-10 h-0 min-h-0">
               <div className="absolute inset-0 pointer-events-none rounded-3xl shadow-[inset_0_8px_32px_0_rgba(255,255,255,0.03)] z-10" />
-              <main className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 scrollbar-thin scrollbar-thumb-purple-500/60 scrollbar-track-transparent">
-                {messages
-                  .filter(m => m.role !== 'system')
-                  .map((msg, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                      className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-[85vw] sm:max-w-[75%] px-4 sm:px-5 py-2 sm:py-3 rounded-2xl leading-relaxed whitespace-pre-wrap break-words shadow-sm
-                          ${
-                            msg.role === 'user'
-                              ? 'bg-gradient-to-br from-indigo-700/80 to-fuchsia-700/80 text-white'
-                              : 'bg-[#1e1b2e]/80 text-white/90 border border-white/10'
-                          }
-                        `}
+              <main
+                className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 scrollbar-thin scrollbar-thumb-purple-500/60 scrollbar-track-transparent flex flex-col"
+              >
+                <div className="mt-auto flex flex-col space-y-3 sm:space-y-4">
+                  {messages
+                    .filter(m => m.role !== 'system')
+                    .map((msg, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.05 }}
+                        className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                       >
-                        {msg.content}
-                      </div>
-                    </motion.div>
-                  ))}
-                <div ref={messagesEndRef} />
-                {loading && <div className="text-fuchsia-300 italic text-sm pl-2">Typing...</div>}
+                        <div
+                          className={`max-w-[85vw] sm:max-w-[75%] px-4 sm:px-5 py-2 sm:py-3 rounded-2xl leading-relaxed whitespace-pre-wrap break-words shadow-sm
+                            ${
+                              msg.role === 'user'
+                                ? 'bg-gradient-to-br from-indigo-700/80 to-fuchsia-700/80 text-white'
+                                : 'bg-[#1e1b2e]/80 text-white/90 border border-white/10'
+                            }
+                          `}
+                        >
+                          {msg.content}
+                        </div>
+                      </motion.div>
+                    ))}
+                  <div ref={messagesEndRef} />
+                  {loading && <TypingIndicator />}
+                </div>
               </main>
-
               <form
                 onSubmit={e => {
                   e.preventDefault();
