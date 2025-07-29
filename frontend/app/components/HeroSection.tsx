@@ -5,10 +5,11 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { Button } from "../../components/ui/button";
 import { Auction } from "../../lib/interfaces";
 import { ChevronLeft, ChevronRight, Clock, Zap } from "lucide-react";
-import clsx from "clsx"; // Using clsx for cleaner class management
+import clsx from "clsx";
+import { useRouter } from "next/navigation";
+import { Button } from "../../components/ui/button";
 
 const AuctionCard = ({ auction, isActive }: { auction: Auction; isActive: boolean }) => {
   return (
@@ -38,6 +39,18 @@ const AuctionCard = ({ auction, isActive }: { auction: Auction; isActive: boolea
                 )}
               >
                 {auction.condition}
+              </span>
+              <span
+                className={clsx(
+                  "text-white text-[10px] sm:text-xs px-2.5 py-1 rounded-full font-bold uppercase",
+                  {
+                    "bg-red-600/80": auction.status === "live",
+                    "bg-yellow-500/80": auction.status === "upcoming",
+                    "bg-gray-600/80": !["live", "upcoming", "closed", "pending"].includes(auction.status),
+                  }
+                )}
+              >
+                {auction.status}
               </span>
             </div>
           </div>
@@ -82,18 +95,17 @@ const AuctionCard = ({ auction, isActive }: { auction: Auction; isActive: boolea
                 <Zap size={14} /> {auction.total_bids} bids
               </div>
             </div>
-            <div className="flex justify-center mt-2">
-              <Button
+              {/* <Button
                 size="lg"
                 className="w-full rounded-full px-6 py-3 text-sm sm:text-base font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg transition-all duration-300 transform hover:scale-105"
               >
                 {auction.status === "live"
-                  ? "Place a Bid"
+                  ? "View on Live Auctions Page"
                   : auction.status === "upcoming"
-                  ? "Get Notified"
+                  ? "Coming soon"
                   : "View Auction"}
-              </Button>
-            </div>
+              </Button> */}
+
           </div>
         </div>
       </div>
@@ -103,6 +115,8 @@ const AuctionCard = ({ auction, isActive }: { auction: Auction; isActive: boolea
 
 function AuctionCardDeck({ auctions, startAnimation }: { auctions: Auction[]; startAnimation: boolean }) {
   const [activeIndex, setActiveIndex] = useState(0);
+
+  const router = useRouter();
   const cardCount = auctions.length;
 
   function getCardProps(idx: number) {
@@ -154,58 +168,48 @@ function AuctionCardDeck({ auctions, startAnimation }: { auctions: Auction[]; st
     setActiveIndex((i) => (i + 1) % cardCount);
   }
 
-  const [dragStartX, setDragStartX] = useState<number | null>(null);
-  const handleDragStart = (e: React.PointerEvent) => {
-    setDragStartX(e.clientX);
-  };
-  const handleDragMove = (e: React.PointerEvent) => {
-    if (dragStartX === null) return;
-    const dragDelta = e.clientX - dragStartX;
-    if (Math.abs(dragDelta) > 50) {
-      if (dragDelta > 50) handlePrev();
-      else handleNext();
-      setDragStartX(null);
-    }
-  };
-  const handleDragEnd = () => {
-    setDragStartX(null);
-  };
-
   return (
-    // Added longer delay and smoother transition for card deck
     <div
       className={clsx(
         "w-full flex flex-col items-center transition-all duration-1000 ease-out transform",
-        { 
-          "opacity-100 translate-y-0": startAnimation, 
-          "opacity-0 translate-y-8": !startAnimation 
+        {
+          "opacity-100 translate-y-0": startAnimation,
+          "opacity-0 translate-y-8": !startAnimation,
         }
       )}
     >
       <div
         className="relative w-full max-w-[300px] h-[480px] sm:max-w-[360px] sm:h-[580px] md:max-w-[400px] md:h-[640px] flex items-center justify-center select-none"
         style={{ perspective: "2000px" }}
-        onPointerDown={handleDragStart}
-        onPointerMove={handleDragMove}
-        onPointerUp={handleDragEnd}
-        onPointerLeave={handleDragEnd}
       >
         <AnimatePresence initial={false}>
           {auctions.map((auction, idx) => {
             const { x, scale, zIndex, rotateY, opacity, filter } = getCardProps(idx);
-            if (opacity === 0 && idx !== activeIndex) return null; // Keep active card rendered even if briefly invisible
+            if (opacity === 0 && idx !== activeIndex) return null; // keep active card rendered
+
             return (
               <motion.div
                 key={auction.auction_id}
-                initial={false} // Prevent initial animation on first render
+                initial={false}
                 animate={{ x, scale, zIndex, rotateY, opacity, filter }}
                 exit={{ opacity: 0, scale: 0.8, zIndex: zIndex - 2 }}
                 transition={{ type: "spring", stiffness: 220, damping: 35 }}
-                className="absolute w-full h-full cursor-grab active:cursor-grabbing"
+                className={clsx(
+                  "absolute w-full h-full",
+                  { "cursor-pointer": idx === activeIndex }
+                )}
                 style={{ zIndex, transformStyle: "preserve-3d" }}
+                onClick={() => {
+                  if (auction.status === "live") {
+                    router.push(`/auctions/live`);
+                  } else {
+                    router.push(`/auctions/upcoming`);
+                  }
+                }}
               >
                 <AuctionCard auction={auction} isActive={idx === activeIndex} />
               </motion.div>
+
             );
           })}
         </AnimatePresence>
@@ -236,7 +240,10 @@ function AuctionCardDeck({ auctions, startAnimation }: { auctions: Auction[]; st
             key={idx}
             className={clsx(
               "h-2 rounded-full transition-all duration-500 ease-in-out",
-              { "w-8 bg-gradient-to-r from-orange-500 to-orange-600": idx === activeIndex, "w-2 bg-white/20 hover:bg-white/40": idx !== activeIndex }
+              {
+                "w-8 bg-gradient-to-r from-orange-500 to-orange-600": idx === activeIndex,
+                "w-2 bg-white/20 hover:bg-white/40": idx !== activeIndex,
+              }
             )}
             onClick={() => setActiveIndex(idx)}
             aria-label={`Go to card ${idx + 1}`}
@@ -251,7 +258,7 @@ export function HeroSection() {
   const [featuredAuctions, setFeaturedAuctions] = useState<Auction[]>([]);
   const [loading, setLoading] = useState(true);
   const [headingDone, setHeadingDone] = useState(false);
-  const [showCards, setShowCards] = useState(false); // New state for card delay
+  const [showCards, setShowCards] = useState(false);
 
   useEffect(() => {
     async function fetchFeatured() {
@@ -270,13 +277,11 @@ export function HeroSection() {
     fetchFeatured();
   }, []);
 
-  // Add delay for showing cards after heading and subtitle are done
   useEffect(() => {
     if (headingDone) {
       const timer = setTimeout(() => {
         setShowCards(true);
-      }, 800); // 800ms delay after heading animation completes
-      
+      }, 800);
       return () => clearTimeout(timer);
     }
   }, [headingDone]);
@@ -331,21 +336,19 @@ export function HeroSection() {
         >
           Join the next generation auction platform—discover rare finds, place real-time bids, and win exclusive items from anywhere.
         </motion.p>
-        
+
         <div className="w-full flex flex-col items-center overflow-visible">
           {loading ? (
-            // Show loading state immediately when heading is done
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={headingDone ? { opacity: 1, y: 0 } : { opacity: 0 }}
               transition={{ duration: 0.6, delay: 0.8 }}
-              className="w-full max-w-[300px] h-[480px] sm:max-w-[360px] sm:h-[580px] md:max-w-[400px] md:h-[640px] flex items-center justify-center bg-white/5 rounded-[2.5rem] animate-pulse border border-white/10 shadow-2xl" 
+              className="w-full max-w-[300px] h-[480px] sm:max-w-[360px] sm:h-[580px] md:max-w-[400px] md:h-[640px] flex items-center justify-center bg-white/5 rounded-[2.5rem] animate-pulse border border-white/10 shadow-2xl"
             />
           ) : featuredAuctions.length > 0 ? (
-            // Pass showCards instead of headingDone for better timing control
             <AuctionCardDeck auctions={featuredAuctions} startAnimation={showCards} />
           ) : (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={showCards ? { opacity: 1, y: 0 } : { opacity: 0 }}
               transition={{ duration: 0.6 }}
