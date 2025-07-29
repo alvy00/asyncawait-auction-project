@@ -360,7 +360,21 @@ const AuctionCard: React.FC<AuctionCardProps> = ({ auction, auctionCreator, isFa
       {/* Bid Section */}
       <div className="w-full mt-2 relative">
         {!loggedIn ? (
-          <Button disabled className="w-full flex items-center justify-center gap-2 rounded-full bg-gray-800 border border-gray-700 text-gray-400 opacity-60 cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30 font-semibold text-base md:text-lg">Login to bid</Button>
+          <Button
+            disabled
+            className="w-full flex items-center justify-center gap-2 rounded-full bg-gray-800 border border-gray-700 text-gray-400 opacity-60 cursor-not-allowed shadow-inner ring-1 ring-inset ring-gray-600/30"
+          >
+            <svg
+              className="w-4 h-4 text-gray-500"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636L5.636 18.364M5.636 5.636l12.728 12.728" />
+            </svg>
+            <span className="text-sm">Login to bid</span>
+          </Button>
         ) : (
           (!isEnded ? 
             (
