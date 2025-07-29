@@ -47,10 +47,10 @@ export default function RootLayout({
               <UserProvider>
                 <Toaster position='top-center'/>
                 {children}
+                <Chatbot />
               </UserProvider>
             </AuthProvider>
           </SupabaseProvider>
-        <Chatbot />
         <Analytics />
       </body>
     </html>
