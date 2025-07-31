@@ -3,7 +3,21 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { Button } from "../../../components/ui/button";
-import { CheckCircle, Zap, Timer, TrendingDown, TrendingUp, Award, Gavel, EyeOff, PenTool, Trophy, Clock, Target, ShieldCheck } from "lucide-react";
+import {
+  CheckCircle,
+  Zap,
+  Timer,
+  TrendingDown,
+  TrendingUp,
+  Award,
+  Gavel,
+  EyeOff,
+  PenTool,
+  Trophy,
+  Clock,
+  Target,
+  ShieldCheck,
+} from "lucide-react";
 
 const AUCTION_TYPES = [
   {
@@ -195,7 +209,7 @@ export function AuctionTypesSection() {
   const activeType = AUCTION_TYPES.find((t) => t.key === active)!;
 
   return (
-    <section className="py-20 relative overflow-hidden ">
+    <section className="py-20 relative overflow-hidden">
       <div className="container mx-auto px-4 relative z-10">
         <motion.h2
           className="text-4xl md:text-5xl font-bold text-center text-white mb-12 drop-shadow-lg"
@@ -205,12 +219,17 @@ export function AuctionTypesSection() {
         >
           Explore Our Auction Types
         </motion.h2>
+
+        {/* Horizontally scrollable tab list */}
         <div className="flex justify-center mb-8">
-          <div className="inline-flex rounded-full bg-white/10 backdrop-blur-md border border-white/10 shadow-lg overflow-hidden">
+          <div
+            className="inline-flex rounded-full bg-white/10 backdrop-blur-md border border-white/10 shadow-lg overflow-x-auto sm:overflow-visible scrollbar-hide"
+            style={{ WebkitOverflowScrolling: "touch" }}
+          >
             {AUCTION_TYPES.map((type) => (
               <button
                 key={type.key}
-                className={`px-6 py-2 md:px-10 md:py-3 font-semibold text-lg transition-all duration-200 focus:outline-none ${
+                className={`px-6 py-2 md:px-10 md:py-3 font-semibold text-lg transition-all duration-200 focus:outline-none whitespace-nowrap ${
                   active === type.key
                     ? "bg-gradient-to-r from-orange-500 to-pink-600 text-white shadow-md"
                     : "text-white/70 hover:text-white"
@@ -222,6 +241,8 @@ export function AuctionTypesSection() {
             ))}
           </div>
         </div>
+
+        {/* Animated Auction Detail Card */}
         <div className="relative max-w-4xl mx-auto">
           <AnimatePresence mode="wait">
             <motion.div
@@ -232,28 +253,40 @@ export function AuctionTypesSection() {
               transition={{ duration: 0.5 }}
               className={`rounded-3xl p-0 md:p-2 shadow-2xl border border-white/10 bg-gradient-to-br ${activeType.accent} backdrop-blur-xl relative overflow-hidden`}
             >
-              {/* <div className="absolute -inset-1 bg-gradient-to-tr from-orange-500/10 via-purple-500/5 to-blue-500/10 opacity-30 pointer-events-none" /> */}
-              <div className="relative z-10 flex flex-col md:flex-row gap-0 md:gap-0 items-stretch">
-                {/* Left: Icon, animation, feature badges */}
-                <div className="flex flex-col items-center justify-center md:w-1/3 bg-white/5 bg-opacity-10 rounded-l-3xl p-8 md:p-12 border-r border-white/10 min-h-[400px]">
+              <div className="relative z-10 flex flex-col md:flex-row items-stretch">
+                {/* Left Panel */}
+                <div className="flex flex-col items-center justify-center md:w-1/3 bg-white/5 rounded-l-3xl p-8 md:p-12 border-r border-white/10 min-h-[400px]">
                   <div className="mb-4">{activeType.icon}</div>
                   <div className="mb-2">{activeType.animation}</div>
                   <div className="flex flex-col gap-2 mt-6 w-full">
                     {activeType.features.map((f, i) => (
-                      <div key={i} className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-xl text-white/90 font-medium text-sm shadow-sm">
+                      <div
+                        key={i}
+                        className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-xl text-white/90 font-medium text-sm shadow-sm"
+                      >
                         {f.icon}
                         <span>{f.label}</span>
                       </div>
                     ))}
                   </div>
                 </div>
-                {/* Right: Content */}
+
+                {/* Right Panel */}
                 <div className="flex-1 flex flex-col justify-center p-8 md:p-12">
-                  <div className={`text-3xl md:text-4xl font-bold mb-2 ${activeType.gradientText}`}>{activeType.label}</div>
-                  <div className="text-lg md:text-xl text-white/90 mb-4 font-medium">{activeType.description}</div>
-                  {/* Stepper */}
+                  <div
+                    className={`text-3xl md:text-4xl font-bold mb-2 ${activeType.gradientText}`}
+                  >
+                    {activeType.label}
+                  </div>
+                  <div className="text-lg md:text-xl text-white/90 mb-4 font-medium">
+                    {activeType.description}
+                  </div>
+
+                  {/* Steps */}
                   <div className="mb-6">
-                    <div className="text-lg font-semibold text-white mb-2">How it works</div>
+                    <div className="text-lg font-semibold text-white mb-2">
+                      How it works
+                    </div>
                     <ol className="space-y-3">
                       {activeType.steps.map((step, i) => (
                         <motion.li
@@ -266,13 +299,20 @@ export function AuctionTypesSection() {
                           <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white/10 border border-white/20 mr-2">
                             {step.icon}
                           </span>
-                          <span className="text-base md:text-lg">{step.text}</span>
+                          <span className="text-base md:text-lg">
+                            {step.text}
+                          </span>
                         </motion.li>
                       ))}
                     </ol>
                   </div>
+
+                  {/* CTA */}
                   <Link href={activeType.cta.href} className="mt-4 inline-block">
-                    <Button size="lg" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-8 py-3 text-lg rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-orange-500/25 flex items-center gap-2">
+                    <Button
+                      size="lg"
+                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-8 py-3 text-lg rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-orange-500/25 flex items-center gap-2"
+                    >
                       <Zap className="w-5 h-5" />
                       {activeType.cta.label}
                     </Button>
@@ -283,11 +323,12 @@ export function AuctionTypesSection() {
           </AnimatePresence>
         </div>
       </div>
-      {/* Glassy gradient background blobs */}
+
+      {/* Background Blobs */}
       <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-orange-500/20 rounded-full filter blur-[120px] animate-pulse-slow z-0" />
       <div className="absolute bottom-[10%] left-[5%] w-[300px] h-[300px] bg-purple-500/10 rounded-full filter blur-[80px] animate-float z-0" />
       <div className="absolute top-[30%] left-[10%] w-[200px] h-[200px] bg-blue-500/10 rounded-full filter blur-[60px] animate-float-delayed z-0" />
       <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none z-0" />
     </section>
   );
-} 
+}
