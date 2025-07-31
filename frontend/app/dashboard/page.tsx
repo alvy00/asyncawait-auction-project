@@ -7,8 +7,6 @@ import { User } from '../../lib/interfaces';
 import { useRouter } from 'next/navigation';
 import { FaChartPie, FaExternalLinkAlt, FaFileInvoiceDollar } from 'react-icons/fa';
 import { motion } from 'framer-motion';
-
-// Component imports
 import WinRatioChart from './_components/WinRatioChart';
 import StatCard from './_components/StatCard';
 import ActionButton from './_components/ActionButton';
@@ -21,19 +19,17 @@ const Dashboard = () => {
   
   const router = useRouter();
 
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
+  if (isLoading) return <LoadingSpinner />;
 
   if (error || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="bg-[#040c16]/50 p-8 rounded-lg shadow-lg text-white max-w-md w-full">
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="bg-[#040c16]/50 p-6 md:p-8 rounded-lg shadow-lg text-white w-full max-w-md">
           <h2 className="text-2xl font-bold mb-4">Error Loading Dashboard</h2>
           <p className="text-red-400">{error || 'Failed to load user data'}</p>
           <button 
             onClick={() => router.push('/login')} 
-            className="mt-6 bg-[#7b62fb] hover:bg-[#6a52e5] text-white py-2 px-4 rounded-md transition-colors"
+            className="mt-6 bg-[#7b62fb] hover:bg-[#6a52e5] text-white py-2 px-4 rounded-md transition-colors w-full"
           >
             Return to Login
           </button>
@@ -47,16 +43,18 @@ const Dashboard = () => {
     : 0;
 
   return (
-    <div className="min-h-screen  text-white p-6 rounded-xl">
-      {/* Welcome Header */}
+    <div className="min-h-screen text-white p-4 sm:p-6 rounded-xl">
+      {/* Header */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mb-8"
+        className="mb-6 sm:mb-8"
       >
-        <h1 className="text-3xl font-bold">Welcome to <span className="text-[#ef863f]">Dashboard!</span></h1>
-        <h2 className="text-4xl font-bold mt-2">{user.name}</h2>
+        <h1 className="text-2xl sm:text-3xl font-bold">
+          Welcome to <span className="text-[#ef863f]">Dashboard!</span>
+        </h1>
+        <h2 className="text-3xl sm:text-4xl font-bold mt-1 sm:mt-2">{user.name}</h2>
       </motion.div>
 
       {/* Action Buttons */}
@@ -64,7 +62,7 @@ const Dashboard = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="mb-8 flex flex-wrap gap-3"
+        className="mb-6 flex flex-col sm:flex-row flex-wrap gap-3"
       >
         <ActionButton 
           href="/auctions/details"
@@ -84,7 +82,7 @@ const Dashboard = () => {
       </motion.div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
         {/* Left Column - Win Ratio Chart */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
@@ -104,9 +102,9 @@ const Dashboard = () => {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="lg:col-span-7 "
+          className="lg:col-span-7"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <StatCard 
               title="Balance" 
               value={`$${user.money.toLocaleString()}`} 
@@ -142,17 +140,17 @@ const Dashboard = () => {
               value={(user.auctions_participated - user.auctions_won).toString()} 
               icon={<FaChartPie className="text-red-400" />} 
             />
-            
-            {/* Centered Create New Auction Button */}
-            <div className="col-span-full flex justify-center mt-4">
+
+            {/* Create New Auction Button */}
+            <div className="col-span-full flex justify-center mt-2 sm:mt-4">
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
               >
                 <Link href="/auctions/create">
-                  <button className="bg-green-500 hover:bg-green-600 text-white font-medium px-6 py-3 rounded-full flex items-center gap-2 transform transition-all duration-200 hover:scale-105 shadow-lg cursor-pointer">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <button className="bg-green-500 hover:bg-green-600 text-white font-medium px-5 py-3 rounded-full flex items-center gap-2 transition-all duration-200 hover:scale-105 shadow-lg">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
                     Create New Auction
@@ -162,9 +160,7 @@ const Dashboard = () => {
             </div>
           </div>
         </motion.div>
-
       </div>
-
     </div>
   );
 };
