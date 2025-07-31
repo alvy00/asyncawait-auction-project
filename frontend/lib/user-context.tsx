@@ -84,12 +84,11 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       setIsLoading(false);
       setRefetchIndex((i) => i + 1);
     }
-  }, [isReady]); // <---- added isReady here
+  }, [isReady]);
 
   // Run on mount and when refetchIndex changes, only if isReady is true
   useEffect(() => {
-    if (!isReady) return; // wait for auth context to be ready
-    refreshUser();
+    if (!isReady) return;
 
     // Subscribe to Supabase auth changes to refresh user accordingly
     const { data: listener } = supabase.auth.onAuthStateChange(
@@ -98,7 +97,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (session?.access_token && session.user) {
           setSupabaseUser(session.user);
-          refreshUser(); // refetch app user on login/state change
+          refreshUser();
         } else {
           setSupabaseUser(null);
           setUser(null);
@@ -110,7 +109,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       listener?.subscription?.unsubscribe();
     };
-  }, [refreshUser, isReady]); // <---- added isReady here
+  }, [refreshUser, isReady]);
 
   return (
     <UserContext.Provider

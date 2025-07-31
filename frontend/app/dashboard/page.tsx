@@ -115,7 +115,7 @@ const Dashboard = () => {
             
             <StatCard 
               title="Auctions Created" 
-              value="03" 
+              value={`${user.total_auctions}`} 
               icon={<FaExternalLinkAlt className="text-blue-400" />} 
             />
 
