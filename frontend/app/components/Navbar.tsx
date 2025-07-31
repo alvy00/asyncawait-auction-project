@@ -18,7 +18,7 @@ import {
   PopoverTrigger,
 } from "../../components/ui/popover";
 
-import { Menu, X, Bell, ChevronDown, LogOut, Settings, Heart } from "lucide-react"
+import { Menu, X, Bell, ChevronDown, LogOut, Settings, Heart, Home, Gavel, Clock, Trophy, Mail, HelpCircle, History } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { HiOutlineUserAdd } from "react-icons/hi"
@@ -114,6 +114,52 @@ export const Navbar = () => {
     { name: "Leaderboards", href: "/leaderboards" },
     { name: "Contact", href: "/contact" },
   ]
+
+  const navItemsSM = [
+    {
+      name: "Home",
+      href: "/",
+      icon: <Home className="w-5 h-5" />,
+    },
+    {
+      name: "Auctions",
+      href: "#",
+      dropdown: true,
+      icon: <Gavel className="w-5 h-5" />,
+      items: [
+        {
+          name: "Live Auctions",
+          href: "/auctions/live",
+          icon: <Gavel className="w-5 h-5" />,
+        },
+        {
+          name: "Upcoming Auctions",
+          href: "/auctions/upcoming",
+          icon: <Clock className="w-5 h-5" />,
+        },
+        {
+          name: "Past Auctions",
+          href: "/auctions/past",
+          icon: <History className="w-5 h-5" />,
+        },
+      ],
+    },
+    {
+      name: "How it works",
+      href: "/how-it-works",
+      icon: <HelpCircle className="w-5 h-5" />,
+    },
+    {
+      name: "Leaderboards",
+      href: "/leaderboards",
+      icon: <Trophy className="w-5 h-5" />,
+    },
+    {
+      name: "Contact",
+      href: "/contact",
+      icon: <Mail className="w-5 h-5" />,
+    },
+  ];
 
   const handleMobileNavClick = (href: string) => {
     setMobileMenuOpen(false)
@@ -619,7 +665,7 @@ export const Navbar = () => {
                 {/* Navigation */}
                 <nav className="flex-1 px-6 py-6">
                   <div className="space-y-2">
-                    {navItems.map((item, idx) =>
+                    {navItemsSM.map((item, idx) =>
                       item.dropdown ? (
                         <div key={item.name} className="space-y-2">
                           <button
@@ -627,7 +673,10 @@ export const Navbar = () => {
                             onClick={() => setMobileAuctionsOpen((v) => !v)}
                             aria-expanded={mobileAuctionsOpen}
                           >
-                            <span>{item.name}</span>
+                            <span className="flex items-center gap-2">
+                              {item.icon}
+                              {item.name}
+                            </span>
                             <ChevronDown
                               className={`w-5 h-5 transition-transform duration-200 ${
                                 mobileAuctionsOpen ? "rotate-180" : ""
@@ -647,8 +696,9 @@ export const Navbar = () => {
                                   <button
                                     key={sub.name}
                                     onClick={() => handleMobileNavClick(sub.href)}
-                                    className="w-full text-left px-4 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/5 transition-all duration-200"
+                                    className="w-full text-left px-4 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/5 transition-all duration-200 flex items-center gap-2"
                                   >
+                                    {sub.icon}
                                     {sub.name}
                                   </button>
                                 ))}
@@ -660,12 +710,13 @@ export const Navbar = () => {
                         <button
                           key={item.name}
                           onClick={() => handleMobileNavClick(item.href)}
-                          className="w-full text-left px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition-all duration-200 font-medium"
+                          className="w-full text-left px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition-all duration-200 font-medium flex items-center gap-2"
                           style={{ fontWeight: idx === 0 ? 700 : 500 }}
                         >
+                          {item.icon}
                           {item.name}
                         </button>
-                      ),
+                      )
                     )}
                   </div>
                 </nav>
@@ -684,19 +735,56 @@ export const Navbar = () => {
                         </div>
                       </div>
 
-                      {/* Notif, Fav, settings icon */}
+                      {/* Dashboard, Notif, Create, Fav, Due, settings icon */}
                       <div className="w-full px-4 py-2">
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 w-full">
-                          {/* Notifications */}
-                          <Button
-                            variant="ghost"
-                            className="flex items-center justify-start gap-2 text-white hover:bg-white/10 transition rounded-full py-2"
-                          >
-                            <Bell className="w-5 h-5" />
-                            <span className="text-sm">Notifications</span>
-                          </Button>
 
-                          {/* Favourites */}
+                          <Link
+                            href="/dashboard"
+                          >
+                            <Button
+                              variant="ghost"
+                              className="flex items-center justify-start gap-2 text-white hover:bg-white/10 transition rounded-full py-2"
+                            >
+                              <MdDashboard className="text-lg" />
+                              Dashboard
+                            </Button>
+                          </Link>
+
+                          
+                            {user?.is_admin === true && 
+                              <Link
+                                href="/admin"
+                              >
+                                <Button
+                                  variant="ghost"
+                                  className="flex items-center justify-start gap-2 text-white hover:bg-white/10 transition rounded-full py-2"
+                                >
+                                  <MdOutlineAdminPanelSettings size={16} />
+                                  Admin
+                                </Button>
+                              </Link>
+                            }
+                          
+                          <Link
+                            href="/create"
+                          >
+                            <Button
+                              variant="ghost"
+                              className="flex items-center justify-start gap-2 text-white hover:bg-white/10 transition rounded-full py-2"
+                            >
+                              <MdOutlineCreateNewFolder className="text-lg" />
+                              Create Auction
+                            </Button>
+                          </Link>
+
+                          <Link href="/due-payment">
+                            <Button variant="ghost" size="sm" className="text-white hover:text-white hover:bg-white/10 cursor-pointer">
+                              <MdOutlinePayment className="w-4 h-4" />
+                              Due Payments
+                            </Button>
+                          </Link>
+
                           <Link href="/favourites">
                             <Button
                               variant="ghost"
@@ -707,7 +795,6 @@ export const Navbar = () => {
                             </Button>
                           </Link>
 
-                          {/* Settings */}
                           <Link href="/dashboard/settings">
                             <Button
                               variant="ghost"
@@ -717,18 +804,17 @@ export const Navbar = () => {
                               <span className="text-sm">Settings</span>
                             </Button>
                           </Link>
+                          
+                          <Button
+                            variant="ghost"
+                            className="w-full text-red-400 hover:bg-red-500/10 hover:text-red-300 justify-start"
+                          >
+                            <LogOut className="w-4 h-4 mr-2" />
+                            Logout
+                          </Button>
 
                         </div>
                       </div>
-
-                      {/* Login & Sign up */}
-                      <Button
-                        variant="ghost"
-                        className="w-full text-red-400 hover:bg-red-500/10 hover:text-red-300 justify-start"
-                      >
-                        <LogOut className="w-4 h-4 mr-2" />
-                        Logout
-                      </Button>
                     </div>
                   ) : (
                     <div className="space-y-3">
